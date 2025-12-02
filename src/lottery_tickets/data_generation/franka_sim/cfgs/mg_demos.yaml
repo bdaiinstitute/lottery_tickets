@@ -1,0 +1,41 @@
+# Hydra configuration
+# MFNOTE: IDK what this does really
+# hydra:
+#   run:
+#     dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
+#   sweep:
+#     dir: multirun/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    # subdir: ${hydra.job.num}
+# If you're running this in k8s, we'll need to specify output_dir, so we know what directory to upload
+output_dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
+# Demo collection configuration
+demo_collection:
+  num_demos: 1000  # Number of successful demos to collect
+  output_file: demos.h5  # Output file name
+  max_attempts: 5000  # Maximum attempts to prevent infinite loops
+  success_threshold: 0.9  # Reward threshold for successful demos
+  num_workers: 4  # Number of parallel workers for demo collection
+  save_as_hdf5: true  # Otherwise, save as pickle.
+
+# Planner configuration
+planner:
+  # Range of speed of execution, the scripted policy might struggle at high speeds.
+  # Set both values to the same number to fix the speed. Previous default speed was 0.004.
+  action_mag: [0.002, 0.008]
+  reach_epsilon: 0.01
+  lift_epsilon: 0.01
+  lift_height: 0.3
+  grasp_wait_steps: 2
+  noise_mag: 0.01
+
+# Environment configuration
+evaluation:
+  env_name: PandaPickCubeVisionRealisticControl-v0
+  env_kwargs:
+    max_episode_steps: 300  # Note that 100 is default, we are collecting slow data intentionally.
+    sampling_bounds: [[0.25, -0.25], [0.55, 0.25]]
+    render_mode: rgb_array  # Set to 'human' for visualization
+# kvtags stored key-value pairs (a dict). Only used for metadata
+kvtags: null
+# Tags for metadata.
+tags: []
