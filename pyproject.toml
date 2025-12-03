@@ -15,4 +15,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-franka-sim = ["franka-sim"]
+franka-sim = [
+    "gym-hil"
+]
