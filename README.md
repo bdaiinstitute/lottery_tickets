@@ -16,9 +16,11 @@ pip install -e .[franka-sim]
 ```
 
 # todos
-- Get frankasim in
+- remove `mg_frankasim.py` when ready.
 - get flow model
 - get data collect
 - train policy
 - experiments for getting lottery tickets
 - viz
+
+- the `hil_gym` gym enviornment doesn't have a made where it returns both block position + images. For now, we just do block position, so written data has empty images + policy only operates on low-dim obs. We should support adding images for visuomotor policy testing.

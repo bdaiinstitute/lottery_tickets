@@ -16,5 +16,7 @@ dependencies = [
 
 [project.optional-dependencies]
 franka-sim = [
-    "gym-hil"
+    "gym-hil",
+    "h5py",
+    "hydra-core",
 ]
