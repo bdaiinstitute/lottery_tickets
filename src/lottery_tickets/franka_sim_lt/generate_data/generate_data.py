@@ -551,11 +551,12 @@ def main(cfg: DictConfig) -> None:
         combined_output_path = output_dir / output_path.name
         with open(combined_output_path, "wb") as f:
             pickle.dump(combined_demos, f)
+            global_path = Path(f.name).resolve()
 
         logging.info(
             f"Saved {len(successful_demo_files)} successful demonstrations as individual files in {output_dir}"
         )
-        logging.info(f"Combined demos saved to {combined_output_path}")
+        logging.info(f"Combined demos saved to {global_path}")
     else:
         # Create metadata.json for HDF5 files.
         create_metadata_json(output_dir, successful_demo_files, cfg)

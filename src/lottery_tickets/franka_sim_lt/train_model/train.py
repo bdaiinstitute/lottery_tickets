@@ -48,6 +48,7 @@ def save_checkpoint(
     }
 
     torch.save(checkpoint, save_path / filename)
+    print(f"saved ckpt to: {save_path / filename}")
 
 
 class ActionChunkDataset(Dataset):

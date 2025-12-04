@@ -16,12 +16,23 @@ pip install -e .[franka-sim]
 ```
 
 # Franka-sim Lottery Ticket Examples
-First, let's generate a bunch of expert data of the franka picking up a cube:
+First, generate a bunch of expert data of the franka picking up a cube:
 
 ```
-python src/lottery_tickets/franka_sim_lt/generate_data.py
+cd src/lottery_tickets/franka_sim_lt/generate_data
+python generate_data.py
 ```
 
+This will save a `demo.pkl` file with all the succesful episodes, and the path to that file will get printed out at the end.
+
+Next, train a simple flow matching model on the data.
+
+```
+cd src/lottery_tickets/franka_sim_lt/train_model
+python train.py dataset.data_path=/PATH/TO/demos.pkl
+```
+
+This will train a flow model and output the paths to where all the checkpoints (including the final one `fm_policy.pt`) are saved. 
 
 # todos
 - remove `mg_frankasim.py` when ready.

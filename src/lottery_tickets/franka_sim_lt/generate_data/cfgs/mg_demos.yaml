@@ -10,7 +10,7 @@
 output_dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
 # Demo collection configuration
 demo_collection:
-  num_demos: 1000  # Number of successful demos to collect
+  num_demos: 100  # Number of successful demos to collect
   output_file: demos.pkl  # Output file name
   max_attempts: 5000  # Maximum attempts to prevent infinite loops
   success_threshold: 0.9  # Reward threshold for successful demos
