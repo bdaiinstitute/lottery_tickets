@@ -7,10 +7,8 @@ import hydra
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from squirl_launcher.common.evaluation_ts import evaluate
-from squirl_launcher.experimental.fm_utils import FMPolicyInterface, load_fm_model
-from squirl_launcher.utils.launcher_ts import build_env
-
+from lottery_tickets.franka_sim_lt.models_utils import load_fm_model,FMPolicyInterface
+from lottery_tickets.franka_sim_lt.gym_utils import make_franksim_env
 
 def evaluate_fm_policy(cfg: DictConfig):
     """Evaluate Flow Matching policy in the environment."""
@@ -35,13 +33,7 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     # Build environment
     print(f"Building environment: {cfg.evaluation.env_name}")
-    try:
-        # Try to build environment using squirl launcher
-        env = build_env(cfg.evaluation.env_name, env_kwargs=cfg.evaluation.env_kwargs)
-    except Exception as e:
-        print(f"Failed to build environment with squirl launcher: {e}")
-        print("Falling back to direct gym environment creation")
-        env = gym.make(cfg.evaluation.env_name)
+    env = make_franksim_env()
 
     print(f"Environment action space: {env.action_space}")
     print(f"Environment observation space: {env.observation_space}")
@@ -52,17 +44,7 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     # Run evaluation
     print(f"Starting evaluation: {cfg.evaluation.num_episodes} episodes")
-    eval_stats = evaluate(
-        policy_fn=policy,
-        env=env,
-        num_episodes=cfg.evaluation.num_episodes,
-        train_ep_idx=0,  # We're just evaluating, not training
-        save_path=video_path,
-        max_steps_per_episode=cfg.evaluation.max_steps_per_episode,
-        device=device,
-        reset_fn=policy.reset,
-    )
-
+    raise RuntimeError("Implement gym evaluation loop here")
     # Print results
     print("\n=== Evaluation Results ===")
     print(f"final.episode.r: {eval_stats['final.episode.r']}")
