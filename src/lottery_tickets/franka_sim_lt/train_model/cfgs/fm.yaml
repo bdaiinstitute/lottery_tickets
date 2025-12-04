@@ -1,0 +1,58 @@
+# Hydra configuration
+hydra:
+  run:
+    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
+# General settings
+device: cuda
+seed: 42
+save_dir: ${hydra:runtime.output_dir}/checkpoints
+
+# Dataset configuration
+dataset:
+  data_path: data/demos_1k.pkl
+  chunk_size: 8
+  num_episodes: 20
+  episode_length: 100
+  # State history configuration
+  use_state_history: false
+  state_history_length: 2  # Number of past states to include
+
+# Model configuration
+model:
+  backbone:
+    _target_: lottery_tickets.franka_sim_lt.models.DiffusionBackboneSimple
+    hidden_dim: 256
+    num_layers: 4
+    # x_dim and state_dim will be set dynamically in train.py
+  fm:
+    _target_: lottery_tickets.franka_sim_lt.models.FM
+    n_inference_steps: 10
+    # backbone, sample_shape, and state_shape will be set dynamically in train.py
+
+# Training configuration
+training:
+  batch_size: 128
+  learning_rate: 0.001
+  num_epochs: 100
+  checkpoint_interval: 10
+
+# Evaluation configuration
+evaluation:
+  model_path: checkpoints/fm_policy_final.pt
+  env_name: PandaPickCubeVisionRealisticControl-v0
+  num_episodes: 10
+  max_steps_per_episode: 300
+  chunk_size: 8
+  video_save_path: ${hydra:runtime.output_dir}/videos
+  # State history configuration for evaluation
+  use_state_history: false
+  state_history_length: 2  # Number of past states to include
+  env_kwargs: # If you're using a Jaxish env, env_kwargs must be empty.
+    max_episode_steps: 300  # Original env has 100.
+    # sampling_bounds: [[0.4, -0.0], [0.4, 0.0]] # new-tianshou bounds
+    sampling_bounds: [[0.25, -0.25], [0.55, 0.25]] # Old jax bounds
+    render_mode: rgb_array  # rgb_array
