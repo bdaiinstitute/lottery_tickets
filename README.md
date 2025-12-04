@@ -34,6 +34,13 @@ python train.py dataset.data_path=/PATH/TO/demos.pkl
 
 This will train a flow model and output the paths to where all the checkpoints (including the final one `fm_policy.pt`) are saved. 
 
+Now we can evaluate a model:
+
+```
+cd src/lottery_tickets/franka_sim_lt/train_model
+python evaluate.py evaluation.model_path=/PATH/TO/fm_policy_final.pt
+```
+
 # todos
 - example for running policy with gym env.
 - experiments for getting lottery tickets.

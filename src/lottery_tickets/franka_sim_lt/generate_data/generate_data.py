@@ -20,7 +20,7 @@ from omegaconf import DictConfig, OmegaConf
 from PIL import Image
 
 import numpy as np
-from lottery_tickets.franka_sim_lt.gym_utils import make_franksim_env
+from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 
 def reach_cube(
     orig_env, action_mag: float, epsilon: float, noise_mag: float
@@ -82,11 +82,10 @@ def do_nothing(orig_env) -> tuple[np.ndarray, np.ndarray]:
     target_gripper = np.array([0.0]) 
     return target_pos, target_gripper
 
-
 def collect_single_demo(
     env, planner_cfg: DictConfig, success_threshold: float
-) -> tuple[list[dict], bool]:
-    """Collect a single demonstration episode."""
+) -> tuple[list[dict], bool, list[np.ndarray]]:
+    """Collect a single demonstration episode and frames for video."""
     orig_env = env.unwrapped
 
     planner_state = {
@@ -97,6 +96,8 @@ def collect_single_demo(
     }
 
     transitions = []
+    frames = []
+
     obs, _ = env.reset()
     done_or_truncated = False
 
@@ -134,9 +135,16 @@ def collect_single_demo(
         else:
             target_pos, target_gripper = do_nothing(orig_env)
 
-        target_orientation = np.array([0,0,0])
+        target_orientation = np.array([0, 0, 0])
         action = np.concatenate([target_pos, target_orientation, target_gripper])
         next_obs, reward, done, truncated, info = env.step(action)
+
+        # Capture rendered frame (as RGB array)
+        try:
+            frame = env.render()
+            frames.append(frame)
+        except Exception as e:
+            logging.warning(f"Render failed at step: {e}")
 
         # Store transition
         transitions.append(
@@ -155,27 +163,30 @@ def collect_single_demo(
         done_or_truncated = done or truncated
 
     success = reward > success_threshold
-    return transitions, success
-
-
+    return transitions, success, frames
 def worker_collect_demo(args: tuple) -> None:
     """Worker function for multiprocessing pool to collect a single demo."""
     env_name, env_kwargs, planner_cfg, success_threshold = args
 
-    # This will ensure different random seeds even if we fork processes.
     random.seed()
     np.random.seed()
 
     try:
-        # Each worker creates its own environment instance
-        # Use the Franka environment
-        env = make_franksim_env()
-        transitions, success = collect_single_demo(env, planner_cfg, success_threshold)
+        env = make_frankasim_env()
+        transitions, success, frames = collect_single_demo(env, planner_cfg, success_threshold)
         env.close()
+
+        video_file = None
+        if success:
+            # Save video as MP4 using imageio
+            video_file = Path(f"demo_video_{random.randint(0, 1e6)}.mp4")
+            imageio.mimsave(video_file, frames, fps=30)
+
         return {
             "success": True,
             "demo_success": success,
             "transitions": transitions,
+            "video_file": str(video_file) if video_file else None,
             "error": None,
         }
     except Exception as e:
@@ -184,9 +195,9 @@ def worker_collect_demo(args: tuple) -> None:
             "success": False,
             "demo_success": False,
             "transitions": None,
+            "video_file": None,
             "error": str(e),
         }
-
 
 def process_pending_results(
     pending_results: list,
@@ -238,6 +249,11 @@ def process_pending_results(
                     logging.info(
                         f"Attempt {attempt_num}: SUCCESS! Saved demo {demo_idx}/{num_demos} to {demo_file}"
                     )
+
+                    if result_data.get("video_file") is not None:
+                        video_path = output_dir / Path(f"{base_name}_{demo_idx:04d}.mp4").name
+                        Path(result_data["video_file"]).rename(video_path)
+                        logging.info(f"Saved video for demo {demo_idx} to {video_path}")
 
                     # Early exit if we've collected enough demos when waiting
                     if wait and len(successful_demo_files) >= num_demos:

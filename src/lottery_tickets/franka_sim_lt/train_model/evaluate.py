@@ -8,7 +8,8 @@ import torch
 from omegaconf import DictConfig, OmegaConf
 
 from lottery_tickets.franka_sim_lt.models_utils import load_fm_model,FMPolicyInterface
-from lottery_tickets.franka_sim_lt.gym_utils import make_franksim_env
+from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
+import imageio
 
 def evaluate_fm_policy(cfg: DictConfig):
     """Evaluate Flow Matching policy in the environment."""
@@ -33,7 +34,7 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     # Build environment
     print(f"Building environment: {cfg.evaluation.env_name}")
-    env = make_franksim_env()
+    env = make_frankasim_env()
 
     print(f"Environment action space: {env.action_space}")
     print(f"Environment observation space: {env.observation_space}")
@@ -42,16 +43,31 @@ def evaluate_fm_policy(cfg: DictConfig):
     video_path = Path(cfg.evaluation.video_save_path)
     video_path.mkdir(parents=True, exist_ok=True)
 
-    # Run evaluation
-    print(f"Starting evaluation: {cfg.evaluation.num_episodes} episodes")
-    raise RuntimeError("Implement gym evaluation loop here")
-    # Print results
-    print("\n=== Evaluation Results ===")
-    print(f"final.episode.r: {eval_stats['final.episode.r']}")
-    print(f"\nVideos saved to: {video_path}")
+    # Evaluate policy
+    num_episodes = cfg.evaluation.num_episodes
+    for episode in range(num_episodes):
+        policy.reset()
+        obs, _ = env.reset()
+        done = False
+        total_reward = 0.0
+        step = 0
+        frames = []
 
-    return eval_stats
+        while not done:
+            action = policy(obs)
+            obs, reward, terminated, truncated, info = env.step(action)
+            done = terminated or truncated
+            total_reward += reward
+            step += 1
+            frames.append(env.render())
 
+        print(f"Episode {episode + 1}/{num_episodes} - Steps: {step}, Total Reward: {total_reward:.2f}")
+        video_file = video_path / f"ep_video_{episode}.mp4"
+        print(f"saved video to : {video_file}")
+        imageio.mimsave(video_file, frames, fps=30)
+
+
+    env.close()
 
 @hydra.main(version_base=None, config_path="cfgs", config_name="fm")
 def main(cfg: DictConfig):

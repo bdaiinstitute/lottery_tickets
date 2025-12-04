@@ -1,14 +1,25 @@
 from gymnasium import Env
-from gymnasium.spaces import Box, Dict
+from gymnasium.spaces import Box
 from gymnasium import ObservationWrapper
 import numpy as np
 import gymnasium as gym
 
-def make_franksim_env():
+def make_frankasim_env():
     import gym_hil
     env = gym.make("gym_hil/PandaPickCubeBase-v0", render_mode="rgb_array")
+    env = ConcatRenderWrapper(env)
     env = StateConcatWrapper(env)
     return(env)
+
+class ConcatRenderWrapper(gym.Wrapper):
+    def __init__(self, env):
+        super().__init__(env)
+
+    def render(self):
+        # Call the original env render
+        front_view, wrist_view = self.env.render()
+        # Concatenate along width
+        return np.concatenate([front_view, wrist_view], axis=1)
 
 
 class StateConcatWrapper(ObservationWrapper):

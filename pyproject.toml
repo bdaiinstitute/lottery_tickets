@@ -20,4 +20,5 @@ franka-sim = [
     "h5py",
     "hydra-core",
     "torch",
+    "moviepy",
 ]

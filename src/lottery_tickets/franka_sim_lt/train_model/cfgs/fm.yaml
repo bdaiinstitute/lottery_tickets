@@ -35,7 +35,7 @@ model:
 
 # Training configuration
 training:
-  batch_size: 128
+  batch_size: 20
   learning_rate: 0.001
   num_epochs: 100
   checkpoint_interval: 10

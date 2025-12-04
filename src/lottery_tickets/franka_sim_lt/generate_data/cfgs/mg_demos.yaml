@@ -26,7 +26,7 @@ planner:
   lift_epsilon: 0.01
   lift_height: 0.3
   grasp_wait_steps: 2
-  noise_mag: 0.01
+  noise_mag: 0.00
 
 # Environment configuration
 evaluation:
