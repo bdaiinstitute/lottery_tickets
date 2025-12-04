@@ -19,4 +19,5 @@ franka-sim = [
     "gym-hil",
     "h5py",
     "hydra-core",
+    "torch",
 ]

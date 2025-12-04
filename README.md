@@ -15,6 +15,14 @@ conda activate lottery_tickets
 pip install -e .[franka-sim]
 ```
 
+# Franka-sim Lottery Ticket Examples
+First, let's generate a bunch of expert data of the franka picking up a cube:
+
+```
+python src/lottery_tickets/franka_sim_lt/generate_data.py
+```
+
+
 # todos
 - remove `mg_frankasim.py` when ready.
 - get flow model
