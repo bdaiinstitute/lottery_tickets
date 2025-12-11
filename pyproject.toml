@@ -19,6 +19,8 @@ franka-sim = [
   "franka-sim",
   "torch",
   "opencv-python",  # headless
+  "h5py",
+  "hydra-core",
 ]
 # franka-sim = [
 #     "gym-hil",

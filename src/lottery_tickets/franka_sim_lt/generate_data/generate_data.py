@@ -14,7 +14,7 @@ import numpy as np
 from omegaconf import DictConfig, OmegaConf
 from PIL import Image
 
-from squirl_launcher.utils.launcher_ts import build_env
+from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 
 
 def reach_cube(
@@ -162,7 +162,7 @@ def worker_collect_demo(args: tuple) -> None:
 
     try:
         # Each worker creates its own environment instance
-        env = build_env(env_name, env_kwargs=env_kwargs)
+        env = make_frankasim_env(env_name, env_kwargs=env_kwargs)
         transitions, success = collect_single_demo(env, planner_cfg, success_threshold)
         env.close()
         return {
@@ -405,7 +405,7 @@ def create_metadata_json(
 def main(cfg: DictConfig) -> None:
     """Main function to collect multiple demonstration episodes and save to file."""
     env_cfg = cfg.evaluation
-    output_dir = Path(cfg.output_dir)
+    output_dir = Path(".").resolve()
     print(f"Output directory: {output_dir}")
     env_kwargs = OmegaConf.to_container(env_cfg.env_kwargs, resolve=True)
 

@@ -1888,6 +1888,8 @@ source = { editable = "." }
 [package.optional-dependencies]
 franka-sim = [
     { name = "franka-sim" },
+    { name = "h5py" },
+    { name = "hydra-core" },
     { name = "opencv-python" },
     { name = "torch" },
 ]
@@ -1898,6 +1900,8 @@ smolvla-libero = [
 [package.metadata]
 requires-dist = [
     { name = "franka-sim", marker = "extra == 'franka-sim'", editable = "src/lottery_tickets/franka_sim_lt/franka_sim" },
+    { name = "h5py", marker = "extra == 'franka-sim'" },
+    { name = "hydra-core", marker = "extra == 'franka-sim'" },
     { name = "lerobot", extras = ["smolvla", "libero"], marker = "extra == 'smolvla-libero'", git = "https://github.com/huggingface/lerobot.git?rev=56b43cc88844cab4f231cf370a6c8eb8103bc9b8" },
     { name = "opencv-python", marker = "extra == 'franka-sim'" },
     { name = "torch", marker = "extra == 'franka-sim'" },
