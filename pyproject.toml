@@ -24,5 +24,5 @@ franka-sim = [
 ]
 
 smolvla-libero = [
-  "lerobot[smolvla,libero]==0.4.2",
+  "lerobot[smolvla,libero] @ git+https://github.com/huggingface/lerobot.git@56b43cc88844cab4f231cf370a6c8eb8103bc9b8",
 ]
