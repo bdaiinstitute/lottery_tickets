@@ -422,7 +422,9 @@ def main(cfg: DictConfig) -> None:
 
     # Prepare output directory and filename components
     output_path: Path = output_dir / demo_cfg.output_file
+    individual_output_dir = output_dir / "individual_demos"
     output_dir.mkdir(parents=True, exist_ok=True)
+    individual_output_dir.mkdir(parents=True, exist_ok=True)
     base_name = output_path.stem if output_path.stem else "demos"
     suffix = output_path.suffix if output_path.suffix else ".pkl"
 
@@ -453,7 +455,7 @@ def main(cfg: DictConfig) -> None:
             completed_indices, successful_demo_files = process_pending_results(
                 pending_results,
                 successful_demo_files,
-                output_dir,
+                individual_output_dir,
                 base_name,
                 suffix,
                 demo_cfg.num_demos,
@@ -478,7 +480,7 @@ def main(cfg: DictConfig) -> None:
             _, successful_demo_files = process_pending_results(
                 pending_results,
                 successful_demo_files,
-                output_dir,
+                individual_output_dir,
                 base_name,
                 suffix,
                 demo_cfg.num_demos,

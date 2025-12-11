@@ -4,23 +4,14 @@ from gymnasium.wrappers import RecordEpisodeStatistics
 
 from lottery_tickets.franka_sim_lt.wrappers.chunking import ChunkingWrapper
 from lottery_tickets.franka_sim_lt.wrappers.obs import ObsWrapper
-from lottery_tickets.franka_sim_lt.wrappers.video_recording import VideoRecordingWrapper
 
 
-def make_frankasim_env(env_name, env_kwargs):
+def make_frankasim_env(env_name, env_kwargs) -> gym.Env:
     env = gym.make(env_name, **env_kwargs)
-    fps = 1.0 / env.get_wrapper_attr("control_dt")
 
     if not has_wrapper(env, ObsWrapper):
         # Flattens all non-image observations into one vector
         env = ObsWrapper(env)
-
-    if not has_wrapper(env, VideoRecordingWrapper):
-        env = VideoRecordingWrapper(
-            env,
-            video_options_generator=None,
-            fps=fps,
-        )
 
     if not has_wrapper(env, ChunkingWrapper):
         env = ChunkingWrapper(

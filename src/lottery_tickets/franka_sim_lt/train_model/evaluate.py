@@ -4,12 +4,13 @@ from pathlib import Path
 
 import gymnasium as gym
 import hydra
+import imageio
 import torch
 from omegaconf import DictConfig, OmegaConf
 
-from lottery_tickets.franka_sim_lt.models_utils import load_fm_model,FMPolicyInterface
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
-import imageio
+from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_fm_model
+
 
 def evaluate_fm_policy(cfg: DictConfig):
     """Evaluate Flow Matching policy in the environment."""
@@ -34,7 +35,9 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     # Build environment
     print(f"Building environment: {cfg.evaluation.env_name}")
-    env = make_frankasim_env()
+    env = make_frankasim_env(
+        cfg.evaluation.env_name, env_kwargs=cfg.evaluation.env_kwargs
+    )
 
     print(f"Environment action space: {env.action_space}")
     print(f"Environment observation space: {env.observation_space}")
@@ -61,13 +64,15 @@ def evaluate_fm_policy(cfg: DictConfig):
             step += 1
             frames.append(env.render())
 
-        print(f"Episode {episode + 1}/{num_episodes} - Steps: {step}, Total Reward: {total_reward:.2f}")
+        print(
+            f"Episode {episode + 1}/{num_episodes} - Steps: {step}, Total Reward: {total_reward:.2f}"
+        )
         video_file = video_path / f"ep_video_{episode}.mp4"
         print(f"saved video to : {video_file}")
         imageio.mimsave(video_file, frames, fps=30)
 
-
     env.close()
+
 
 @hydra.main(version_base=None, config_path="cfgs", config_name="fm")
 def main(cfg: DictConfig):

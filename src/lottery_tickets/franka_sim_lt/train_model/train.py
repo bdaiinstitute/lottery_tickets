@@ -76,9 +76,9 @@ class ActionChunkDataset(Dataset):
 
         # Assume data is a list of episodes
         assert isinstance(data, list), "Data should be a list of episodes"
-        assert all(
-            isinstance(ep, list) for ep in data
-        ), "Each episode should be a list of transitions"
+        assert all(isinstance(ep, list) for ep in data), (
+            "Each episode should be a list of transitions"
+        )
 
         self.episodes = data
         self.num_episodes = len(self.episodes)

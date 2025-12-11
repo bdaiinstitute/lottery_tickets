@@ -1,7 +1,7 @@
 # Hydra configuration
 hydra:
   run:
-    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: outputs/policy/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.num}
@@ -43,7 +43,7 @@ training:
 # Evaluation configuration
 evaluation:
   model_path: checkpoints/fm_policy_final.pt
-  env_name: PandaPickCubeVisionRealisticControl-v0
+  env_name: PandaPickCubeRealisticControl-v0
   num_episodes: 10
   max_steps_per_episode: 300
   chunk_size: 8
