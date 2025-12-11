@@ -1,5 +1,3 @@
-import logging
-
 import franka_sim.envs  # noqa: F401 required import for franka sim envs
 import gymnasium as gym
 from gymnasium.wrappers import RecordEpisodeStatistics
