@@ -494,9 +494,8 @@ class EvalMode(Enum):
 
 @dataclass 
 class EvalPipelineConfigNoisePath(EvalPipelineConfig):
-    eval_mode : EvalMode = False
+    eval_mode : EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
-
 
 @parser.wrap()
 def eval_main(cfg: EvalPipelineConfigNoisePath):

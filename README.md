@@ -18,13 +18,14 @@ pip install -e .[smolvla-libero]
 pip install -e .[franka-sim]
 ```
 
-# SmolVLA for LIBERO Lottery Ticket Examples'
-First go into the smolvla_libero folder
+# SmolVLA for LIBERO Lottery Ticket Examples
+First go into the `smolvla_libero` directory, and set `MUJOCO_GL` to use gpu rendering for faster performance:
 ```
 cd src/lottery_tickets/smolvla_libero
+export MUJOCO_GL=egl
 ```
 
-For our experiments, we use LeRobot's finetuned version of SmolVLA for LIBERO: "HuggingFaceVLA/smolvla_libero" 
+For the pretrained policy weights in our experiments, we use <a href="https://huggingface.co/HuggingFaceVLA/smolvla_libero">LeRobot's finetuned version of SmolVLA for LIBERO: "HuggingFaceVLA/smolvla_libero" </a>. 
 
 There are 5 libero environments you can use as your env.task:
 - libero_object
@@ -35,9 +36,9 @@ There are 5 libero environments you can use as your env.task:
 
 We have a python script (pretty much exact copy of `lerobot_eval.py`) you can run that can be used in 1 of 3 ways:
 
-1. Generating a new ticket
+## 1. Generating a new ticket
 
-Set `eval_mode=NEW_TICKET` to generate a new noise vector (it will be sampled from standard normal), and run `n_episodes` of eval on it for the `env.task` list. You can set the seed for the environments by passing `seed` parameter an integer argument (`1000` is the default). The noise vector will be saved to `{output_dir}/{A_UNIQUE_ID}/initial_noise.pt` for future use, along with videos and results. 
+Set `eval_mode=NEW_TICKET` to generate a new noise vector (it will be sampled from standard normal), and run `n_episodes` of eval on it for the `env.task` list. You can set the seed for the environments by passing `seed` parameter an integer argument (`1000` is the default value). The noise vector will be saved to `{output_dir}/{A_UNIQUE_ID}/initial_noise.pt` for future use, along with videos and results. 
 
 ```
 python evaluate.py \
@@ -46,12 +47,12 @@ python evaluate.py \
         --env.task=libero_spatial \
         --eval.batch_size=1 \
         --eval.n_episodes=1 \
-        --output_dir=outputs/libero_spatial_tickets
-        --eval_mode=NEW_TICKET
+        --output_dir=outputs/libero_spatial_tickets \
+        --eval_mode=NEW_TICKET \
         --seed=1000
 ```
 
-2. Evaluating a saved ticket
+## 2. Evaluating a saved ticket
 
 Set `eval_mode=LOAD_TICKET` and load a ticket by passing `initial_noise.pt` into `noise_path`. We can change the seed too to rollout on different environment seeds.
 
@@ -62,13 +63,13 @@ python evaluate.py \
         --env.task=libero_spatial \
         --eval.batch_size=1 \
         --eval.n_episodes=1 \
-        --output_dir=outputs/libero_spatial_tickets
-        --eval_mode=LOAD_TICKET
-        --noise_path=PATH/TO/initial_noise.pt
+        --output_dir=outputs/eval_libero_spatial_tickets/ticket_results \
+        --eval_mode=LOAD_TICKET \
+        --noise_path=PATH/TO/initial_noise.pt \
         --seed=100000
 ```
 
-3. Running the original policy
+## 3. Running the original policy
 
 Set `eval_mode=ORIGINAL_POLICY`, and the original policy (i.e: sampling from gaussian at all steps) will be evaluated. Results and videos will be saved, but there will be noise `initial_noise.pt` saved since it's not used. 
 
@@ -79,8 +80,8 @@ python evaluate.py \
         --env.task=libero_spatial \
         --eval.batch_size=1 \
         --eval.n_episodes=1 \
-        --output_dir=outputs/libero_spatial_tickets
-        --eval_mode=ORIGINAL_POLICY
+        --output_dir=outputs/libero_spatial_tickets \
+        --eval_mode=ORIGINAL_POLICY \
         --seed=1000
 ```
 
