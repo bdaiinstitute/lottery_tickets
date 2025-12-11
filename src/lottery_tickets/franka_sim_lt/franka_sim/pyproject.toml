@@ -18,11 +18,12 @@ dependencies = [
     "numpy>=1.23.0",
     "PyOpenGL==3.1.4",
     "PyOpenGL_accelerate==3.1.9",
-    "mujoco>=2.3.2",
-    "gymnasium>=0.29.1",
+    "mujoco>=3.3.0", # Can be 2.x.x, but 3.x.x is preferred.
+    "gymnasium>=1.0.0",  # Can be 0.x.x, but 1.x.x is preferred.
     "dm-robotics-transformations",
     "imageio[ffmpeg]",
     "lxml",
+    "packaging",
 ]
 
 # [project.optional-dependencies]

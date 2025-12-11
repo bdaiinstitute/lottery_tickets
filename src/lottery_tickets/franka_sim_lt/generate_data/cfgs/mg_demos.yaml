@@ -10,12 +10,12 @@
 output_dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
 # Demo collection configuration
 demo_collection:
-  num_demos: 100  # Number of successful demos to collect
-  output_file: demos.pkl  # Output file name
+  num_demos: 1000  # Number of successful demos to collect
+  output_file: demos.h5  # Output file name
   max_attempts: 5000  # Maximum attempts to prevent infinite loops
   success_threshold: 0.9  # Reward threshold for successful demos
   num_workers: 4  # Number of parallel workers for demo collection
-  save_as_hdf5: false  # Otherwise, save as pickle.
+  save_as_hdf5: true  # Otherwise, save as pickle.
 
 # Planner configuration
 planner:
@@ -26,7 +26,7 @@ planner:
   lift_epsilon: 0.01
   lift_height: 0.3
   grasp_wait_steps: 2
-  noise_mag: 0.00
+  noise_mag: 0.01
 
 # Environment configuration
 evaluation:
