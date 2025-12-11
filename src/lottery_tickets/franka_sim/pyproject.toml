@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "franka_sim"
+version = "1.0.0"
+readme = "README.md"
+requires-python = ">=3.8"
+
+authors = [
+    { name = "Thomas Weng", email = "tweng@rai-inst.com" },
+    { name = "Ondrej Biza", email = "obiza@rai-inst.com" }
+]
+
+dependencies = [
+    "dm_env",
+    "numpy>=1.23.0",
+    "PyOpenGL==3.1.4",
+    "PyOpenGL_accelerate==3.1.9",
+    "mujoco>=2.3.2",
+    "gymnasium>=0.29.1",
+    "dm-robotics-transformations",
+    "imageio[ffmpeg]",
+    "lxml",
+]
+
+# [project.optional-dependencies]
+# ci = [
+#     "pyrender", # for mujoco osmesa
+# ]
