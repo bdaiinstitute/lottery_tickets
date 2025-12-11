@@ -11,11 +11,18 @@ cd lottery_tickets
 conda create -n lottery_tickets python=3.10
 conda activate lottery_tickets
 
-# Install package with frankasim dependencies
+# Install package with smolvla + libero dependencies
+pip install -e .[smolvla-libero]
+
+# 🚧 (NOT STABLE) 🚧  Install package with frankasim
 pip install -e .[franka-sim]
 ```
 
-# Franka-sim Lottery Ticket Examples
+# SmolVLA for LIBERO Lottery Ticket Examples
+
+
+
+# 🚧 (NOT STABLE) 🚧 Franka-sim Lottery Ticket Examples 
 First, generate a bunch of expert data of the franka picking up a cube:
 
 ```

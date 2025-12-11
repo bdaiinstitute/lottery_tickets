@@ -22,3 +22,7 @@ franka-sim = [
     "torch",
     "moviepy",
 ]
+
+smolvla-libero = [
+  "lerobot[smolvla,libero]==0.4.2",
+]
