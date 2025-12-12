@@ -1,10 +1,15 @@
 # The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies
 
-This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experiments, each experiment using a simulation and policy class:
+This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
 1.  [LeRobot pretrained SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
 2. [State-based flow matching policy for franka-sim](#franka-sim-lottery-ticket-examples)
 3. 🚧 State-based diffusion policies for robomimic 🚧
 
+SmolVLA + Libero represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated.
+
+Franka-sim involves a cube picking task with a franka robot, and includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide.
+
+🚧 State-based diffusion policies for robomimic 🚧
 
 
 # SmolVLA for LIBERO Lottery Ticket Examples
