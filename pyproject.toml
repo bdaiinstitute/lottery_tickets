@@ -16,13 +16,27 @@ dependencies = [
 
 [project.optional-dependencies]
 franka-sim = [
-    "gym-hil",
-    "h5py",
-    "hydra-core",
-    "torch",
-    "moviepy",
+  "franka-sim",
+  "torch",
+  "opencv-python",  # headless
+  "h5py",
+  "hydra-core",
 ]
+# franka-sim = [
+#     "gym-hil",
+#     "h5py",
+#     "hydra-core",
+#     "torch",
+#     "moviepy",
+# ]
 
 smolvla-libero = [
   "lerobot[smolvla,libero] @ git+https://github.com/huggingface/lerobot.git@56b43cc88844cab4f231cf370a6c8eb8103bc9b8",
 ]
+
+[tool.uv.sources]
+franka-sim = { workspace = true }
+
+[tool.uv.workspace]
+members = ["src/lottery_tickets/franka_sim_lt/franka_sim"]
+exclude = []

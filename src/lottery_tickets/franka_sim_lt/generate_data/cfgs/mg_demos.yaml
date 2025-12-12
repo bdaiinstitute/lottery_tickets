@@ -1,16 +1,14 @@
 # Hydra configuration
-# MFNOTE: IDK what this does really
-# hydra:
-#   run:
-#     dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
-#   sweep:
-#     dir: multirun/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
-    # subdir: ${hydra.job.num}
-# If you're running this in k8s, we'll need to specify output_dir, so we know what directory to upload
-output_dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
+hydra:
+  run:
+    dir: outputs/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: multirun/demos/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+
 # Demo collection configuration
 demo_collection:
-  num_demos: 100  # Number of successful demos to collect
+  num_demos: 1000  # Number of successful demos to collect
   output_file: demos.pkl  # Output file name
   max_attempts: 5000  # Maximum attempts to prevent infinite loops
   success_threshold: 0.9  # Reward threshold for successful demos
@@ -26,11 +24,11 @@ planner:
   lift_epsilon: 0.01
   lift_height: 0.3
   grasp_wait_steps: 2
-  noise_mag: 0.00
+  noise_mag: 0.01
 
 # Environment configuration
 evaluation:
-  env_name: PandaPickCubeVisionRealisticControl-v0
+  env_name: PandaPickCubeRealisticControl-v0
   env_kwargs:
     max_episode_steps: 300  # Note that 100 is default, we are collecting slow data intentionally.
     sampling_bounds: [[0.25, -0.25], [0.55, 0.25]]

@@ -1,8 +1,3 @@
-import time
-import imageio
-import gymnasium as gym
-import numpy as np
-
 import copy
 import io
 import json
@@ -19,8 +14,8 @@ import numpy as np
 from omegaconf import DictConfig, OmegaConf
 from PIL import Image
 
-import numpy as np
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
+
 
 def reach_cube(
     orig_env, action_mag: float, epsilon: float, noise_mag: float
@@ -35,10 +30,10 @@ def reach_cube(
 
     if norm > action_mag:
         target_pos = (target_pos / norm) * action_mag
-    target_pos = target_pos 
+    target_pos = target_pos / orig_env._action_scale[0]
     target_pos = target_pos + np.random.normal(0, 1, 3) * noise_mag
 
-    target_gripper = np.array([0.0])
+    target_gripper = np.array([0.0]) / orig_env._action_scale[1]
     return target_pos, target_gripper, done
 
 
@@ -47,7 +42,7 @@ def grasp_cube(
 ) -> tuple[np.ndarray, np.ndarray, bool]:
     """Close the gripper to grasp the cube and wait for specified steps."""
     target_pos = np.zeros(3, dtype=np.float32)
-    target_gripper = np.array([1.0]) 
+    target_gripper = np.array([1.0]) / orig_env._action_scale[1]
 
     planner_state["grasp_wait"] += 1
     done = planner_state["grasp_wait"] > wait_steps
@@ -69,23 +64,24 @@ def lift_cube(
 
     if norm > action_mag:
         target_pos = (target_pos / norm) * action_mag
-    target_pos = target_pos
+    target_pos = target_pos / orig_env._action_scale[0]
     target_pos = target_pos + np.random.normal(0, 1, 3) * noise_mag
 
-    target_gripper = np.array([0.0]) 
+    target_gripper = np.array([0.0]) / orig_env._action_scale[1]
     return target_pos, target_gripper, done
 
 
 def do_nothing(orig_env) -> tuple[np.ndarray, np.ndarray]:
     """Keep the gripper stationary with the cube grasped."""
     target_pos = np.zeros(3, dtype=np.float32)
-    target_gripper = np.array([0.0]) 
+    target_gripper = np.array([0.0]) / orig_env._action_scale[1]
     return target_pos, target_gripper
+
 
 def collect_single_demo(
     env, planner_cfg: DictConfig, success_threshold: float
-) -> tuple[list[dict], bool, list[np.ndarray]]:
-    """Collect a single demonstration episode and frames for video."""
+) -> tuple[list[dict], bool]:
+    """Collect a single demonstration episode."""
     orig_env = env.unwrapped
 
     planner_state = {
@@ -96,8 +92,6 @@ def collect_single_demo(
     }
 
     transitions = []
-    frames = []
-
     obs, _ = env.reset()
     done_or_truncated = False
 
@@ -135,16 +129,8 @@ def collect_single_demo(
         else:
             target_pos, target_gripper = do_nothing(orig_env)
 
-        target_orientation = np.array([0, 0, 0])
-        action = np.concatenate([target_pos, target_orientation, target_gripper])
+        action = np.concatenate([target_pos, target_gripper])
         next_obs, reward, done, truncated, info = env.step(action)
-
-        # Capture rendered frame (as RGB array)
-        try:
-            frame = env.render()
-            frames.append(frame)
-        except Exception as e:
-            logging.warning(f"Render failed at step: {e}")
 
         # Store transition
         transitions.append(
@@ -163,30 +149,26 @@ def collect_single_demo(
         done_or_truncated = done or truncated
 
     success = reward > success_threshold
-    return transitions, success, frames
+    return transitions, success
+
+
 def worker_collect_demo(args: tuple) -> None:
     """Worker function for multiprocessing pool to collect a single demo."""
     env_name, env_kwargs, planner_cfg, success_threshold = args
 
+    # This will ensure different random seeds even if we fork processes.
     random.seed()
     np.random.seed()
 
     try:
-        env = make_frankasim_env()
-        transitions, success, frames = collect_single_demo(env, planner_cfg, success_threshold)
+        # Each worker creates its own environment instance
+        env = make_frankasim_env(env_name, env_kwargs=env_kwargs)
+        transitions, success = collect_single_demo(env, planner_cfg, success_threshold)
         env.close()
-
-        video_file = None
-        if success:
-            # Save video as MP4 using imageio
-            video_file = Path(f"demo_video_{random.randint(0, 1e6)}.mp4")
-            imageio.mimsave(video_file, frames, fps=30)
-
         return {
             "success": True,
             "demo_success": success,
             "transitions": transitions,
-            "video_file": str(video_file) if video_file else None,
             "error": None,
         }
     except Exception as e:
@@ -195,9 +177,9 @@ def worker_collect_demo(args: tuple) -> None:
             "success": False,
             "demo_success": False,
             "transitions": None,
-            "video_file": None,
             "error": str(e),
         }
+
 
 def process_pending_results(
     pending_results: list,
@@ -249,11 +231,6 @@ def process_pending_results(
                     logging.info(
                         f"Attempt {attempt_num}: SUCCESS! Saved demo {demo_idx}/{num_demos} to {demo_file}"
                     )
-
-                    if result_data.get("video_file") is not None:
-                        video_path = output_dir / Path(f"{base_name}_{demo_idx:04d}.mp4").name
-                        Path(result_data["video_file"]).rename(video_path)
-                        logging.info(f"Saved video for demo {demo_idx} to {video_path}")
 
                     # Early exit if we've collected enough demos when waiting
                     if wait and len(successful_demo_files) >= num_demos:
@@ -315,7 +292,6 @@ def write_hdf5(demo_file: Path, transitions: list[dict]) -> None:
                     dtype=first_demo[key].dtype,
                 )
 
-        print(first_demo["observations"].keys())
         key = "state"
         hf_key = "state"
         data = first_demo["observations"][key]
@@ -429,7 +405,7 @@ def create_metadata_json(
 def main(cfg: DictConfig) -> None:
     """Main function to collect multiple demonstration episodes and save to file."""
     env_cfg = cfg.evaluation
-    output_dir = Path(cfg.output_dir)
+    output_dir = Path(".").resolve()
     print(f"Output directory: {output_dir}")
     env_kwargs = OmegaConf.to_container(env_cfg.env_kwargs, resolve=True)
 
@@ -446,7 +422,9 @@ def main(cfg: DictConfig) -> None:
 
     # Prepare output directory and filename components
     output_path: Path = output_dir / demo_cfg.output_file
+    individual_output_dir = output_dir / "individual_demos"
     output_dir.mkdir(parents=True, exist_ok=True)
+    individual_output_dir.mkdir(parents=True, exist_ok=True)
     base_name = output_path.stem if output_path.stem else "demos"
     suffix = output_path.suffix if output_path.suffix else ".pkl"
 
@@ -477,7 +455,7 @@ def main(cfg: DictConfig) -> None:
             completed_indices, successful_demo_files = process_pending_results(
                 pending_results,
                 successful_demo_files,
-                output_dir,
+                individual_output_dir,
                 base_name,
                 suffix,
                 demo_cfg.num_demos,
@@ -502,7 +480,7 @@ def main(cfg: DictConfig) -> None:
             _, successful_demo_files = process_pending_results(
                 pending_results,
                 successful_demo_files,
-                output_dir,
+                individual_output_dir,
                 base_name,
                 suffix,
                 demo_cfg.num_demos,
@@ -525,12 +503,11 @@ def main(cfg: DictConfig) -> None:
         combined_output_path = output_dir / output_path.name
         with open(combined_output_path, "wb") as f:
             pickle.dump(combined_demos, f)
-            global_path = Path(f.name).resolve()
 
         logging.info(
             f"Saved {len(successful_demo_files)} successful demonstrations as individual files in {output_dir}"
         )
-        logging.info(f"Combined demos saved to {global_path}")
+        logging.info(f"Combined demos saved to {combined_output_path}")
     else:
         # Create metadata.json for HDF5 files.
         create_metadata_json(output_dir, successful_demo_files, cfg)

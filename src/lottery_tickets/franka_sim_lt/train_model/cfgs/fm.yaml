@@ -1,7 +1,7 @@
 # Hydra configuration
 hydra:
   run:
-    dir: outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    dir: outputs/policy/${now:%Y-%m-%d}/${now:%H-%M-%S}
   sweep:
     dir: multirun/${now:%Y-%m-%d}/${now:%H-%M-%S}
     subdir: ${hydra.job.num}
@@ -15,8 +15,6 @@ save_dir: ${hydra:runtime.output_dir}/checkpoints
 dataset:
   data_path: data/demos_1k.pkl
   chunk_size: 8
-  num_episodes: 20
-  episode_length: 100
   # State history configuration
   use_state_history: false
   state_history_length: 2  # Number of past states to include
@@ -43,7 +41,7 @@ training:
 # Evaluation configuration
 evaluation:
   model_path: checkpoints/fm_policy_final.pt
-  env_name: PandaPickCubeVisionRealisticControl-v0
+  env_name: PandaPickCubeRealisticControl-v0
   num_episodes: 10
   max_steps_per_episode: 300
   chunk_size: 8

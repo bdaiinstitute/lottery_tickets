@@ -1,58 +1,47 @@
-from gymnasium import Env
-from gymnasium.spaces import Box
-from gymnasium import ObservationWrapper
-import numpy as np
+import franka_sim.envs  # noqa: F401 required import for franka sim envs
 import gymnasium as gym
+from gymnasium.wrappers import RecordEpisodeStatistics
 
-def make_frankasim_env():
-    import gym_hil
-    env = gym.make("gym_hil/PandaPickCubeBase-v0", render_mode="rgb_array")
-    env = ConcatRenderWrapper(env)
-    env = StateConcatWrapper(env)
-    return(env)
-
-class ConcatRenderWrapper(gym.Wrapper):
-    def __init__(self, env):
-        super().__init__(env)
-
-    def render(self):
-        # Call the original env render
-        front_view, wrist_view = self.env.render()
-        # Concatenate along width
-        return np.concatenate([front_view, wrist_view], axis=1)
+from lottery_tickets.franka_sim_lt.wrappers.chunking import ChunkingWrapper
+from lottery_tickets.franka_sim_lt.wrappers.obs import ObsWrapper
 
 
-class StateConcatWrapper(ObservationWrapper):
-    def __init__(self, env: Env, agent_key: str = "agent_pos", env_key: str = "environment_state"):
-        super().__init__(env)
-        self.agent_key = agent_key
-        self.env_key = env_key
+def make_frankasim_env(env_name, env_kwargs) -> gym.Env:
+    env = gym.make(env_name, **env_kwargs)
 
-        # We assume the base env returns something (like a dict) where
-        # agent_pos and environment_pos are numpy arrays with fixed shape.
-        # For example:
-        agent_space = env.observation_space.spaces.get(agent_key)
-        env_space = env.observation_space.spaces.get(env_key)
+    if not has_wrapper(env, ObsWrapper):
+        # Flattens all non-image observations into one vector
+        env = ObsWrapper(env)
 
-        assert agent_space is not None, f"No {agent_key} in observation_space"
-        assert env_space is not None, f"No {env_key} in observation_space"
+    if not has_wrapper(env, ChunkingWrapper):
+        env = ChunkingWrapper(
+            env, obs_horizon=1, act_exec_horizon=None
+        )  # Adds an observation-history dimension.
 
-        assert isinstance(agent_space, Box) and isinstance(env_space, Box), \
-            "Expect Box spaces for agent and environment positions"
+    if not has_wrapper(env, RecordEpisodeStatistics):
+        # Prevent "ValueError: Attempted to add episode stats when they already exist."
+        env = RecordEpisodeStatistics(env)
 
-        # New observation space: a flat vector of concatenated positions
-        low = np.concatenate((agent_space.low.flatten(), env_space.low.flatten()))
-        high = np.concatenate((agent_space.high.flatten(), env_space.high.flatten()))
-        self.observation_space = Box(
-            low=low,
-            high=high,
-            dtype=agent_space.dtype
-        )
+    return env
 
-    def observation(self, obs):
-        agent = obs[self.agent_key]
-        epos = obs[self.env_key]
-        # flatten and concatenate
-        new_state = np.concatenate((np.asarray(agent).flatten(),
-                                    np.asarray(epos).flatten()))
-        return {"state": new_state}
+
+def has_wrapper(env, wrapper_class: type, max_depth: int = 10000) -> bool:
+    """Check if the environment or any of its wrappers is an instance of the specified wrapper class.
+
+    Args:
+        env (gym.Env): The environment to check.
+        wrapper_class (type): The wrapper class to look for.
+
+    Returns:
+        bool: True if the environment or any of its wrappers is an instance of the specified class, False otherwise.
+    """
+    current_env = env
+    depth = 0
+    while depth < max_depth:
+        if isinstance(current_env, wrapper_class):
+            return True
+        if not hasattr(current_env, "env"):
+            break
+        current_env = current_env.env
+        depth += 1
+    return False
