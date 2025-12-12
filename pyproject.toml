@@ -22,13 +22,6 @@ franka-sim = [
   "h5py",
   "hydra-core",
 ]
-# franka-sim = [
-#     "gym-hil",
-#     "h5py",
-#     "hydra-core",
-#     "torch",
-#     "moviepy",
-# ]
 
 smolvla-libero = [
   "lerobot[smolvla,libero] @ git+https://github.com/huggingface/lerobot.git@56b43cc88844cab4f231cf370a6c8eb8103bc9b8",

@@ -1,6 +1,14 @@
 # The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies
 
-# Setup
+This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experiments, each experiment using a simulation and policy class:
+1.  [LeRobot pretrained SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
+2. [State-based flow matching policy for franka-sim](#franka-sim-lottery-ticket-examples)
+3. 🚧 State-based diffusion policies for robomimic 🚧
+
+
+
+# SmolVLA for LIBERO Lottery Ticket Examples
+## Setup
 
 ```
 # Clone the repo and go into it.
@@ -14,15 +22,11 @@ conda activate lottery_tickets
 # Install package with smolvla + libero dependencies
 pip install -e .[smolvla-libero]
 
-# 🚧 (NOT STABLE) 🚧  Install package with frankasim
-pip install -e .[franka-sim]
-```
-
-# SmolVLA for LIBERO Lottery Ticket Examples
-First go into the `smolvla_libero` directory, and set `MUJOCO_GL` to use gpu rendering for faster performance:
-```
-cd src/lottery_tickets/smolvla_libero
+# It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
 export MUJOCO_GL=egl
+
+# Go into the `smolvla_libero` directory
+cd src/lottery_tickets/smolvla_libero
 ```
 
 For the pretrained policy weights in our experiments, we use <a href="https://huggingface.co/HuggingFaceVLA/smolvla_libero">LeRobot's finetuned version of SmolVLA for LIBERO: "HuggingFaceVLA/smolvla_libero" </a>. 
@@ -87,7 +91,20 @@ python evaluate.py \
 
 
 
-# 🚧 (NOT STABLE) 🚧 Franka-sim Lottery Ticket Examples 
+# Franka-sim Lottery Ticket Examples 
+
+## Setup
+```
+# Clone the repo and go into it.
+git clone https://github.com/rai-inst/lottery_tickets.git
+cd lottery_tickets
+
+# Setup uv venv and install franka-sim
+uv sync --extra franka-sim
+# source the venv
+source .venv/bin/activate
+```
+
 First, generate a bunch of expert data of the franka picking up a cube:
 
 ```
