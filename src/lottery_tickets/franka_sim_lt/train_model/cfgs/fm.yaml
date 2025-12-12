@@ -15,8 +15,6 @@ save_dir: ${hydra:runtime.output_dir}/checkpoints
 dataset:
   data_path: data/demos_1k.pkl
   chunk_size: 8
-  num_episodes: 20
-  episode_length: 100
   # State history configuration
   use_state_history: false
   state_history_length: 2  # Number of past states to include
