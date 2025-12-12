@@ -48,6 +48,7 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     # Evaluate policy
     num_episodes = cfg.evaluation.num_episodes
+    total_reward_list = []
     for episode in range(num_episodes):
         policy.reset()
         obs, _ = env.reset()
@@ -64,6 +65,7 @@ def evaluate_fm_policy(cfg: DictConfig):
             step += 1
             frames.append(env.render())
 
+        total_reward_list.append(total_reward)
         print(
             f"Episode {episode + 1}/{num_episodes} - Steps: {step}, Total Reward: {total_reward:.2f}"
         )
@@ -71,6 +73,8 @@ def evaluate_fm_policy(cfg: DictConfig):
         print(f"saved video to : {video_file}")
         imageio.mimsave(video_file, frames, fps=30)
 
+    avg_reward = sum(total_reward_list) / num_episodes
+    print(f"Average Reward over {num_episodes} episodes: {avg_reward:.2f}")
     env.close()
 
 
