@@ -33,7 +33,7 @@ export MUJOCO_GL=egl
 
 The codebase supports the following:
 1. [Flow matching policies already trained that you can evaluate](#evaluating-pretrained-flow-matching-policy)
-2. [Generating a new lottery ticket fpr franka-sim](#generating-a-new-lottery-ticket-fpr-franka-sim)
+2. [Generating a new lottery ticket fpr franka-sim](#generating-a-new-lottery-ticket-for-franka-sim)
 3. [Evaluating an existing franka-sim lottery ticket](#evaluating-an-existing-franka-sim-lottery-ticket)
 
 ##  Evaluating pretrained flow matching policy
