@@ -51,7 +51,7 @@ python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm
 
 You will see the policy's total rewards for each episode get printed out. This policy typically has an average around 30 +-15, whereas success normally is >80. It on occasion succeeds, but most of the time it is not a good policy. 
 
-## Generating a new lottery ticket fpr franka-sim
+## Generating a new lottery ticket for franka-sim
 You can generate a new lottery ticket and evaluate it by setting `new_noise=True`. It'll run similarly to the previous script, except an initial noise will be chosen at the start, used for all episodes, and then saved as `init_x.pt` in the same folder as the videos folder. Run the script to grab a lottery ticket and see if you win!
 
 ```
