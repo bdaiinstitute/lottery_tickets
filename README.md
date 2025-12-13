@@ -35,6 +35,8 @@ The codebase supports the following:
 1. [Flow matching policies already trained that you can evaluate](#evaluating-pretrained-flow-matching-policy)
 2. [Generating a new lottery ticket for franka-sim](#generating-a-new-lottery-ticket-for-franka-sim)
 3. [Evaluating an existing franka-sim lottery ticket](#evaluating-an-existing-franka-sim-lottery-ticket)
+4. [Visualize ticket and original policy performance](#visualize-ticket-and-original-policy-performance)
+5. TODO: Add instructions for generating data + training a model.
 
 ##  Evaluating pretrained flow matching policy
 First, go into `train_model` folder, and download a checkpoint (TODO: Make this accessible to public)
@@ -49,7 +51,7 @@ You can run an evaluation on that checkpoint by running `evaluate.py` and settin
 python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +original_policy=True
 ```
 
-You will see the policy's total rewards for each episode get printed out. This policy typically has an average around 30 +-15, whereas success normally is >80. It on occasion succeeds, but most of the time it is not a good policy. 
+You will see the policy's total rewards for each episode get printed out. This policy typically has an average ~17 on average, whereas success normally is >80. It on occasion succeeds, slowly, but most of the time it is not a good policy. 
 
 ## Generating a new lottery ticket for franka-sim
 You can generate a new lottery ticket and evaluate it by setting `new_noise=True`. It'll run similarly to the previous script, except an initial noise will be chosen at the start, used for all episodes, and then saved as `init_x.pt` in the same folder as the videos folder. Run the script to grab a lottery ticket and see if you win!
@@ -58,11 +60,12 @@ You can generate a new lottery ticket and evaluate it by setting `new_noise=True
 python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +new_noise=True
 ```
 
-If you'd like to generate a large number of tickets, you can run the following bash script:
+If you'd like to generate a large number of tickets, you can run the following bash script (TODO: Put options for passing checkpoint, output dir, num episodes, etc. as arguments for bash script, or just edit evaluate.py to do loop more effeciently). This will generate a folder that will contain subdirs, each subdir representing the results of a ticket:
 
 ```
 bash generate_tickets.sh
 ```
+
 
 ## Evaluating an existing franka-sim lottery ticket
 You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via `noise_path` parameter. For example, you can download a golden ticket for `fm_seed_1001` checkpoint (and the other checkpoints) we've found via:
@@ -78,6 +81,15 @@ python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm
 ```
 
 This golden ticket typically averages at least above 100, which is normally a success. It does still occassionaly fail, but it is much more reliable than the original policy. 
+
+## Visualize ticket and original policy performance
+You can visualize the results in a 2D scatter plot, where the x-axis represents the rewards/success rate for the first 50% episodes, and the y-axis is the rewards/success rate for the second 50% episodes. The more linear this is, the more predictable performance of a golden ticket on a set of environment states generalize to others. Also, if the results of the original policy are also in the folder (and named `original_policy`), then it will be added to the plot with specialized coloring to compare tickets and original policy performance.
+
+The script also prints out the tickets in order of their average episode rewards and task success rate, along with the original policy's at the top.
+
+```
+python viz_regression_to_mean.py --root_dir=./outputs/fm_seed_1001_lottery_ticket_search --out_avg=scatter_fm_seed_1001_rewards.png --out_success=scatter_fm_seed_1001_success.png --threshold=100
+```
 
 
 # SmolVLA for LIBERO Lottery Ticket Examples
@@ -95,7 +107,7 @@ We have a python script (pretty much exact copy of `lerobot_eval.py`) you can ru
 1. [Generate a new lottery ticket (i.e: get performance on a task suite)](#generating-a-new-ticket)
 2. [Evaluate a saved lottery ticket on other tasks](#evaluating-a-saved-ticket)
 3. [Running the original policy](#running-the-original-policy)
-
+4. TODO: Visualize the results
 
 ## Setup
 

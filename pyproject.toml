@@ -21,6 +21,7 @@ franka-sim = [
   "opencv-python",  # headless
   "h5py",
   "hydra-core",
+  "matplotlib"
 ]
 
 smolvla-libero = [
