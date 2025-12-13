@@ -59,10 +59,16 @@ python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm
 ```
 
 ## Evaluating an existing franka-sim lottery ticket
-You can evaluate the saved `init_x.pt` of a model by passing a path to it via `noise_path`. For example, you can download a golden ticket for `fm_seed_1001` checkpoint we've been using here TODO.
+You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via `noise_path` parameter. For example, you can download a golden ticket for `fm_seed_1001` checkpoint (and the other checkpoints) we've found via:
 
 ```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +noise_path=./outputs/policy/2025-12-12/best_so_far2/init_x.pt
+gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/golden_tickets" .
+```
+
+Now you can evaluate the golden tickets, for example:
+
+```
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +noise_path=./golden_tickets/fm_seed_1001/init_x.pt 
 ```
 
 This golden ticket typically averages at least above 100, which is normally a success. It does still occassionaly fail, but it is much more reliable than the original policy. 
