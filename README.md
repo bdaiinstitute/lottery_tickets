@@ -1,15 +1,71 @@
 # The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies
 
 This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
-1.  [LeRobot pretrained SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
-2. [State-based flow matching policy for franka-sim](#franka-sim-lottery-ticket-examples)
+1. [franka-sim cube picking with state-based flow matching policies](#franka-sim-lottery-ticket-examples)
+2.  [LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
 3. 🚧 State-based diffusion policies for robomimic 🚧
 
-SmolVLA + Libero represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated.
+Franka-sim involves a cube picking task with a franka robot, and includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide. This is a great experimental testbed if you'd like to examine all parts of a pipeline (data collection, policy training, and inference) that result in policies with golden tickets. The small model makes it easier to do experiments with little compute. The policy and training code is all custom-written.
 
-Franka-sim involves a cube picking task with a franka robot, and includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide.
+🤗 SmolVLA + Libero represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated. This is a good experimental testbed for examining lottery tickets with an open-source VLA, and on a multi-task setting. The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint from LeRobot, so this reflects looking for lottery tickets in a model we didn't create. 
 
 🚧 State-based diffusion policies for robomimic 🚧
+
+# Franka-sim Lottery Ticket Examples 
+
+## Setup
+```
+# Clone the repo and go into it.
+git clone https://github.com/rai-inst/lottery_tickets.git
+cd lottery_tickets
+
+# Setup uv venv and install franka-sim
+uv sync --extra franka-sim
+# source the venv
+source .venv/bin/activate
+
+# Go into the  franka_sim_lt folder
+cd src/lottery_tickets/franka_sim_lt/
+
+# It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
+export MUJOCO_GL=egl
+```
+
+The codebase supports the following:
+1. [Flow matching policies already trained that you can evaluate](#evaluating-pretrained-flow-matching-policy)
+2. [Generating a new lottery ticket fpr franka-sim](#generating-a-new-lottery-ticket-fpr-franka-sim)
+3. [Evaluating an existing franka-sim lottery ticket](#evaluating-an-existing-franka-sim-lottery-ticket)
+
+##  Evaluating pretrained flow matching policy
+First, go into `train_model` folder, and download a checkpoint (TODO: Make this accessible to public)
+```
+cd train_model
+gsutil -m cp -r  "gs://bdai-common-storage/lottery_tickets/checkpoints"  .
+```
+
+You can run an evaluation on that checkpoint by running `evaluate.py` and setting `evaluation.model_path` to your chosen checkpoint. For these examples, consider the ckpt `fm_seed_1001`.
+
+```
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +original_policy=True
+```
+
+You will see the policy's total rewards for each episode get printed out. This policy typically has an average around 30 +-15, whereas success normally is >80. It on occasion succeeds, but most of the time it is not a good policy. 
+
+## Generating a new lottery ticket fpr franka-sim
+You can generate a new lottery ticket and evaluate it by setting `new_noise=True`. It'll run similarly to the previous script, except an initial noise will be chosen at the start, used for all episodes, and then saved as `init_x.pt` in the same folder as the videos folder. Run the script to grab a lottery ticket and see if you win!
+
+```
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +new_noise=True
+```
+
+## Evaluating an existing franka-sim lottery ticket
+You can evaluate the saved `init_x.pt` of a model by passing a path to it via `noise_path`. For example, you can download a golden ticket for `fm_seed_1001` checkpoint we've been using here TODO.
+
+```
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +noise_path=./outputs/policy/2025-12-12/best_so_far2/init_x.pt
+```
+
+This golden ticket typically averages at least above 100, which is normally a success. It does still occassionaly fail, but it is much more reliable than the original policy. 
 
 
 # SmolVLA for LIBERO Lottery Ticket Examples
@@ -98,44 +154,3 @@ python evaluate.py \
         --eval_mode=ORIGINAL_POLICY \
         --seed=1000
 ```
-
-
-
-# Franka-sim Lottery Ticket Examples 
-
-## Setup
-```
-# Clone the repo and go into it.
-git clone https://github.com/rai-inst/lottery_tickets.git
-cd lottery_tickets
-
-# Setup uv venv and install franka-sim
-uv sync --extra franka-sim
-# source the venv
-source .venv/bin/activate
-
-# Go into the  franka_sim_lt folder
-cd src/lottery_tickets/franka_sim_lt/
-
-# It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
-export MUJOCO_GL=egl
-```
-
-The codebase supports the following:
-1. [Flow matching policies already trained that you can evaluate](#evaluating-pretrained-flow-matching-policy)
-2. TODO:
-
-# Evaluating pretrained flow matching policy
-First, go into `train_model` folder, and download a checkpoint (TODO: Make this accessible to public)
-```
-cd train_model
-gsutil -m cp -r  "gs://bdai-common-storage/lottery_tickets/checkpoints"  .
-```
-
-You can run an evaluation on that checkpoint by running `evaluate.py` and setting `evaluation.model_path` to your chosen checkpoint.
-
-```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1002/checkpoints/fm_policy_final.pt
-```
-
-You will see the policy's episode returns (typically above 100 means success), and a saved video of the rollout. 

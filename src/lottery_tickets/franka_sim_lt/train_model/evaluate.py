@@ -46,6 +46,21 @@ def evaluate_fm_policy(cfg: DictConfig):
     video_path = Path(cfg.evaluation.video_save_path)
     video_path.mkdir(parents=True, exist_ok=True)
 
+    # Check if running original policy, with a new lottery ticket, or a saved lottery ticket
+    # check if origianl policy
+    if cfg.get("new_noise", False):
+        init_x_size = env.action_space.shape[0] * cfg.evaluation.chunk_size
+        print("Evaluating new lottery ticket with new noise initialization.")
+        init_x = torch.randn((1, init_x_size), device=cfg.device)
+    elif cfg.get("noise_path", False):
+        init_x = torch.load(cfg.noise_path)
+        print(f"Evaluating {cfg.noise_path}.")
+    elif cfg.get("original_policy", False):
+        init_x = None
+        print("Evaluating original policy without lottery ticket.")
+    else:
+        raise RuntimeError("Need to either test original policy, test a new ticket, or eval an existing ticket")
+
     # Evaluate policy
     num_episodes = cfg.evaluation.num_episodes
     total_reward_list = []
@@ -58,7 +73,7 @@ def evaluate_fm_policy(cfg: DictConfig):
         frames = []
 
         while not done:
-            action = policy(obs)
+            action = policy(obs, init_x=init_x)
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             total_reward += reward
@@ -75,6 +90,10 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     avg_reward = sum(total_reward_list) / num_episodes
     print(f"Average Reward over {num_episodes} episodes: {avg_reward:.2f}")
+
+    if 'new_noise' in cfg.keys() or 'noise_path' in cfg.keys():
+        torch.save(init_x, video_path.parent / "init_x.pt")
+
     env.close()
 
 
