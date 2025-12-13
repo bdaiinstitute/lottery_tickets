@@ -58,6 +58,12 @@ You can generate a new lottery ticket and evaluate it by setting `new_noise=True
 python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +new_noise=True
 ```
 
+If you'd like to generate a large number of tickets, you can run the following bash script:
+
+```
+bash generate_tickets.sh
+```
+
 ## Evaluating an existing franka-sim lottery ticket
 You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via `noise_path` parameter. For example, you can download a golden ticket for `fm_seed_1001` checkpoint (and the other checkpoints) we've found via:
 
