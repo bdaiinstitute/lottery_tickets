@@ -11,7 +11,7 @@
   </tr>
   <tr>
     <td colspan="2" align="center">
-      <em>(left) Policy sampling from gaussian (i.e: default policy) vs. (right) Policy using a fixed initial noise that is a golden ticket.</em>
+      <em>(left) Policy sampling from gaussian (i.e: default policy) vs. (right) Policy using a fixed initial noise that is a golden ticket. (TODO: Provide hyperlinks to default policy and this golden ticket)</em>
     </td>
   </tr>
 </table>
