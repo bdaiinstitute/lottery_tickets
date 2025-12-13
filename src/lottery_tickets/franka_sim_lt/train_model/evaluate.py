@@ -10,7 +10,7 @@ from omegaconf import DictConfig, OmegaConf
 
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_fm_model
-
+import numpy as np
 
 def evaluate_fm_policy(cfg: DictConfig):
     """Evaluate Flow Matching policy in the environment."""
@@ -90,6 +90,10 @@ def evaluate_fm_policy(cfg: DictConfig):
 
     avg_reward = sum(total_reward_list) / num_episodes
     print(f"Average Reward over {num_episodes} episodes: {avg_reward:.2f}")
+
+    # turn the total_reward_list into a numpy array and save it to file
+    total_reward_list_np = np.array(total_reward_list)
+    np.save(video_path.parent / "total_reward_list.npy", total_reward_list_np)
 
     if 'new_noise' in cfg.keys() or 'noise_path' in cfg.keys():
         torch.save(init_x, video_path.parent / "init_x.pt")
