@@ -1,5 +1,22 @@
 # The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies
 
+<table>
+  <tr>
+    <td align="center">
+      <img src="./media/base_policy_frankasim.gif" width="360">
+    </td>
+    <td align="center">
+      <img src="./media/golden_ticket_frankasim.gif" width="360">
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" align="center">
+      <em>(left) Policy sampling from gaussian (i.e: default policy) vs. (right) Policy using a fixed initial noise that is a golden ticket.</em>
+    </td>
+  </tr>
+</table>
+
+
 This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
 1. [franka-sim cube picking with state-based flow matching policies](#franka-sim-lottery-ticket-examples)
 2.  [LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
