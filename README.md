@@ -1,7 +1,15 @@
 # The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies
-
 <table>
+  <!-- Header row -->
   <tr>
+    <th></th>
+    <th align="center">Original Policy (i.e: Initial noise sampled from gaussian)</th>
+    <th align="center">Golden Ticket (i.e: Optimized fixed initial noise)</th>
+  </tr>
+
+  <!-- FrankaSim row -->
+  <tr>
+    <td align="center"><strong>FrankaSim</strong></td>
     <td align="center">
       <img src="./media/base_policy_frankasim.gif" width="360">
     </td>
@@ -9,12 +17,30 @@
       <img src="./media/golden_ticket_frankasim.gif" width="360">
     </td>
   </tr>
+
+  <!-- LIBERO row -->
   <tr>
-    <td colspan="2" align="center">
-      <em>(left) Policy sampling from gaussian (i.e: default policy) vs. (right) Policy using a fixed initial noise that is a golden ticket. (TODO: Provide hyperlinks to default policy and this golden ticket)</em>
+    <td align="center"><strong>SmolVLA + LIBERO</strong></td>
+    <td align="center">
+      <img src="./media/base_policy_libero.gif" width="360">
+    </td>
+    <td align="center">
+      <img src="./media/golden_ticket_libero.gif" width="360">
+    </td>
+  </tr>
+
+  <!-- Caption -->
+  <tr>
+    <td colspan="3" align="center">
+      <em>
+        (left) Baseline policy (Gaussian sampling) vs. (right) golden-ticket policy
+        using a fixed initial noise. (top) is frankasim and (bottom) is LIBERO.
+      </em>
     </td>
   </tr>
 </table>
+
+
 
 
 This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
