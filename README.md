@@ -1,9 +1,9 @@
-# The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies
+# 🎫 The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies 
 <table>
   <!-- Header row -->
   <tr>
     <th align="center">Original Policy (i.e: Initial noise sampled from gaussian)</th>
-    <th align="center">Golden Ticket (i.e: Optimized fixed initial noise)</th>
+    <th align="center">🎫 Golden Ticket (i.e: Optimized fixed initial noise)</th>
   </tr>
 
   <!-- FrankaSim row -->
@@ -30,7 +30,7 @@
   <tr>
     <td colspan="3" align="center">
       <em>
-        (left) Baseline policy (Gaussian sampling) vs. (right) golden-ticket policy
+        (left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy
         using a fixed initial noise. (top) is frankasim and (bottom) is 🤗 SmolVLA + LIBERO.
       </em>
     </td>
