@@ -79,7 +79,7 @@ The codebase supports the following:
 2. [Generating a new lottery ticket for franka-sim](#generating-a-new-lottery-ticket-for-franka-sim)
 3. [Evaluating an existing franka-sim lottery ticket](#evaluating-an-existing-franka-sim-lottery-ticket)
 4. [Visualize ticket and original policy performance](#visualize-ticket-and-original-policy-performance)
-5. TODO: Add instructions for generating data + training a model.
+5. [Generate data and train your own base policy](#generate-data-and-train-your-own-base-policy)
 
 ##  Evaluating pretrained flow matching policy
 First, go into `train_model` folder, and download a checkpoint (TODO: Make this accessible to public)
@@ -126,13 +126,39 @@ python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm
 This golden ticket typically averages at least above 100, which is normally a success. It does still occassionaly fail, but it is much more reliable than the original policy. 
 
 ## Visualize ticket and original policy performance
-You can visualize the results in a 2D scatter plot, where the x-axis represents the rewards/success rate for the first 50% episodes, and the y-axis is the rewards/success rate for the second 50% episodes. The more linear this is, the more predictable performance of a golden ticket on a set of environment states generalize to others. Also, if the results of the original policy are also in the folder (and named `original_policy`), then it will be added to the plot with specialized coloring to compare tickets and original policy performance.
+You can visualize the results in a 2D scatter plot, where the x-axis represents the rewards/success rate for the first 50% episodes, and the y-axis is the rewards/success rate for the second 50% episodes. The more linear this is, the more predictable performance of a golden ticket on a set of environment states generalize to others. To help with checking for this linearity, our graph includes a best-fit line along with r^2 value. Also, if the results of the original policy are also in the folder (and named `original_policy`), then it will be added to the plot with specialized coloring to compare tickets and original policy performance.
 
 The script also prints out the tickets in order of their average episode rewards and task success rate, along with the original policy's at the top.
 
 ```
 python viz_regression_to_mean.py --root_dir=./outputs/fm_seed_1001_lottery_ticket_search --out_avg=scatter_fm_seed_1001_rewards.png --out_success=scatter_fm_seed_1001_success.png --threshold=100
 ```
+
+Here is an example output we got when running the script on `fm_seed_1001`. As can be seen by the line of best fit and the r^2 value, the performance of the tickets on the first set of episodes is highly predictive of its performance on the other episodes. Also, we can see that while the base policy (red) has low performance, there are many tickets (blue) that are much better, dramatically increasing base policy performance from ~15% to high ~90% success rate.
+
+<table align="center">
+  <tr>
+    <td><img src="media/fm_seed_1001_success_frankasim.png" width="360"/></td>
+    <td><img src="media/fm_seed_1001_rewards_frankasim.png" width="360"/></td>
+  </tr>
+  <tr>
+    <td align="center"><em>Success rates for tickets and base policy (`fm_seed_1001`)</em></td>
+    <td align="center"><em>Episode rewards for tickets and base policy (`fm_seed_1001`)</em></td>
+  </tr>
+</table>
+
+
+## Generate data and train your own base policy
+You can generate demonstration data and train your own policy, in case you'd like to experiment with different parts of the pipeline to investigate what causes golden tickets to occur.
+
+First, you can generate expert data by running the following script:
+
+```
+cd generate_data
+python generate_data.py
+```
+
+This will use a task and motion planning algorithm to generate demonstrations of the franka picking up the cube. By default, the script will run until it has collected 1000 succesful demos. All of the saved data will be placed in the `outputs` folder by default.
 
 
 # SmolVLA for LIBERO Lottery Ticket Examples
