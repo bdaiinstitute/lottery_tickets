@@ -157,6 +157,13 @@ python generate_data.py
 
 This will use a task and motion planning algorithm to generate demonstrations of the franka picking up the cube. By default, the script will run until it has collected 1000 succesful demos. All of the saved data will be placed in the `outputs` folder by default. There will be a pickle file `demos.pkl` that contains all the demonstrations and will be used for training.
 
+You can also download the data we used to train our checkpoints here if you'd prefer not to generate your own data:
+
+```
+gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/data" .
+```
+
+
 Now we can train a policy with the data by using the train script inside `train_model`, and passing the path to `demo.pkl` to the `dataset.data_path` parameter. For example:
 
 ```
