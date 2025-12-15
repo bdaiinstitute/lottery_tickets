@@ -2,14 +2,12 @@
 <table>
   <!-- Header row -->
   <tr>
-    <th></th>
     <th align="center">Original Policy (i.e: Initial noise sampled from gaussian)</th>
     <th align="center">Golden Ticket (i.e: Optimized fixed initial noise)</th>
   </tr>
 
   <!-- FrankaSim row -->
   <tr>
-    <td align="center"><strong>FrankaSim</strong></td>
     <td align="center">
       <img src="./media/base_policy_frankasim.gif" width="360">
     </td>
@@ -20,7 +18,6 @@
 
   <!-- LIBERO row -->
   <tr>
-    <td align="center"><strong>SmolVLA + LIBERO</strong></td>
     <td align="center">
       <img src="./media/base_policy_libero.gif" width="360">
     </td>
@@ -34,7 +31,7 @@
     <td colspan="3" align="center">
       <em>
         (left) Baseline policy (Gaussian sampling) vs. (right) golden-ticket policy
-        using a fixed initial noise. (top) is frankasim and (bottom) is LIBERO.
+        using a fixed initial noise. (top) is frankasim and (bottom) is 🤗 SmolVLA + LIBERO.
       </em>
     </td>
   </tr>
@@ -158,7 +155,19 @@ cd generate_data
 python generate_data.py
 ```
 
-This will use a task and motion planning algorithm to generate demonstrations of the franka picking up the cube. By default, the script will run until it has collected 1000 succesful demos. All of the saved data will be placed in the `outputs` folder by default.
+This will use a task and motion planning algorithm to generate demonstrations of the franka picking up the cube. By default, the script will run until it has collected 1000 succesful demos. All of the saved data will be placed in the `outputs` folder by default. There will be a pickle file `demos.pkl` that contains all the demonstrations and will be used for training.
+
+Now we can train a policy with the data by using the train script inside `train_model`, and passing the path to `demo.pkl` to the `dataset.data_path` parameter. For example:
+
+```
+cd train_model
+python train.py dataset.data_path=/PATH/TO/demos.pkl
+```
+
+This will print out the average loss per epoch, and save checkpoints along the way to `outputs/policy`. The last checkpoint will be saved as `fm_policy_final.pt`, although you can use any of the checkpoints saved along the way.
+
+You can [evaluate your newly trained checkpoint](#evaluating-pretrained-flow-matching-policy) in the same way as before, or you can [search for golden tickets](#generating-a-new-lottery-ticket-for-franka-sim).
+
 
 
 # SmolVLA for LIBERO Lottery Ticket Examples
