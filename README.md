@@ -26,6 +26,18 @@
     </td>
   </tr>
 
+  <!-- Robomimic row -->
+  <tr>
+    <td align="center"><strong>🚧 robomimic 🚧</strong></td>
+    <td align="center">
+      <img src="./media/task_square.gif" width="360">
+    </td>
+    <td align="center">
+      🚧TODO🚧
+    </td>
+  </tr>
+
+
   <!-- Caption -->
   <tr>
     <td colspan="3" align="center">
