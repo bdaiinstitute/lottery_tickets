@@ -39,7 +39,7 @@
   <tr>
     <td colspan="3" align="center">
       <em>
-(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO for robomimic</a>.
+(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO for robomimic</a>. Each row uses a different golden ticket that was optimized for that model. (TODO: links)
       </em>
     </td>
   </tr>
