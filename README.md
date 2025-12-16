@@ -28,10 +28,10 @@
 
   <!-- Robomimic row -->
   <tr>
-    <td align="center"><strong>🚧Golden ticket video🚧</strong></td>
     <td align="center">
       <img src="./media/task_square.gif" width="360">
     </td>
+    <td align="center"><strong>🚧Golden ticket video🚧</strong></td>
   </tr>
 
 
