@@ -28,12 +28,9 @@
 
   <!-- Robomimic row -->
   <tr>
-    <td align="center"><strong>🚧 robomimic 🚧</strong></td>
+    <td align="center"><strong>🚧Golden ticket video🚧</strong></td>
     <td align="center">
       <img src="./media/task_square.gif" width="360">
-    </td>
-    <td align="center">
-      🚧TODO🚧
     </td>
   </tr>
 
@@ -42,8 +39,7 @@
   <tr>
     <td colspan="3" align="center">
       <em>
-        (left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy
-        using a fixed initial noise. (top) is frankasim and (bottom) is 🤗 SmolVLA + LIBERO.
+(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO for robomimic</a>.
       </em>
     </td>
   </tr>
@@ -55,13 +51,13 @@
 This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
 1. [franka-sim cube picking with state-based flow matching policies](#franka-sim-lottery-ticket-examples)
 2.  [LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
-3. 🚧 State-based diffusion policies for robomimic 🚧
+3. 🚧 DPPO for robomimic 🚧
 
 Franka-sim involves a cube picking task with a franka robot, where the cube randomly spawns in a ~1/2 square meter region in front of the robot. Our codebase includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide. This is a great experimental testbed if you'd like to examine all parts of a pipeline (data collection, policy training, and inference) that result in policies with golden tickets. The small model makes it easier to do experiments with little compute. The policy and training code is all custom-written.
 
 🤗 SmolVLA + Libero represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated. This is a good experimental testbed for examining lottery tickets with an open-source VLA, and on a multi-task setting. The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint from LeRobot, so this reflects looking for lottery tickets in a model we didn't create. 
 
-🚧 State-based diffusion policies for robomimic 🚧
+🚧 DPPO for robomimic 🚧
 
 # Franka-sim Lottery Ticket Examples 
 
