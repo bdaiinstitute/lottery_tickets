@@ -1,0 +1,95 @@
+defaults:
+  - _self_
+hydra:
+  run:  
+    dir: ${logdir}
+
+name: gym_hopper_dsrl_${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+logdir: ${log_dir}/gym-dsrl/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+base_policy_path: ./dppo/log/gym-pretrain/hopper-medium-v2_pre_diffusion_mlp_ta4_td20/2024-06-12_23-10-05/checkpoint/state_3000.pt
+normalization_path: ./dppo/log/gym/${env_name}/normalization.npz
+dppo_path: ./dppo
+
+algorithm: dsrl_na # options are: dsrl_na, dsrl_sac
+
+seed: 1
+device: cuda:0
+use_wandb: True
+env_name: hopper-medium-v2
+log_dir: ./logs
+obs_dim: 11
+action_dim: 3
+cond_steps: 1
+act_steps: 4
+load_offline_data: False
+deterministic_eval: False 
+
+eval_interval: 4000
+num_evals: 200
+save_model_interval: 10000
+save_replay_buffer: False
+
+env:
+  n_envs:  4
+  n_eval_envs: 25
+  name: ${env_name}
+  max_episode_steps: 1000
+  reset_at_iteration: False
+  save_video: False
+  best_reward_threshold_for_success: 0
+  reward_offset: 0
+  wrappers:
+    mujoco_dppo_lowdim:
+      normalization_path: ${normalization_path}
+    multi_step:
+      n_obs_steps: ${cond_steps}
+      n_action_steps: ${act_steps}
+      max_episode_steps: ${env.max_episode_steps}
+      reset_within_step: True
+
+wandb:
+  project: dsrl
+  run: ${now:%H-%M-%S}_${name}
+  group: gym-hopper
+
+train:
+  tau: 0.005 # Target update rate
+  actor_lr: 3e-4
+  batch_size: 256
+  train_freq: 2 # Update model after this many environment steps
+  utd: 20 # Number of gradient steps to take per update
+  noise_critic_grad_steps: 10 # Number of gradient steps to take per update when fitting noise critic 
+  use_layer_norm: True
+  layer_size: 128 # Layer size for actor and critic
+  num_layers: 3 # Number of layers for actor and critic
+  discount: 0.99
+  ent_coef: -1
+  target_ent: 0.0
+  init_rollout_steps: 2001 # Number of rollout steps of standard diffusion policy to collect for replay buffer before training starts
+  action_magnitude: 1.5 # Maximum action magnitude in noise action space
+  n_critics: 2 # Number of critic Q networks
+  critic_backup_combine_type: min
+
+model:
+  _target_: model.diffusion.diffusion_eval.DiffusionEval
+  use_ddim: True
+  ddim_steps: 5
+  ft_denoising_steps: 0
+  predict_epsilon: True
+  denoised_clip_value: 1.0
+  network_path: ${base_policy_path}
+  network:
+    _target_: model.diffusion.mlp_diffusion.DiffusionMLP
+    time_dim: 16
+    mlp_dims: [512, 512, 512]
+    activation_type: ReLU
+    residual_style: True
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    horizon_steps: ${act_steps}
+    action_dim: ${action_dim}
+  horizon_steps: ${act_steps}
+  obs_dim: ${obs_dim}
+  action_dim: ${action_dim}
+  denoising_steps: 20
+  device: ${device}
+  controllable_noise: True

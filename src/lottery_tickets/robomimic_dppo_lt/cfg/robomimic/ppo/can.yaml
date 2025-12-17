@@ -1,0 +1,140 @@
+defaults:
+  - _self_
+
+hydra:
+  run:
+    dir: ${logdir}
+
+name: ${exp_name}_topk_${top_k}_can_ppo_${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+logdir: ${log_dir}/robomimic-ppo/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+
+base_policy_path: ./dppo/log/robomimic-pretrain/can/can_pre_diffusion_mlp_ta4_td20/2024-06-28_13-29-54/checkpoint/state_5000.pt
+normalization_path: ./dppo/log/robomimic/${env_name}/normalization.npz
+dppo_path: ./dppo
+exp_name: can_ppo
+noise_path: null
+top_k: null
+
+seed: 1
+device: cuda:0
+use_wandb: True
+env_name: can
+log_dir: ./logs
+obs_dim: 23
+action_dim: 7
+cond_steps: 1
+act_steps: 4
+load_offline_data: False
+deterministic_eval: False
+
+eval_interval: 3000
+num_evals: 200
+save_model_interval: 500000
+
+env:
+  n_envs: 4
+  n_eval_envs: 25
+  name: ${env_name}
+  max_episode_steps: 300
+  reward_offset: 1
+  wrappers:
+    robomimic_lowdim:
+      normalization_path: ${normalization_path}
+      low_dim_keys: ['robot0_eef_pos','robot0_eef_quat','robot0_gripper_qpos','object']
+
+wandb:
+  project: dsrl_robomimic
+  run: ${now:%H-%M-%S}_${name}
+  group: robomimic-can-ppo
+
+# train:
+#   learning_rate: 3.0e-4
+#   n_steps: 256
+#   batch_size: 1024
+#   n_epochs: 6
+#   gamma: 0.99
+#   gae_lambda: 0.975
+#   clip_range: 0.2
+#   ent_coef: 0.01
+#   vf_coef: 0.5
+#   max_grad_norm: 0.5
+#   total_timesteps: 20000000
+#   use_layer_norm: true
+#   layer_size: 256
+#   num_layers: 3
+#   action_magnitude: 1 # Maximum action magnitude in noise action space
+
+train:
+  learning_rate: 1.0e-4
+  n_steps: 4096
+  batch_size: 128
+  n_epochs: 30
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_range: 0.10
+  ent_coef: 0.0
+  vf_coef: 0.9
+  max_grad_norm: 0.5
+  total_timesteps: 20000000
+  use_layer_norm: true
+  layer_size: 128
+  num_layers: 3
+  action_magnitude: 1 # Maximum action magnitude in noise action space
+
+# train:
+#   learning_rate: 2.0e-4
+#   n_steps: 3072
+#   batch_size: 256
+#   n_epochs: 20
+#   gamma: 0.99
+#   gae_lambda: 0.95
+#   clip_range: 0.12
+#   ent_coef: 0.002
+#   vf_coef: 0.75
+#   max_grad_norm: 0.5
+#   total_timesteps: 20000000
+#   use_layer_norm: true
+#   layer_size: 256
+#   num_layers: 3
+#   action_magnitude: 1 # Maximum action magnitude in noise action space
+
+# train:
+#   learning_rate: 3.0e-5
+#   n_steps: 2048
+#   batch_size: 256
+#   n_epochs: 40
+#   gamma: 0.995
+#   gae_lambda: 0.95
+#   clip_range: 0.10
+#   ent_coef: 0.0
+#   vf_coef: 1.0
+#   max_grad_norm: 0.5
+#   total_timesteps: 20000000
+#   use_layer_norm: true
+#   layer_size: 128
+#   num_layers: 3
+#   action_magnitude: 1 # Maximum action magnitude in noise action space
+
+model:
+  _target_: model.diffusion.diffusion_eval.DiffusionEval
+  ft_denoising_steps: 0
+  predict_epsilon: True
+  denoised_clip_value: 1.0
+  randn_clip_value: 3
+  network_path: ${base_policy_path}
+  network:
+    _target_: model.diffusion.mlp_diffusion.DiffusionMLP
+    time_dim: 16
+    mlp_dims: [512, 512, 512]
+    residual_style: True
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    horizon_steps: ${act_steps}
+    action_dim: ${action_dim}
+  horizon_steps: ${act_steps}
+  obs_dim: ${obs_dim}
+  action_dim: ${action_dim}
+  denoising_steps: 20
+  device: ${device}
+  use_ddim: True
+  ddim_steps: 8
+  controllable_noise: True
