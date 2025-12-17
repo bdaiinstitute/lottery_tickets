@@ -49,17 +49,17 @@
 
 
 This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
-1. [franka-sim cube picking with state-based flow matching policies](#franka-sim-lottery-ticket-examples)
-2.  [LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
-3. [DPPO for robomimic](#dppo-for-robomimic-lottery-ticket-examples)
+1. [🦾 franka-sim cube picking with state-based flow matching policies](#🦾-franka-sim-lottery-ticket-examples)
+2.  [🤗 LeRobot pretrained 🤗SmolVLA for LIBERO](#🤗-smolvla-for-libero-lottery-ticket-examples)
+3. [✨ DPPO for robomimic](#✨-dppo-for-robomimic-lottery-ticket-examples)
 
-Franka-sim involves a cube picking task with a franka robot, where the cube randomly spawns in a ~1/2 square meter region in front of the robot. Our codebase includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide. This is a great experimental testbed if you'd like to examine all parts of a pipeline (data collection, policy training, and inference) that result in policies with golden tickets. The small model makes it easier to do experiments with little compute. The policy and training code is all custom-written.
+[🦾 Franka-sim](#🦾-franka-sim-lottery-ticket-examples) involves a cube picking task with a franka robot, where the cube randomly spawns in a ~1/2 square meter region in front of the robot. Our codebase includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide. This is a great experimental testbed if you'd like to examine all parts of a pipeline (data collection, policy training, and inference) that result in policies with golden tickets. The small model makes it easier to do experiments with little compute. The policy and training code is all custom-written.
 
-🤗 SmolVLA + Libero represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated. This is a good experimental testbed for examining lottery tickets with an open-source VLA, and on a multi-task setting. The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint from LeRobot, so this reflects looking for lottery tickets in a model we didn't create. 
+[🤗 SmolVLA + Libero](#🤗-smolvla-for-libero-lottery-ticket-examples) represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated. This is a good experimental testbed for examining lottery tickets with an open-source VLA, and on a multi-task setting. The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint from LeRobot, so this reflects looking for lottery tickets in a model we didn't create. 
 
-🚧 DPPO for robomimic 🚧
+[✨ DPPO for robomimic](#✨-dppo-for-robomimic-lottery-ticket-examples) includes the original DPPO robomimic checkpoints used in the DSRL project. We provide golden tickets for these policies, and code for generating new tickets and comparing against the base policy. 
 
-# Franka-sim Lottery Ticket Examples 
+# 🦾 Franka-sim Lottery Ticket Examples 
 
 ## Setup
 ```
@@ -185,7 +185,7 @@ You can [evaluate your newly trained checkpoint](#evaluating-pretrained-flow-mat
 
 
 
-# SmolVLA for LIBERO Lottery Ticket Examples
+# 🤗 SmolVLA for LIBERO Lottery Ticket Examples
 
 For the pretrained policy weights in our experiments, we use <a href="https://huggingface.co/HuggingFaceVLA/smolvla_libero">LeRobot's finetuned version of SmolVLA for LIBERO: "HuggingFaceVLA/smolvla_libero" </a>. 
 
@@ -273,7 +273,7 @@ python evaluate.py \
 ```
 
 
-# DPPO for robomimic Lottery Ticket Examples
+# ✨ DPPO for robomimic Lottery Ticket Examples
 The original DPPO paper released state-based diffusion policy checkpoints for robomimic tasks. These checkpoints were used in the original DSRL set of experiments. We use these same model checkpoints and show the existence of golden tickets.
 
 ## Setup
@@ -283,17 +283,21 @@ git clone https://github.com/rai-inst/lottery_tickets.git
 cd lottery_tickets
 # Create and activate python3.10 conda env, then install robomimic + dppo dependencies 
 # TODO: simplify the dependencies, not sure we need the stable-baselines for basic results?
-conda create -n dppo3 python=3.10 -y
-conda activate dppo3
+conda create -n dppo_robomimic python=3.10 -y
+conda activate dppo_robomimic
 pip install -e .[dppo-robomimic]
 
 # Setup DPPO
-# TODO: See if we can add this to `dppo-robomimic` optional dependency setup
+# TODO: See if we can add this to `dppo-robomimic` optional dependency setup and still have everything work nicely
 cd src/lottery_tickets/robomimic_dppo_lt
 git clone https://github.com/ajwagen/dppo-dsrl.git dppo
 cd dppo
 pip install -e .[gym,robomimic]
+# go back to main directory.
+cd ..
 ```
+
+## Download pretraiend dppo robomimic checkpoints
 
 To download the pretrained DPPO model checkpoints, <a href="https://drive.google.com/drive/folders/1kzC49RRFOE7aTnJh_7OvJ1K5XaDmtuh1">download this folder</a> and place it in your `dppo/log` folder. This is directly lifted from <a href="https://github.com/ajwagen/dsrl?tab=readme-ov-file#installation">the original DSRL codebase</a>.
 
@@ -301,5 +305,5 @@ To download the pretrained DPPO model checkpoints, <a href="https://drive.google
 Randomly sample `noise_samples` tickets (noises from a Gaussian) and evaluate them over `n_envs` fixed set of environments. Results are logged to `out`.
 
 ```
-python lottery_ticket.py --task_name can --n_envs 100 --noise_samples 5000 --seed 999 --out "logs_res_rm/lottery_ticket_results/" --ddim_steps 8 --no_wandb
+python lottery_ticket.py --task_name can --n_envs 100 --noise_samples 5 --seed 999 --out "logs_res_rm/lottery_ticket_results/" --ddim_steps 8 --no_wandb
 ```
