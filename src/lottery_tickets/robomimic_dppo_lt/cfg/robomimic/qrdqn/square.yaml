@@ -1,0 +1,91 @@
+defaults:
+  - _self_
+
+hydra:
+  run:
+    dir: ${logdir}
+
+name: ${exp_name}_topk_${top_k}_square_qrdqn_${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+logdir: ${log_dir}/robomimic-qrdqn/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+
+base_policy_path: ./dppo/log/robomimic-pretrain/square/square_pre_diffusion_mlp_ta4_td100_ddim-100steps/2025-04-11_19-13-26_44/checkpoint/state_3000.pt
+normalization_path: ./dppo/log/robomimic/${env_name}/normalization.npz
+dppo_path: ./dppo
+exp_name: square_qrdqn
+noise_path: null
+top_k: null
+
+seed: 1
+device: cuda:0
+use_wandb: True
+env_name: square
+log_dir: ./logs
+obs_dim: 23
+action_dim: 7
+cond_steps: 1
+act_steps: 4
+load_offline_data: False
+deterministic_eval: False
+
+eval_interval: 4000
+num_evals: 200
+save_model_interval: 500000
+
+env:
+  n_envs: 4
+  n_eval_envs: 25
+  name: ${env_name}
+  max_episode_steps: 400
+  reward_offset: 1
+  wrappers:
+    robomimic_lowdim:
+      normalization_path: ${normalization_path}
+      low_dim_keys: ['robot0_eef_pos','robot0_eef_quat','robot0_gripper_qpos','object']
+
+wandb:
+  project: dsrl_robomimic
+  run: ${now:%H-%M-%S}_${name}
+  group: robomimic-square-qrdqn
+
+train:
+  learning_rate: 3.0e-4
+  buffer_size: 20000000
+  learning_starts: 8000
+  batch_size: 512
+  gamma: 0.99
+  train_freq: 1
+  gradient_steps: 10
+  tau: 0.005
+  target_update_interval: 1
+  exploration_fraction: 0.15
+  exploration_initial_eps: 0.15
+  exploration_final_eps: 0.01
+  max_grad_norm: 10.0
+  n_quantiles: 101
+  net_arch: [1024, 1024]
+  total_timesteps: 10000000
+
+model:
+  _target_: model.diffusion.diffusion_eval.DiffusionEval
+  ft_denoising_steps: 0
+  predict_epsilon: True
+  denoised_clip_value: 1.0
+  randn_clip_value: 3
+  network_path: ${base_policy_path}
+  network:
+    _target_: model.diffusion.mlp_diffusion.DiffusionMLP
+    time_dim: 32
+    mlp_dims: [1024, 1024, 1024]
+    cond_mlp_dims: [512, 64]
+    residual_style: True
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    horizon_steps: ${act_steps}
+    action_dim: ${action_dim}
+  horizon_steps: ${act_steps}
+  obs_dim: ${obs_dim}
+  action_dim: ${action_dim}
+  denoising_steps: 100
+  device: ${device}
+  use_ddim: True
+  ddim_steps: 8
+  controllable_noise: True

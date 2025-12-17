@@ -24,6 +24,10 @@ franka-sim = [
   "matplotlib"
 ]
 
+dppo-robomimic = [
+  "stable-baselines3 @ git+https://github.com/ajwagen/stable-baselines3-dsrl.git@10e5d311b5c42fe571ff3eeb72f622ca616a149d"
+]
+
 smolvla-libero = [
   "lerobot[smolvla,libero] @ git+https://github.com/huggingface/lerobot.git@56b43cc88844cab4f231cf370a6c8eb8103bc9b8",
 ]
