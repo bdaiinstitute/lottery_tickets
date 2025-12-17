@@ -29,9 +29,11 @@
   <!-- Robomimic row -->
   <tr>
     <td align="center">
-      <img src="./media/task_square.gif" width="360">
+      <img src="./media/base_policy_robomimic.gif" width="360">
     </td>
-    <td align="center"><strong>🚧Golden ticket video🚧</strong></td>
+    <td align="center">
+      <img src="./media/golden_ticket_robomimic.gif" width="360">
+    </td>
   </tr>
 
 
@@ -39,7 +41,7 @@
   <tr>
     <td colspan="3" align="center">
       <em>
-(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO for robomimic</a>. Each row uses a different golden ticket that was optimized for that model. (TODO: links)
+(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO for robomimic</a>. Each row uses a different golden ticket that was optimized for that model.
       </em>
     </td>
   </tr>
@@ -317,4 +319,21 @@ We can evaluate the base policy performance (i.e: sampling from gaussian) with a
 
 ```
 python dppo_base_eval.py --task_name can --n_evals_per_seed 100 --n_seeds 5 --seed 1619 --out "logs_res_rm/policy_eval/" --ddim_steps 8 --save_vid
+```
+
+## Evaluate golden tickets for dppo robomimic
+<a href="https://drive.google.com/drive/folders/1GCtMUE3bylCTIZb_zQYgCxVcrj_Phl3-">You can download a folder containing golden tickets for can here</a>. You can then run the following script to evaluate the golden tickets on different environment states by passing the directory path to `eval` parameter. The folder contains multiple tickets, ranked by their performance, so you can use `eval_idx` to select which ticket to run, with `0` representing the best golden ticket. 
+
+
+```
+python opt_noise.py \
+--eval ./envs100_samples5000_seed999_ddim8_20251130_221846_ddim8 \
+--eval_idx 0 \
+--task_name can \
+--n_evals_per_seed 3 \
+--n_seeds 5 \
+--seed 1619 \
+--out "logs_res_rm/noise_eval_results/" \
+--ddim_steps 8 \
+--save_vid
 ```
