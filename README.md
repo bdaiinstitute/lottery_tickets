@@ -55,7 +55,7 @@ This is a repository for testing the lottery ticket hypothesis for robot control
 2.  [🤗 LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
 3. [DPPO for robomimic](#dppo-for-robomimic-lottery-ticket-examples)
 
-All three experiment setups contain code for running a baseline policy, generating tickets, and evaluating tickets. Each repo may contain other utilities:
+All three experiment setups contain code for running a baseline policy, generating tickets, evaluating tickets, and links to golden tickets we have found so you can try them yourself. Each repo may contain other utilities, since each experiment testbed serves a different purpose:
 
 [🦾 Franka-sim](#franka-sim-lottery-ticket-examples) involves a cube picking task with a franka robot, where the cube randomly spawns in a ~1/2 square meter region in front of the robot. Our codebase includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide. This is a great experimental testbed if you'd like to examine all parts of a pipeline (data collection, policy training, and inference) that result in policies with golden tickets. The small model makes it easier to do experiments with little compute. The policy and training code is all custom-written.
 
@@ -317,14 +317,16 @@ python lottery_ticket.py --task_name can --n_envs 3 --noise_samples 5 --seed 999
 ```
 
 ## Evaluate the default dppo robomic policy
-We can evaluate the base policy performance (i.e: sampling from gaussian) with a similar script. 
+We can evaluate the base policy performance (i.e: sampling from gaussian) with a similar script. For can, we typically see a performance in the 40% success range for the base policy performance.
 
 ```
-python dppo_base_eval.py --task_name can --n_evals_per_seed 100 --n_seeds 5 --seed 1619 --out "logs_res_rm/policy_eval/" --ddim_steps 8 --save_vid
+python dppo_base_eval.py --task_name can --n_evals_per_seed 3 --n_seeds 50 --seed 1619 --out "logs_res_rm/policy_eval/" --ddim_steps 8 
 ```
 
 ## Evaluate golden tickets for dppo robomimic
 <a href="https://drive.google.com/drive/folders/1GCtMUE3bylCTIZb_zQYgCxVcrj_Phl3-">You can download a folder containing golden tickets for can here</a>. You can then run the following script to evaluate the golden tickets on different environment states by passing the directory path to `eval` parameter. The folder contains multiple tickets, ranked by their performance, so you can use `eval_idx` to select which ticket to run, with `0` representing the best golden ticket. 
+
+Generally, the average success rate of the golden ticket in `envs100_samples5000_seed999_ddim8_20251130_221846_ddim8` for `eval_idx=0` is ~80% for can.
 
 
 ```
@@ -333,9 +335,8 @@ python opt_noise.py \
 --eval_idx 0 \
 --task_name can \
 --n_evals_per_seed 3 \
---n_seeds 5 \
+--n_seeds 50 \
 --seed 1619 \
 --out "logs_res_rm/noise_eval_results/" \
---ddim_steps 8 \
---save_vid
+--ddim_steps 8 
 ```
