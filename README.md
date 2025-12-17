@@ -276,6 +276,10 @@ python evaluate.py \
 # DPPO for robomimic Lottery Ticket Examples
 The original DPPO paper released state-based diffusion policy checkpoints for robomimic tasks. These checkpoints were used in the original DSRL set of experiments. We use these same model checkpoints and show the existence of golden tickets.
 
+We have scripts for:
+1. [Generating new tickets using a base policy](#generate-tickets-with-dppo-robomimic)
+2. [Evaluate the default dppo robomic policy](#evaluate-the-default-dppo-robomic-policy)
+
 ## Setup
 ```
 # Clone the repo and go into it.
@@ -297,13 +301,20 @@ pip install -e .[gym,robomimic]
 cd ..
 ```
 
-## Download pretraiend dppo robomimic checkpoints
+## Download pretrained dppo robomimic checkpoints
 
 To download the pretrained DPPO model checkpoints, <a href="https://drive.google.com/drive/folders/1kzC49RRFOE7aTnJh_7OvJ1K5XaDmtuh1">download this folder</a> and place it in your `dppo/log` folder. This is directly lifted from <a href="https://github.com/ajwagen/dsrl?tab=readme-ov-file#installation">the original DSRL codebase</a>.
 
 ## Generate tickets with dppo robomimic
-Randomly sample `noise_samples` tickets (noises from a Gaussian) and evaluate them over `n_envs` fixed set of environments. Results are logged to `out`.
+Randomly sample `noise_samples` tickets (noises from a Gaussian) and evaluate them over `n_envs` fixed set of environments. Results are logged to `out`. You can pass `--save-vid` to save videos for all tickets on all environments, but normally only recommended for n_envs < 10 for debugging purposes. 
 
 ```
-python lottery_ticket.py --task_name can --n_envs 100 --noise_samples 5 --seed 999 --out "logs_res_rm/lottery_ticket_results/" --ddim_steps 8 --no_wandb
+python lottery_ticket.py --task_name can --n_envs 3 --noise_samples 5 --seed 999 --out "logs_res_rm/lottery_ticket_results/" --ddim_steps 8 --no_wandb --save_vid
+```
+
+## Evaluate the default dppo robomic policy
+We can evaluate the base policy performance (i.e: sampling from gaussian) with a similar script. 
+
+```
+python dppo_base_eval.py --task_name can --n_evals_per_seed 100 --n_seeds 5 --seed 1619 --out "logs_res_rm/policy_eval/" --ddim_steps 8 --save_vid
 ```

@@ -47,6 +47,7 @@ def p_args():
 	p.add_argument("--out", default="logs_res_rm/lottery_ticket_results/")
 	p.add_argument("--ddim_steps", type=int, default=None, help="DDIM steps to override config value")
 	p.add_argument("--no_wandb", action="store_true", help="Disable wandb logging")
+	p.add_argument("--save_vid", action="store_true", help="Save evaluation videos")
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int, seed: int, ddim_steps: int, exp_name: str = "") -> str:
@@ -239,7 +240,7 @@ def main():
 	
 	base_policy = load_base_policy(cfg)
 	video_dir = os.path.join(args.out, "raw_videos")
-	save_vid = args.n_envs < 10
+	save_vid = args.save_vid #args.n_envs < 10
 	# Derive and fix per-env seeds once so every reset keeps the same mapping
 	ss_env = np.random.SeedSequence(args.seed)
 	fixed_seeds = [int(s.generate_state(1)[0]) for s in ss_env.spawn(args.n_envs)]

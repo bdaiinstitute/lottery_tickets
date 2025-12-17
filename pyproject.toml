@@ -25,7 +25,8 @@ franka-sim = [
 ]
 
 dppo-robomimic = [
-  "stable-baselines3 @ git+https://github.com/ajwagen/stable-baselines3-dsrl.git@10e5d311b5c42fe571ff3eeb72f622ca616a149d"
+  "stable-baselines3 @ git+https://github.com/ajwagen/stable-baselines3-dsrl.git@10e5d311b5c42fe571ff3eeb72f622ca616a149d",
+  "moviepy"
 ]
 
 smolvla-libero = [
