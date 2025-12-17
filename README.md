@@ -55,6 +55,8 @@ This is a repository for testing the lottery ticket hypothesis for robot control
 2.  [🤗 LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
 3. [DPPO for robomimic](#dppo-for-robomimic-lottery-ticket-examples)
 
+All three experiment setups contain code for running a baseline policy, generating tickets, and evaluating tickets. Each repo may contain other utilities:
+
 [🦾 Franka-sim](#franka-sim-lottery-ticket-examples) involves a cube picking task with a franka robot, where the cube randomly spawns in a ~1/2 square meter region in front of the robot. Our codebase includes an automated way to generate demonstrations, training code for behavior cloning with a flow matching policy on the collected data, and model checkpoints of policies we have already trained. We also include golden tickets for the checkpoints we provide. This is a great experimental testbed if you'd like to examine all parts of a pipeline (data collection, policy training, and inference) that result in policies with golden tickets. The small model makes it easier to do experiments with little compute. The policy and training code is all custom-written.
 
 [🤗 SmolVLA + Libero](#smolvla-for-libero-lottery-ticket-examples) represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated. This is a good experimental testbed for examining lottery tickets with an open-source VLA, and on a multi-task setting. The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint from LeRobot, so this reflects looking for lottery tickets in a model we didn't create. 
