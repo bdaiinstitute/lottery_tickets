@@ -41,7 +41,7 @@
   <tr>
     <td colspan="3" align="center">
       <em>
-(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO for robomimic</a>. Each row uses a different golden ticket that was optimized for that model.
+(left) Baseline policy (Gaussian sampling) vs. (right) 🎫 golden-ticket policy using a fixed initial noise. (top) is frankasim, (middle) is 🤗 SmolVLA + LIBERO, (bottom) is <a href="https://github.com/irom-princeton/dppo">DPPO + robomimic</a>. Each row uses a different golden ticket that was optimized for that model.
       </em>
     </td>
   </tr>
@@ -53,7 +53,7 @@
 This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
 1. [franka-sim cube picking with state-based flow matching policies](#franka-sim-lottery-ticket-examples)
 2.  [🤗 LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
-3. [DPPO for robomimic](#dppo-for-robomimic-lottery-ticket-examples)
+3. [DPPO + robomimic](#dppo-for-robomimic-lottery-ticket-examples)
 
 All three experiment setups contain code for running a baseline policy, generating tickets, evaluating tickets, and links to golden tickets we have found so you can try them yourself. Each repo may contain other utilities, since each experiment testbed serves a different purpose:
 
@@ -61,7 +61,7 @@ All three experiment setups contain code for running a baseline policy, generati
 
 [🤗 SmolVLA + Libero](#smolvla-for-libero-lottery-ticket-examples) represents an experiment where a pretrained VLA checkpoint is taken (directly from LeRobot), and golden tickets are searched for over a multitude of task suites. We also include golden tickets we have found which can be evaluated. This is a good experimental testbed for examining lottery tickets with an open-source VLA, and on a multi-task setting. The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint from LeRobot, so this reflects looking for lottery tickets in a model we didn't create. 
 
-[✨ DPPO for robomimic](#dppo-for-robomimic-lottery-ticket-examples) includes the original DPPO robomimic checkpoints used in the DSRL project. We provide golden tickets for these policies, and code for generating new tickets and comparing against the base policy. 
+[✨ DPPO for robomimic](#dppo-for-robomimic-lottery-ticket-examples) includes the original DPPO robomimic checkpoints used in the DSRL project. We provide golden tickets for these policies, and code for generating new tickets and comparing against the base policy. This reflects a setting of using a a model we didn't create.
 
 # Franka-sim Lottery Ticket Examples 
 
@@ -97,25 +97,30 @@ cd train_model
 gsutil -m cp -r  "gs://bdai-common-storage/lottery_tickets/checkpoints"  .
 ```
 
-You can run an evaluation on that checkpoint by running `evaluate.py` and setting `evaluation.model_path` to your chosen checkpoint. For these examples, consider the ckpt `fm_seed_1001`.
+You can run an evaluation on that checkpoint by running `evaluate.py` and setting `evaluation.model_path` to your chosen checkpoint. You can set `num_episodes` to determime how many block poses we evaluate the policy on. All of the outputs will be saved in `hydra.run.dir`, or `outputs` by default. For these examples, consider the ckpt `fm_seed_1001`, and we'll save all our experiments in `fm_seed_1001_example`, and name this one `original_policy` for making it easy to compare against tickets later:
 
 ```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +original_policy=True
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +original_policy=True evaluation.num_episodes=10 hydra.run.dir=outputs/fm_seed_1001_example/original_policy 
 ```
 
-You will see the policy's total rewards for each episode get printed out. This policy typically has an average episode reward of ~17, whereas success normally is >80. It on occasion succeeds, slowly, but most of the time it is not a good policy. 
+You will see the policy's total rewards for each episode get printed out. This policy typically has an average episode reward of 20-40, whereas success normally is >80. It on occasion succeeds, slowly, but most of the time it is not a good policy. 
 
 ## Generating a new lottery ticket for franka-sim
 You can generate a new lottery ticket and evaluate it by setting `new_noise=True`. It'll run similarly to the previous script, except an initial noise will be chosen at the start, used for all episodes, and then saved as `init_x.pt` in the same folder as the videos folder. Run the script to grab a lottery ticket and see if you win!
 
 ```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +new_noise=True
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +new_noise=True hydra.run.dir=outputs/fm_seed_1001_example/example_ticket evaluation.num_episodes=10
 ```
 
-If you'd like to generate a large number of tickets, you can run the following bash script (TODO: Put options for passing checkpoint, output dir, num episodes, etc. as arguments for bash script, or just edit evaluate.py to do loop more effeciently). This will generate a folder that will contain subdirs, each subdir representing the results of a ticket:
+Depending on the base policy and the ticket drawn, the performance can range a lot. If you'd like to generate a large number of tickets, you can run the following bash script. It will generate n tickets, and make a folder for each of them inside `output_dir`. Example here does 25 tickets with 10 environment states (250 episodes), but you can vary this based on your compute budget. (TODO: remove this script and add functionality to python script, requires changing save file dir for hydra). This will generate a folder that will contain subdirs, each subdir representing the results of a ticket:
 
 ```
-bash generate_tickets.sh
+./generate_tickets.sh \
+  --n=25 \
+  --model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt \
+  --output_dir=outputs/fm_seed_1001_example \
+  --num_episodes=10 \
+  --new_noise=true
 ```
 
 
@@ -129,7 +134,7 @@ gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/golden_tickets" .
 Now you can evaluate the golden tickets, for example:
 
 ```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +noise_path=./golden_tickets/fm_seed_1001/init_x.pt 
+python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +noise_path=./golden_tickets/fm_seed_1001/init_x.pt hydra.run.dir=outputs/fm_seed_1001_example/golden_ticket evaluation.num_episodes=10
 ```
 
 This golden ticket typically averages at least above 100, which is normally a success. It does still occassionaly fail, but it is much more reliable than the original policy. 
@@ -140,10 +145,10 @@ You can visualize the results in a 2D scatter plot, where the x-axis represents 
 The script also prints out the tickets in order of their average episode rewards and task success rate, along with the original policy's at the top.
 
 ```
-python viz_regression_to_mean.py --root_dir=./outputs/fm_seed_1001_lottery_ticket_search --out_avg=scatter_fm_seed_1001_rewards.png --out_success=scatter_fm_seed_1001_success.png --threshold=100
+python viz_regression_to_mean.py --root_dir=./outputs/fm_seed_1001_example --out_avg=fm_seed_1001_example_rewards.png --out_success=fm_seed_1001_example_success.png --threshold=100
 ```
 
-Here is an example output we got when running the script on `fm_seed_1001`. As can be seen by the line of best fit and the r^2 value, the performance of the tickets on the first set of episodes is highly predictive of its performance on the other episodes. Also, we can see that while the base policy (red) has low performance, there are many tickets (blue) that are much better, dramatically increasing base policy performance from ~15% to high ~90% success rate.
+Here is an example output we got when running the script on `fm_seed_1001_example`. As can be seen by the line of best fit and the r^2 value, the performance of the tickets on the first set of episodes is highly predictive of its performance on the other episodes. Also, we can see that while the base policy (red) has low performance, there are many tickets (blue) that are much better, dramatically increasing base policy performance from ~15% to high ~90% success rate.
 
 <table align="center">
   <tr>
@@ -227,9 +232,20 @@ export MUJOCO_GL=egl
 cd src/lottery_tickets/smolvla_libero
 ```
 
+### 🐛 Debugging SmolVLA + LIBERO setup
+When install the `smolvla-libero` depedencies, if you run into an isuse wih building `hf-egl-probe` and `egl-probe`, you may need to do:
+
+```
+pip install egl_probe --no-build-isolation
+pip install hf_egl_probe --no-build-isolation
+```
+
+
 ## Generating a new ticket
 
-Set `eval_mode=NEW_TICKET` to generate a new noise vector (it will be sampled from standard normal), and run `n_episodes` of eval on it for the `env.task` list. You can set the seed for the environments by passing `seed` parameter an integer argument (`1000` is the default value). The noise vector will be saved to `{output_dir}/{A_UNIQUE_ID}/initial_noise.pt` for future use, along with videos and results. 
+Set `eval_mode=NEW_TICKET` to generate a new noise vector (it will be sampled from standard normal), and run `n_episodes` of eval on it for the `env.task` list. You can set the seed for the environments by passing `seed` parameter an integer argument (`1000` is the default value). The noise vector will be saved to `{output_dir}/{A_UNIQUE_ID}/initial_noise.pt` for future use, along with videos and results. (TODO: batch_size for now is always assumed to be 1, but could be adjusted).
+
+If you are asked to specify a custom path for the dataset folder, recommend "n".
 
 ```
 python evaluate.py \
@@ -262,7 +278,7 @@ python evaluate.py \
 
 ## Running the original policy
 
-Set `eval_mode=ORIGINAL_POLICY`, and the original policy (i.e: sampling from gaussian at all steps) will be evaluated. Results and videos will be saved, but there will be noise `initial_noise.pt` saved since it's not used. 
+Set `eval_mode=ORIGINAL_POLICY`, and the original policy (i.e: sampling from gaussian at all steps) will be evaluated. Results and videos will be saved to `{output_dir}/original_policy`, but there will be no `initial_noise.pt` saved since it's not used. You can vary `n_episodes` to run the original policy multiple times on each task in the task suite `env.task`.
 
 ```
 python evaluate.py \
@@ -270,7 +286,7 @@ python evaluate.py \
         --env.type=libero \
         --env.task=libero_spatial \
         --eval.batch_size=1 \
-        --eval.n_episodes=1 \
+        --eval.n_episodes=3 \
         --output_dir=outputs/libero_spatial_tickets \
         --eval_mode=ORIGINAL_POLICY \
         --seed=1000

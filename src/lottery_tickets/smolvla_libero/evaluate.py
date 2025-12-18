@@ -535,7 +535,7 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         # Run base policy (i.e: sampling gaussian noise as usual)
         noise = None
         print("Running base policy (i.e: sampling gaussian noise as usual!")
-        output_dir = cfg.output_dir / "base_policy"
+        output_dir = cfg.output_dir / "original_policy"
     elif cfg.eval_mode is EvalMode.NEW_TICKET:
         # Generate a new noise vector to act as a ticket
         noise = torch.normal(
