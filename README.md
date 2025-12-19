@@ -299,6 +299,7 @@ The original DPPO paper released state-based diffusion policy checkpoints for ro
 We have scripts for:
 1. [Generating new tickets using a base policy](#generate-tickets-with-dppo-robomimic)
 2. [Evaluate the default dppo robomic policy](#evaluate-the-default-dppo-robomic-policy)
+3. [Evaluate golden tickets for dppo robomimic](#evaluate-golden-tickets-for-dppo-robomimic)
 
 ## Setup
 ```
@@ -340,7 +341,7 @@ python dppo_base_eval.py --task_name can --n_evals_per_seed 3 --n_seeds 50 --see
 ```
 
 ## Evaluate golden tickets for dppo robomimic
-<a href="https://drive.google.com/drive/folders/1GCtMUE3bylCTIZb_zQYgCxVcrj_Phl3-">You can download a folder containing golden tickets for can here</a>. You can then run the following script to evaluate the golden tickets on different environment states by passing the directory path to `eval` parameter. The folder contains multiple tickets, ranked by their performance, so you can use `eval_idx` to select which ticket to run, with `0` representing the best golden ticket. 
+<a href="https://drive.google.com/drive/folders/1GCtMUE3bylCTIZb_zQYgCxVcrj_Phl3-">You can download a folder containing golden tickets for `can` task here</a>. You can then run the following script to evaluate the golden tickets on different environment states by passing the directory path to `eval` parameter. The folder contains multiple tickets, ranked by their performance, so you can use `eval_idx` to select which ticket to run, with `0` representing the best golden ticket. 
 
 Generally, the average success rate of the golden ticket in `envs100_samples5000_seed999_ddim8_20251130_221846_ddim8` for `eval_idx=0` is ~80% for can.
 
