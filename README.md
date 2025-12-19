@@ -48,9 +48,9 @@
 </table>
 
 
+# Overview 
 
-
-This is a repository for testing the lottery ticket hypothesis for robot control. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
+This is a repository for testing the lottery ticket hypothesis for robot control: The performance of a pretrained, frozen diffusion/flow matching policy can be improved by replacing sampling initial noise from the prior distribution (typically isotropic gaussian) with a well-chosen, constant initial noise input, which we call a golden ticket. There are three different experimental setups, where each experiment uses a unique simulation and policy class:
 1. [franka-sim cube picking with state-based flow matching policies](#franka-sim-lottery-ticket-examples)
 2.  [🤗 LeRobot pretrained 🤗SmolVLA for LIBERO](#smolvla-for-libero-lottery-ticket-examples)
 3. [DPPO + robomimic](#dppo-for-robomimic-lottery-ticket-examples)
