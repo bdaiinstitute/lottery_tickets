@@ -8,19 +8,21 @@ import hydra
 import numpy as np
 import torch
 import wandb
+
+from model.diffusion.diffusion import DiffusionModel
 from stable_baselines3.common.callbacks import BaseCallback
 
 
 class DPPOBasePolicyWrapper:
-	def __init__(self, base_policy):
+	def __init__(self, base_policy: DiffusionModel):
 		"""Initializes a wrapper policy.
 		
 		Args:
-			base_policy: The base policy to wrap.
+			base_policy: The base diffusion policy to wrap.
 		"""
 		self.base_policy = base_policy
 
-	def __call__(self, obs, initial_noise, return_numpy=True):
+	def __call__(self, obs: torch.Tensor, initial_noise: torch.Tensor, return_numpy: bool = True):
 		cond = {
 			"state": obs,
 			"noise_action": initial_noise,
