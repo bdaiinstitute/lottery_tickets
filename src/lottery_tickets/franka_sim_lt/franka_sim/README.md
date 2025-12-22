@@ -1,5 +1,5 @@
 # Intro
-This package provide a simple Franka arm and Robotiq Gripper simulator written in Mujoco.
+This package provides a simple Franka arm and Robotiq Gripper simulator written in Mujoco.
 It includes a state-based and a vision-based Franka lift cube task environment.
 
 # Credits

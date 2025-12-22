@@ -2,7 +2,6 @@
 
 from pathlib import Path
 
-import gymnasium as gym
 import hydra
 import imageio
 import torch
@@ -12,8 +11,13 @@ from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_fm_model
 import numpy as np
 
-def evaluate_fm_policy(cfg: DictConfig):
-    """Evaluate Flow Matching policy in the environment."""
+def evaluate_fm_policy(cfg: DictConfig) -> None:
+    """
+    Evaluates a Flow Matching policy in the environment.
+    
+    Args:
+        cfg: The policy configuration dictionary.
+    """
 
     # Set device
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")

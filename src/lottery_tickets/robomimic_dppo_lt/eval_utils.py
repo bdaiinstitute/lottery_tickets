@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """Shared utilities for noise evaluation scripts."""
 import os
 import json

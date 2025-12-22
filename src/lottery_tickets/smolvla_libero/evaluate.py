@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """Evaluate smolvla baseline, new tickets, or saved tickets on libero environments.
 
 This is a modified version of lerobot_eval.py to support fixed initial noise vectors for the entire eval.
@@ -77,7 +80,6 @@ from lerobot.utils.utils import (
 )
 
 from functools import partial
-from types import MethodType
 
 
 def rollout(

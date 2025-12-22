@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import copy
 import io
 import json
@@ -14,11 +16,12 @@ import numpy as np
 from omegaconf import DictConfig, OmegaConf
 from PIL import Image
 
+from franka_sim.mujoco_gym_env import MujocoGymEnv
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 
 
 def reach_cube(
-    orig_env, action_mag: float, epsilon: float, noise_mag: float
+    orig_env: MujocoGymEnv, action_mag: float, epsilon: float, noise_mag: float
 ) -> tuple[np.ndarray, np.ndarray, bool]:
     """Move the robot gripper towards the target cube."""
     tcp_pos = orig_env._data.sensor("2f85/pinch_pos").data
@@ -38,7 +41,7 @@ def reach_cube(
 
 
 def grasp_cube(
-    orig_env, planner_state, wait_steps: int
+    orig_env: MujocoGymEnv, planner_state, wait_steps: int
 ) -> tuple[np.ndarray, np.ndarray, bool]:
     """Close the gripper to grasp the cube and wait for specified steps."""
     target_pos = np.zeros(3, dtype=np.float32)
@@ -51,7 +54,7 @@ def grasp_cube(
 
 
 def lift_cube(
-    orig_env, action_mag: float, epsilon: float, height: float, noise_mag: float
+    orig_env: MujocoGymEnv, action_mag: float, epsilon: float, height: float, noise_mag: float
 ) -> tuple[np.ndarray, np.ndarray, bool]:
     """Lift the grasped cube to the specified height."""
     tcp_pos = orig_env._data.sensor("2f85/pinch_pos").data
@@ -71,7 +74,7 @@ def lift_cube(
     return target_pos, target_gripper, done
 
 
-def do_nothing(orig_env) -> tuple[np.ndarray, np.ndarray]:
+def do_nothing(orig_env: MujocoGymEnv) -> tuple[np.ndarray, np.ndarray]:
     """Keep the gripper stationary with the cube grasped."""
     target_pos = np.zeros(3, dtype=np.float32)
     target_gripper = np.array([0.0]) / orig_env._action_scale[1]
@@ -79,7 +82,7 @@ def do_nothing(orig_env) -> tuple[np.ndarray, np.ndarray]:
 
 
 def collect_single_demo(
-    env, planner_cfg: DictConfig, success_threshold: float
+    env: MujocoGymEnv, planner_cfg: DictConfig, success_threshold: float
 ) -> tuple[list[dict], bool]:
     """Collect a single demonstration episode."""
     orig_env = env.unwrapped

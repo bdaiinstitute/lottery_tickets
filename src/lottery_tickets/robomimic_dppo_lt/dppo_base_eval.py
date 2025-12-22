@@ -1,24 +1,24 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import argparse
-import json
 import os
 import random
 import sys
 from datetime import datetime
 from pathlib import Path
 
-import hydra
 import numpy as np
 import torch
 from hydra import compose, initialize_config_dir
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 os.environ["MUJOCO_GL"] = "egl"
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-if str(BASE_DIR) not in sys.path:
-	sys.path.append(str(BASE_DIR))
+if BASE_DIR.as_posix() not in sys.path:
+	sys.path.append(BASE_DIR.as_posix())
 
-from env_util import build_lt_env, build_single_env
+from env_util import build_single_env
 from policy_util import load_base_policy
 from eval_utils import save_eval_serial
 
@@ -41,7 +41,7 @@ def p_args():
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_seeds: int, n_evals_per_seed: int, seed: int, ddim_steps: int) -> str:
-	ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+	ts = datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')
 	run_name = f"base_policy_seeds{n_seeds}_evals{n_evals_per_seed}_seed{seed}_ddim{ddim_steps}_{ts}"
 	return os.path.join(out_path.rstrip('/'), task_name, run_name)
 

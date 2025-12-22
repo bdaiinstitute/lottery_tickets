@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import pickle
 from pathlib import Path
 
@@ -48,7 +50,7 @@ def save_checkpoint(
     }
 
     torch.save(checkpoint, save_path / filename)
-    print(f"saved ckpt to: {save_path / filename}")
+    print(f"saved checkpoint to: {save_path / filename}")
 
 
 class ActionChunkDataset(Dataset):
@@ -148,8 +150,13 @@ class ActionChunkDataset(Dataset):
         }
 
 
-def train_fm_policy(cfg: DictConfig):
-    """Train Flow Matching policy on state-action data."""
+def train_fm_policy(cfg: DictConfig) -> None:
+    """
+    Train Flow Matching policy on state-action data.
+    
+    Args:
+        cfg: The policy configuration dictionary.
+    """
 
     # Set device
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")

@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import argparse
 from pathlib import Path
 
@@ -5,8 +7,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def compute_means_and_success(rewards, threshold):
-    """Compute first/second half mean reward and success rates."""
+def compute_means_and_success(rewards: list[float], threshold: float) -> tuple[float, ...]:
+    """
+    Compute first/second half mean reward, standard errors, and success rates.
+    
+    Args:
+        rewards: List of per-episode rewards.
+        threshold: Threshold eeward above which to consider an episode successful.
+
+    Returns:
+        tuple of
+        - first half mean reward
+        - second half mean eeward
+        - first half standard error
+        - second half standard error
+        - first half success rate
+        - second half success rate
+    """
     n = len(rewards)
     split = n // 2
     first = rewards[:split]
@@ -23,7 +40,16 @@ def compute_means_and_success(rewards, threshold):
     return first_mean, second_mean, first_se, second_se, first_success, second_success
 
 
-def main(root_dir: Path, out_avg_path: Path, out_success_path: Path, threshold: float = 100.0):
+def main(root_dir: Path, out_avg_path: Path, out_success_path: Path, threshold: float = 100.0) -> None:
+    """
+    Main function for visualizing regression to mean.
+    
+    Args:
+        root_dir: Path to directory containing the model to evaluate.
+        out_avg: Output image path for average reward.
+        out_success: Output image path for success rate.
+        threshold: Episode reward threshold to count as success.
+    """
     # Lists for lottery tickets (average rewards)
     x_mean, y_mean, x_se, y_se, ticket_names = [], [], [], [], []
 
@@ -189,7 +215,7 @@ def main(root_dir: Path, out_avg_path: Path, out_success_path: Path, threshold: 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root_dir", type=Path, required=True, help="Path to fm_seed_1001_lottery_ticket_search directory")
+    parser.add_argument("--root_dir", type=Path, required=True, help="Path to directory containing model to evaluate")
     parser.add_argument("--out_avg", type=Path, default=Path("lottery_ticket_avg_reward.png"), help="Output image path for average reward")
     parser.add_argument("--out_success", type=Path, default=Path("lottery_ticket_success_rate.png"), help="Output image path for success rate")
     parser.add_argument("--threshold", type=float, default=100.0, help="Episode reward threshold to count as success")

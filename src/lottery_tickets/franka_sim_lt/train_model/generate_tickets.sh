@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 # Defaults (optional)
 N=1
 NEW_NOISE=true

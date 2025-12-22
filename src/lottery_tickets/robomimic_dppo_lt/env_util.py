@@ -1,10 +1,9 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import json
-import os
-import sys
 
 import gym
 import gymnasium
-import hydra
 import numpy as np
 import torch
 from gymnasium import spaces

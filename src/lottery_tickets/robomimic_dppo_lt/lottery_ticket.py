@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """
 - Noise search is configured in a way that every reset of the environment resets to the same seed
 assigned to that environment instance. All the environment instances are stepped in parallel,
@@ -14,12 +16,11 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import hydra
 import numpy as np
 import torch
 import wandb
 from hydra import compose, initialize_config_dir
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 os.environ["MUJOCO_GL"] = "egl"
 
@@ -51,7 +52,7 @@ def p_args():
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int, seed: int, ddim_steps: int, exp_name: str = "") -> str:
-	ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+	ts = datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')
 	run_name = f"envs{n_envs}_samples{noise_samples}_seed{seed}_ddim{ddim_steps}_{ts}"
 	if exp_name:
 		run_name = f"{run_name}_{exp_name}"

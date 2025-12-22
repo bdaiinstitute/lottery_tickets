@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """
 Eval for noise search
 -------------------------
@@ -21,11 +23,10 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import hydra
 import numpy as np
 import torch
 from hydra import compose, initialize_config_dir
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
@@ -35,7 +36,7 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 if str(BASE_DIR) not in sys.path:
 	sys.path.append(str(BASE_DIR))
 
-from env_util import build_lt_env, build_single_env
+from env_util import build_single_env
 from policy_util import load_base_policy
 from eval_utils import evaluate_noise_single, load_noise_idx, save_eval_serial
 

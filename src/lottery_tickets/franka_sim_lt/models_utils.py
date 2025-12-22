@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import torch
 from lottery_tickets.franka_sim_lt.models import FM
 from hydra.utils import instantiate
