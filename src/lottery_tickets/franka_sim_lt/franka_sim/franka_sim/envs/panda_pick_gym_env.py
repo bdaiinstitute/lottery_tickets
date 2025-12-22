@@ -7,6 +7,7 @@ import gymnasium as gym
 import mujoco
 import numpy as np
 from gymnasium import spaces
+from typing import Optional
 
 from franka_sim.controllers import opspace
 from franka_sim.mujoco_gym_env import GymRenderingSpec, MujocoGymEnv
@@ -46,9 +47,9 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
             seed: The RNG seed to use.
             control_dt: The control timestep, in seconds.
             physics_dt: The physics timestep, in seconds.
-            time_limit: ???
-            render_spec: ???
-            render_mode: ???
+            time_limit: Time limit on episode length, in seconds.
+            render_spec: Rendering specifications, like height and width of image.
+            render_mode: The rendering mode, either "rgb_array" or "human".
             image_obs: If True, uses image observations. Else uses block state as observations.
             sampling_bounds: The sampling bounds for the block positions.
         """
@@ -168,7 +169,7 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         self.render_images()
 
     def reset(
-        self, seed=None, **kwargs
+        self, seed : Optional[int]=None, **kwargs
     ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
         """
         Reset the environment.
@@ -261,7 +262,11 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         return np.concatenate(self.render_images(), axis=1)
 
     def render_images(self) -> list[np.ndarray]:
-        """Standalone method for rendering images, which can be called directly by a user."""
+        """Standalone method for rendering images, which can be called directly by a user.
+
+        Returns:
+            List of images from each camera.
+        """
         if self._viewer is None:
             raise ValueError("Viewer has not been initialized.")
 
@@ -272,12 +277,18 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         )
 
     def close(self) -> None:
+        """Closes the environment."""
         if self._viewer is not None:
             close_gym_mjc_viewer_multiversion(self._viewer)
 
     # Helper methods.
 
     def _compute_observation(self) -> dict:
+        """Computes observation for gym wrapper from mujoco data.
+        
+        Returns:
+            obs: a dict containing the observation with keys 'state' and optionally 'images'.
+        """
         obs = {}
         obs["state"] = {}
 
@@ -323,6 +334,11 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         return obs
 
     def _compute_reward(self) -> float:
+        """Computes reward based on gripper and block positions.
+        
+        Returns:
+            rew: The computed reward.
+        """
         block_pos = self._data.sensor("block_pos").data
         tcp_pos = self._data.sensor("2f85/pinch_pos").data
         dist = np.linalg.norm(block_pos - tcp_pos)
@@ -333,6 +349,11 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         return rew
 
     def _compute_success(self) -> bool:
+        """Computes success based on block and gripper positions.
+        
+        Returns:
+            success: True if the block is lifted successfully, False otherwise.
+        """
         # Note: untested
         block_pos = self._data.sensor("block_pos").data
         tcp_pos = self._data.sensor("2f85/pinch_pos").data
@@ -341,6 +362,7 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
 
 
 if __name__ == "__main__":
+    """Simple test of the PandaPickCubeGymEnv environment."""
     # Note that render_mode="human" only works with gymnasium>=1.0.0
     # because we updated Mujoco.
     env = PandaPickCubeGymEnv(render_mode="human")

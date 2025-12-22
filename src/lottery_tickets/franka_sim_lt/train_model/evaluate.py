@@ -8,7 +8,7 @@ import torch
 from omegaconf import DictConfig, OmegaConf
 
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
-from lottery_tickets.franka_sim_lt.models_utils import FlowMatchingPolicyInterface, load_flow_matching_model
+from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_flow_matching_model
 import numpy as np
 
 def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
@@ -29,7 +29,7 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
     print(f"Model config: {config}")
 
     # Create policy interface
-    policy = FlowMatchingPolicyInterface(
+    policy = FMPolicyInterface(
         fm_model,
         cfg.evaluation.chunk_size,
         device,

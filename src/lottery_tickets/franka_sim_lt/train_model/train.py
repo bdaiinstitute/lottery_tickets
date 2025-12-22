@@ -93,9 +93,19 @@ class ActionChunkDataset(Dataset):
                 self.indices.append((episode_idx, step_idx))
 
     def __len__(self):
+        """Get length of self.indices."""
         return len(self.indices)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx : int) -> dict:
+        """
+        Get state and action chunk for the given index.
+
+        Args:
+            idx: Index of the data point
+        
+        Returns:
+            dict containing "state" and "action_chunk"
+        """
         episode_idx, step_idx = self.indices[idx]
 
         episode = self.episodes[episode_idx]
@@ -267,7 +277,11 @@ def train_flow_matching_policy(cfg: DictConfig) -> None:
 
 @hydra.main(version_base=None, config_path="cfgs", config_name="fm")
 def main(cfg: DictConfig):
-    """Main training script with Hydra configuration."""
+    """Main training script with Hydra configuration.
+    
+    Args:
+        cfg: The configuration object.
+    """
 
     # Print configuration
     print("Configuration:")

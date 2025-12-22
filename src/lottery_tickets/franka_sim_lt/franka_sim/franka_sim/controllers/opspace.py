@@ -79,9 +79,9 @@ def pd_control_orientation(
 
 
 def opspace(
-    model,
-    data,
-    site_id,
+    model : mujoco.MjModel,
+    data : mujoco.MjData,
+    site_id : int,
     dof_ids: np.ndarray,
     pos: Optional[np.ndarray] = None,
     ori: Optional[np.ndarray] = None,

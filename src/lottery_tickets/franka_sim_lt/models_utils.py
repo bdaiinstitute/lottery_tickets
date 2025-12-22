@@ -1,18 +1,18 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
 
 import torch
-from lottery_tickets.franka_sim_lt.models import FlowMatching
+from lottery_tickets.franka_sim_lt.models import FM
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from typing import Any
 import numpy as np
 
-class FlowMatchingPolicyInterface:
+class FMPolicyInterface:
     """Policy interface that wraps Flow Matching model to work with gym environments."""
 
     def __init__(
         self,
-        fm_model: FlowMatching,
+        fm_model: FM,
         chunk_size: int,
         device: str | torch.device = "cpu",
         use_state_history: bool = False,
@@ -112,7 +112,7 @@ class FlowMatchingPolicyInterface:
 
 def load_flow_matching_model(
     model_path: str, device: str | torch.device = "cpu"
-) -> tuple[FlowMatching, dict]:
+) -> tuple[FM, dict]:
     """
     Load Flow Matching model from checkpoint.
     
