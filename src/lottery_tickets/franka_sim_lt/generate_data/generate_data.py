@@ -209,7 +209,7 @@ def collect_single_demo(
     return transitions, success
 
 
-def worker_collect_demo(args: tuple) -> None:
+def worker_collect_demo(args: tuple) -> dict:
     """Worker function for multiprocessing pool to collect a single demo.
     
     Args:
@@ -505,7 +505,7 @@ def main(cfg: DictConfig) -> None:
     planner_cfg = cfg.planner
     num_workers = demo_cfg.num_workers
 
-    successful_demo_files = []
+    successful_demo_files : list = []
     attempts = 0
 
     logging.info(
@@ -523,7 +523,7 @@ def main(cfg: DictConfig) -> None:
     # Use multiprocessing pool for parallel demo collection
     with Pool(processes=num_workers) as pool:
         # Keep submitting tasks until we have enough successful demos or reach max attempts
-        pending_results = []
+        pending_results : list[tuple]= []
 
         while (
             len(successful_demo_files) < demo_cfg.num_demos
