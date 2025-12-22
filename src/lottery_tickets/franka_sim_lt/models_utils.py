@@ -1,7 +1,7 @@
 # Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
 
 import torch
-from lottery_tickets.franka_sim_lt.models import FM
+from lottery_tickets.franka_sim_lt.models import FlowMatching
 from hydra.utils import instantiate
 from omegaconf import OmegaConf
 from typing import Any
@@ -12,7 +12,7 @@ class FMPolicyInterface:
 
     def __init__(
         self,
-        fm_model: FM,
+        fm_model: FlowMatching,
         chunk_size: int,
         device: str | torch.device = "cpu",
         use_state_history: bool = False,
@@ -97,7 +97,7 @@ class FMPolicyInterface:
 
 def load_fm_model(
     model_path: str, device: str | torch.device = "cpu"
-) -> tuple[FM, dict]:
+) -> tuple[FlowMatching, dict]:
     """Load Flow Matching model from checkpoint."""
     checkpoint = torch.load(model_path, map_location=device)
     config = checkpoint["config"]

@@ -68,7 +68,7 @@ The noise vector will be saved to `{output_dir}/{A_UNIQUE_ID}/initial_noise.pt` 
 
 If you are asked to specify a custom path for the dataset folder, recommend "n".
 
-```
+```bash
 python evaluate.py \
         --policy.path="HuggingFaceVLA/smolvla_libero" \
         --env.type=libero \
@@ -86,7 +86,7 @@ python evaluate.py \
 Set `eval_mode=LOAD_TICKET` and load a ticket by passing `initial_noise.pt` into `noise_path`.
 You can change the `--seed` argument to rollout on different environment seeds.
 
-```
+```bash
 python evaluate.py \
         --policy.path="HuggingFaceVLA/smolvla_libero" \
         --env.type=libero \
@@ -106,7 +106,7 @@ Set `eval_mode=ORIGINAL_POLICY`, and the original policy (i.e., sampling from ga
 Results and videos will be saved to `{output_dir}/original_policy`, but there will be no `initial_noise.pt` saved since it's not used.
 You can vary `n_episodes` to run the original policy multiple times on each task in the task suite `env.task`.
 
-```
+```bash
 python evaluate.py \
         --policy.path="HuggingFaceVLA/smolvla_libero" \
         --env.type=libero \

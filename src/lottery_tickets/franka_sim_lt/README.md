@@ -11,18 +11,22 @@ git clone https://github.com/rai-inst/lottery_tickets.git
 cd lottery_tickets
 ```
 
-Then, setup the 
+Then, setup the UV virtual environment and install franka-sim.
 
 ```bash
-# Setup uv venv and install franka-sim
 uv sync --extra franka-sim
-# source the venv
 source .venv/bin/activate
+```
 
-# Go into the franka_sim_lt folder
+Go into the franka_sim_lt folder
+
+```bash
 cd src/lottery_tickets/franka_sim_lt/
+```
 
-# It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
+It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
+
+```bash
 export MUJOCO_GL=egl
 ```
 
@@ -34,8 +38,10 @@ The codebase supports the following:
 5. [Generate data and train your own base policy](#generate-data-and-train-your-own-base-policy)
 
 ## Evaluating pretrained flow matching policy
-First, go into `train_model` folder, and download a checkpoint (TODO: Make this accessible to public)
-```
+First, go into `train_model` folder, and download a checkpoint.
+(TODO: Make this accessible to public)
+
+```bash
 cd train_model
 gsutil -m cp -r  "gs://bdai-common-storage/lottery_tickets/checkpoints" .
 ```
@@ -45,41 +51,59 @@ You can set `num_episodes` to determime how many block poses we evaluate the pol
 All of the outputs will be saved in `hydra.run.dir`, or `outputs` by default.
 For these examples, consider the ckpt `fm_seed_1001`, and we'll save all our experiments in `fm_seed_1001_example`, and name this one `original_policy` for making it easy to compare against tickets later:
 
-```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +original_policy=True evaluation.num_episodes=10 hydra.run.dir=outputs/fm_seed_1001_example/original_policy 
+```bash
+python evaluate.py \
+    evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt \
+    +original_policy=True \
+    evaluation.num_episodes=10 \
+    hydra.run.dir=outputs/fm_seed_1001_example/original_policy
 ```
 
-You will see the policy's total rewards for each episode get printed out. This policy typically has an average episode reward of 20-40, whereas success normally is >80. It on occasion succeeds, slowly, but most of the time it is not a good policy. 
+You will see the policy's total rewards for each episode get printed out.
+This policy typically has an average episode reward of 20-40, whereas success normally is >80.
+It on occasion succeeds, slowly, but most of the time it is not a good policy. 
 
 ## Generating a new lottery ticket for franka-sim
-You can generate a new lottery ticket and evaluate it by setting `new_noise=True`. It'll run similarly to the previous script, except an initial noise will be chosen at the start, used for all episodes, and then saved as `init_x.pt` in the same folder as the videos folder. Run the script to grab a lottery ticket and see if you win!
 
-```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +new_noise=True hydra.run.dir=outputs/fm_seed_1001_example/example_ticket evaluation.num_episodes=10
+You can generate a new lottery ticket and evaluate it by setting `new_noise=True`.
+It will run similarly to the previous script, except an initial noise will be chosen at the start, used for all episodes, and then saved as `init_x.pt` in the same folder as the videos folder.
+Run the script to grab a lottery ticket and see if you win!
+
+```bash
+python evaluate.py \
+    evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt \
+    +new_noise=True \
+    evaluation.num_episodes=10 \
+    hydra.run.dir=outputs/fm_seed_1001_example/example_ticket
 ```
 
 Depending on the base policy and the ticket drawn, the performance can cover a wide range. If you'd like to generate a large number of tickets, you can run the following bash script. It will generate n tickets, and make a folder for each of them inside `output_dir`. Example here does 25 tickets with 10 environment states (250 episodes), but you can vary this based on your compute budget. (TODO: remove this script and add functionality to python script, requires changing save file dir for hydra). This will generate a folder that will contain subdirs, each subdir representing the results of a ticket:
 
-```
+```bash
 ./generate_tickets.sh \
-  --n=25 \
-  --model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt \
-  --output_dir=outputs/fm_seed_1001_example \
-  --num_episodes=10 \
-  --new_noise=true
+    --n=25 \
+    --model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt \
+    --output_dir=outputs/fm_seed_1001_example \
+    --num_episodes=10 \
+    --new_noise=true
 ```
 
 ## Evaluating an existing franka-sim lottery ticket
-You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via `noise_path` parameter. For example, you can download a golden ticket for `fm_seed_1001` checkpoint (and the other checkpoints) we've found via:
+You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via `noise_path` parameter.
+For example, you can download a golden ticket for `fm_seed_1001` checkpoint (and the other checkpoints) we've found via:
 
-```
+```bash
 gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/golden_tickets" .
 ```
 
 Now you can evaluate the golden tickets, for example:
 
-```
-python evaluate.py evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt +noise_path=./golden_tickets/fm_seed_1001/init_x.pt hydra.run.dir=outputs/fm_seed_1001_example/golden_ticket evaluation.num_episodes=10
+```bash
+python evaluate.py \
+    evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt \
+    +noise_path=./golden_tickets/fm_seed_1001/init_x.pt \
+    evaluation.num_episodes=10 \
+    hydra.run.dir=outputs/fm_seed_1001_example/golden_ticket
 ```
 
 This golden ticket typically averages at least above 100, which is normally a success. It does still occassionaly fail, but it is much more reliable than the original policy. 
@@ -89,11 +113,17 @@ You can visualize the results in a 2D scatter plot, where the x-axis represents 
 
 The script also prints out the tickets in order of their average episode rewards and task success rate, along with the original policy's at the top.
 
-```
-python viz_regression_to_mean.py --root_dir=./outputs/fm_seed_1001_example --out_avg=fm_seed_1001_example_rewards.png --out_success=fm_seed_1001_example_success.png --threshold=100
+```bash
+python viz_regression_to_mean.py \
+    --root_dir=./outputs/fm_seed_1001_example \
+    --out_avg=fm_seed_1001_example_rewards.png \
+    --out_success=fm_seed_1001_example_success.png \
+    --threshold=100
 ```
 
-Here is an example output we got when running the script on `fm_seed_1001_example`. As can be seen by the line of best fit and the r^2 value, the performance of the tickets on the first set of episodes is highly predictive of its performance on the other episodes. Also, we can see that while the base policy (red) has low performance, there are many tickets (blue) that are much better, dramatically increasing base policy performance from ~15% to high ~90% success rate.
+Here is an example output we got when running the script on `fm_seed_1001_example`.
+As can be seen by the line of best fit and the r^2 value, the performance of the tickets on the first set of episodes is highly predictive of its performance on the other episodes.
+Also, we can see that while the base policy (red) has low performance, there are many tickets (blue) that are much better, dramatically increasing base policy performance from ~15% to high ~90% success rate.
 
 <table align="center">
   <tr>
@@ -111,7 +141,7 @@ You can generate demonstration data and train your own policy, in case you'd lik
 
 First, you can generate expert data by running the following script:
 
-```
+```bash
 cd generate_data
 python generate_data.py
 ```
@@ -120,14 +150,13 @@ This will use a task and motion planning algorithm to generate demonstrations of
 
 You can also download the data we used to train our checkpoints here if you'd prefer not to generate your own data:
 
-```
+```bash
 gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/data" .
 ```
 
-
 Now we can train a policy with the data by using the train script inside `train_model`, and passing the path to `demo.pkl` to the `dataset.data_path` parameter. For example:
 
-```
+```bash
 cd train_model
 python train.py dataset.data_path=/PATH/TO/demos.pkl
 ```

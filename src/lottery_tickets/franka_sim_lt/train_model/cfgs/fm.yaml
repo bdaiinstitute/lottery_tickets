@@ -27,7 +27,7 @@ model:
     num_layers: 4
     # x_dim and state_dim will be set dynamically in train.py
   fm:
-    _target_: lottery_tickets.franka_sim_lt.models.FM
+    _target_: lottery_tickets.franka_sim_lt.models.FlowMatching
     n_inference_steps: 10
     # backbone, sample_shape, and state_shape will be set dynamically in train.py
 

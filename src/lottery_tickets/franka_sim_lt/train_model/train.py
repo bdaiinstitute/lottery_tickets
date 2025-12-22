@@ -185,7 +185,7 @@ def train_fm_policy(cfg: DictConfig) -> None:
     print(f"State dimension: {state_dim}")
     print(f"Action chunk dimension: {action_dim}")
 
-    # Create FM model using hydra instantiate
+    # Create Flow Matching model using hydra instantiate
     backbone = instantiate(
         cfg.model.backbone,
         x_dim=action_dim,

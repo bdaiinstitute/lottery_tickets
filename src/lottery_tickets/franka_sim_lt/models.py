@@ -4,8 +4,15 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-def dict_to_device(dict: dict[str, torch.Tensor], device: str | torch.device):
-    return {k: v.to(device) for k, v in dict.items()}
+def dict_to_device(tensor_dict: dict[str, torch.Tensor], device: str | torch.device) -> dict[str, torch.Tensor]:
+    """
+    Utility function that moves all entries in a tensor dictionary to a specific device and returns a new tensor.
+    
+    Args:
+        tensor_dict: The dictionary mapping string keys to torch tensor values.
+        device: The target device to move the tensors to.
+    """
+    return {k: v.to(device) for k, v in tensor_dict.items()}
 
 
 class DiffusionBackboneSimple(nn.Module):
@@ -16,7 +23,15 @@ class DiffusionBackboneSimple(nn.Module):
         hidden_dim: int = 128,
         num_layers: int = 4,
     ):
-        """Initialize a simple MLP backbone for diffusion models."""
+        """
+        Initialize a simple MLP backbone for diffusion models.
+        
+        Args:
+            x_dim: The dimension of the noise vector.
+            state_dim: The dimension of the state vector.
+            hidden_dim: The hidden layer dimension.
+            num_layers: The total number of layers in the MLP.
+        """
         super().__init__()
         # MLP on concatenated [x, state, time_emb]
         layers = []
@@ -33,12 +48,19 @@ class DiffusionBackboneSimple(nn.Module):
     def forward(
         self, x: torch.Tensor, state: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
-        """Forward pass through the MLP with concatenated inputs."""
+        """
+        Forward pass through the MLP with concatenated inputs.
+        
+        Args:
+            x: The noise tensor.
+            state: The state tensor.
+            t: The diffusion time step.
+        """
         h = torch.cat([x, state, t.unsqueeze(-1)], dim=-1)
         return self.mlp(h)
 
 
-class FM(nn.Module):
+class FlowMatching(nn.Module):
     def __init__(
         self,
         backbone: nn.Module,
@@ -49,7 +71,18 @@ class FM(nn.Module):
         use_bridge: bool = False,
         bridge_alpha: float = 0.1,
     ) -> None:
-        """Initialize the Flow Matching model with specified backbone and parameters."""
+        """
+        Initialize the Flow Matching model with specified backbone and parameters.
+        
+        Args:
+            backbone: The backbone network.
+            sample_shape: The shape of the noise sample tensor.
+            state_shape: The shape of the state tensor.
+            n_inference_steps: The number of flow steps to use at inference time.
+            use_midpoint: ???
+            use_bridge: ???
+            bridge_alpha: ???
+        """
         super().__init__()
         self.backbone = backbone
         self.sample_shape = sample_shape

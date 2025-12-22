@@ -23,7 +23,7 @@ def evaluate_fm_policy(cfg: DictConfig) -> None:
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Load the trained FM model
+    # Load the trained Flow Matching model
     print(f"Loading model from {cfg.evaluation.model_path}")
     fm_model, config = load_fm_model(cfg.evaluation.model_path, device)
     print(f"Model config: {config}")

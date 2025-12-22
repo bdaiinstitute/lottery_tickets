@@ -488,6 +488,7 @@ def _compile_episode_data(
 
     return data_dict
 
+
 class EvalMode(Enum):
     NEW_TICKET = "NEW_TICKET"
     LOAD_TICKET = "LOAD_TICKET"
@@ -498,6 +499,7 @@ class EvalMode(Enum):
 class EvalPipelineConfigNoisePath(EvalPipelineConfig):
     eval_mode : EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
+
 
 @parser.wrap()
 def eval_main(cfg: EvalPipelineConfigNoisePath):
