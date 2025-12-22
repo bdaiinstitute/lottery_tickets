@@ -7,7 +7,7 @@ from omegaconf import OmegaConf
 from typing import Any
 import numpy as np
 
-class FMPolicyInterface:
+class FlowMatchingPolicyInterface:
     """Policy interface that wraps Flow Matching model to work with gym environments."""
 
     def __init__(
@@ -18,6 +18,16 @@ class FMPolicyInterface:
         use_state_history: bool = False,
         state_history_length: int = 4,
     ):
+        """
+        Initializes a flow matching policy interface.
+
+        Args:
+            fm_model: The Flow Matching model.
+            chunk_size: The size of the action chunks output by the model.
+            device: The Torch device to send the model to.
+            use_state_history: If True, enables the use of state history.
+            state_history_length: The length of the state history vector.
+        """
         self.fm_model = fm_model
         self.chunk_size = chunk_size
         self.device = device
@@ -33,7 +43,12 @@ class FMPolicyInterface:
     ) -> np.ndarray:
         """
         Convert gym observation to action using Flow Matching model.
+
         Implements action chunking by buffering future actions.
+
+        Args:
+            obs: A dictionary of named observation tensors.
+            init_x: The initial noise vector to pass in (optional).
         """
         # Extract current state from observation
         current_state = obs["state"]
@@ -95,10 +110,19 @@ class FMPolicyInterface:
         self.state_history_buffer.clear()
 
 
-def load_fm_model(
+def load_flow_matching_model(
     model_path: str, device: str | torch.device = "cpu"
 ) -> tuple[FlowMatching, dict]:
-    """Load Flow Matching model from checkpoint."""
+    """
+    Load Flow Matching model from checkpoint.
+    
+    Args:
+        model_path: The path to the model to load.
+        device: The torch device to load the model to.
+
+    Returns:
+        The loaded model, and the config loaded from the specified path.
+    """
     checkpoint = torch.load(model_path, map_location=device)
     config = checkpoint["config"]
 

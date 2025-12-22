@@ -150,7 +150,7 @@ class ActionChunkDataset(Dataset):
         }
 
 
-def train_fm_policy(cfg: DictConfig) -> None:
+def train_flow_matching_policy(cfg: DictConfig) -> None:
     """
     Train Flow Matching policy on state-action data.
     
@@ -279,7 +279,7 @@ def main(cfg: DictConfig):
         np.random.seed(cfg.seed)
 
     print("Starting training...")
-    train_fm_policy(cfg)
+    train_flow_matching_policy(cfg)
 
 
 if __name__ == "__main__":

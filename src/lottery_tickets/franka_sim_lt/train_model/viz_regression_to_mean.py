@@ -142,18 +142,18 @@ def main(root_dir: Path, out_avg_path: Path, out_success_path: Path, threshold: 
 
     # ---- Average reward plot ----
     plt.figure(figsize=(6, 6))
-    plt.errorbar(x_mean, y_mean, xerr=x_se, yerr=y_se, fmt='o', alpha=0.7, capsize=2, color='blue', label='Lottery tickets')
+    plt.errorbar(x_mean, y_mean, xerr=x_se, yerr=y_se, fmt="o", alpha=0.7, capsize=2, color="blue", label="Lottery tickets")
     if orig_x:
-        plt.errorbar(orig_x, orig_y, xerr=orig_x_se, yerr=orig_y_se, fmt='o', alpha=0.7, capsize=2, color='red', label='Original policy')
+        plt.errorbar(orig_x, orig_y, xerr=orig_x_se, yerr=orig_y_se, fmt="o", alpha=0.7, capsize=2, color="red", label="Original policy")
 
     x_line = np.linspace(x_mean.min(), x_mean.max(), 100)
     y_line = a * x_line + b
-    plt.plot(x_line, y_line, linestyle='-', color='green', label=f'Best fit (tickets)')
+    plt.plot(x_line, y_line, linestyle="-", color="green", label=f"Best fit (tickets)")
 
     plt.xlabel(f"Average reward (first 50% episodes, total {n} episodes)")
     plt.ylabel(f"Average reward (second 50% episodes, total {n} episodes)")
     plt.title("Lottery Tickets vs Original Policy (Average Reward)")
-    plt.text(0.05, 0.95, f"$R^2 = {r2_reward:.3f}$", transform=plt.gca().transAxes, verticalalignment='top', fontsize=10)
+    plt.text(0.05, 0.95, f"$R^2 = {r2_reward:.3f}$", transform=plt.gca().transAxes, verticalalignment="top", fontsize=10)
     plt.legend()
     plt.grid(True)
     plt.tight_layout()
@@ -163,16 +163,16 @@ def main(root_dir: Path, out_avg_path: Path, out_success_path: Path, threshold: 
 
     # ---- Success rate plot ----
     plt.figure(figsize=(6, 6))
-    plt.scatter(x_succ, y_succ, color='blue', alpha=0.7, label='Lottery tickets')
+    plt.scatter(x_succ, y_succ, color="blue", alpha=0.7, label="Lottery tickets")
     if orig_x_succ:
-        plt.scatter(orig_x_succ, orig_y_succ, color='red', alpha=0.7, label='Original policy')
+        plt.scatter(orig_x_succ, orig_y_succ, color="red", alpha=0.7, label="Original policy")
 
     if len(x_succ) > 1:
         x_line_s = np.linspace(0, 1, 100)
         y_line_s = a_s * x_line_s + b_s
-        plt.plot(x_line_s, y_line_s, linestyle='-', color='green', label='Best fit (tickets)')
+        plt.plot(x_line_s, y_line_s, linestyle="-", color="green", label="Best fit (tickets)")
         plt.text(0.05, 0.95, f"$R^2 = {r2_succ:.3f}$", transform=plt.gca().transAxes,
-                 verticalalignment='top', fontsize=10)
+                 verticalalignment="top", fontsize=10)
 
     plt.xlabel(f"Success rate (first 50% episodes, threshold {threshold})")
     plt.ylabel(f"Success rate (second 50% episodes, threshold {threshold})")

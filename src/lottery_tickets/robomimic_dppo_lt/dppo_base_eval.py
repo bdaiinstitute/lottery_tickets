@@ -29,7 +29,8 @@ TASK_CONFIGS = {
 	"transport": "cfg/robomimic/dsrl_transport.yaml",
 }
 
-def p_args():
+def parse_args() -> argparse.Namespace:
+	"""Helper function to parse arguments."""
 	p = argparse.ArgumentParser()
 	p.add_argument("--task_name", default="can", choices=list(TASK_CONFIGS.keys()))
 	p.add_argument("--n_evals_per_seed", type=int, default=100)
@@ -41,9 +42,9 @@ def p_args():
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_seeds: int, n_evals_per_seed: int, seed: int, ddim_steps: int) -> str:
-	ts = datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')
+	ts = datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
 	run_name = f"base_policy_seeds{n_seeds}_evals{n_evals_per_seed}_seed{seed}_ddim{ddim_steps}_{ts}"
-	return os.path.join(out_path.rstrip('/'), task_name, run_name)
+	return os.path.join(out_path.rstrip("/"), task_name, run_name)
 
 def evaluate_policy_single(env, save_vid=False, eval_num=0, rew_offset=0.0):
 	if save_vid:
@@ -73,20 +74,19 @@ def evaluate_policy_single(env, save_vid=False, eval_num=0, rew_offset=0.0):
 	return episode_reward, success
 
 def main():
-	args = p_args()
-	base_path = str(BASE_DIR)
-	# config_path = os.path.join(base_path, TASK_CONFIGS[args.task_name])
+	args = parse_args()
+	base_path = BASE_DIR.as_posix()
 	config_path = os.path.join(f"{base_path}/lottery_tickets/robomimic_dppo_lt", TASK_CONFIGS[args.task_name])
 
 	OmegaConf.register_new_resolver("eval", eval)
 	config_dir = os.path.dirname(config_path)
-	config_name = os.path.basename(config_path).replace('.yaml', '')
+	config_name = os.path.basename(config_path).replace(".yaml", "")
 	with initialize_config_dir(version_base=None, config_dir=config_dir):
 		cfg = compose(config_name=config_name)
 	OmegaConf.set_struct(cfg, False)
 	cfg.seed = args.seed
-	if not hasattr(cfg, 'device') or cfg.device is None:
-		cfg.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+	if not hasattr(cfg, "device") or cfg.device is None:
+		cfg.device = "cuda:0" if torch.cuda.is_available() else "cpu"
 	
 	# Override ddim_steps if provided
 	if args.ddim_steps is not None:

@@ -38,6 +38,20 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         image_obs: bool = False,
         sampling_bounds=_DEFAULT_SAMPLING_BOUNDS,
     ):
+        """
+        Initializes a Panda pick cube gym environment.
+
+        Args:
+            action_scale: Scaling factors for the actions.
+            seed: The RNG seed to use.
+            control_dt: The control timestep, in seconds.
+            physics_dt: The physics timestep, in seconds.
+            time_limit: ???
+            render_spec: ???
+            render_mode: ???
+            image_obs: If True, uses image observations. Else uses block state as observations.
+            sampling_bounds: The sampling bounds for the block positions.
+        """
         self._action_scale = action_scale
         self.sampling_bounds = np.asarray(sampling_bounds)
         super().__init__(
@@ -156,6 +170,16 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
     def reset(
         self, seed=None, **kwargs
     ) -> tuple[dict[str, np.ndarray], dict[str, Any]]:
+        """
+        Reset the environment.
+
+        Args:
+            seed: The RNG seed to use for resetting.
+
+        Returns:
+            observation: dict[str, np.ndarray],
+            info: dict[str, Any]
+        """
         mujoco.mj_resetData(self._model, self._data)
 
         # Reset arm to home position.
@@ -178,22 +202,22 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         obs = self._compute_observation()
         return obs, {}
 
-    """
-    take a step in the environment.
-    Params:
-        action: np.ndarray
-
-    Returns:
-        observation: dict[str, np.ndarray],
-        reward: float,
-        done: bool,
-        truncated: bool,
-        info: dict[str, Any]
-    """
-
     def step(
         self, action: np.ndarray
     ) -> tuple[dict[str, np.ndarray], float, bool, bool, dict[str, Any]]:
+        """
+        Take a step in the environment.
+
+        Args:
+            action: np.ndarray
+
+        Returns:
+            observation: dict[str, np.ndarray],
+            reward: float,
+            done: bool,
+            truncated: bool,
+            info: dict[str, Any]
+        """
         x, y, z, grasp = action
 
         # Set the mocap position.
@@ -237,6 +261,7 @@ class PandaPickCubeGymEnv(MujocoGymEnv):
         return np.concatenate(self.render_images(), axis=1)
 
     def render_images(self) -> list[np.ndarray]:
+        """Standalone method for rendering images, which can be called directly by a user."""
         if self._viewer is None:
             raise ValueError("Viewer has not been initialized.")
 

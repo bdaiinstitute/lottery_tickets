@@ -39,9 +39,9 @@ pip install -e .[gym,robomimic]
 cd ..
 ```
 
-You will also need to install the MuJoCo 2.1 binaries as described in [this README](https://github.com/openai/mujoco-py?tab=readme-ov-file#install-mujoco).
+For robomimic, you will also need to install the MuJoCo 2.1 binaries as described in [this README](https://github.com/openai/mujoco-py?tab=readme-ov-file#install-mujoco).
 
-NOTE: If you get an error about `GL/osmesa.h: No such file or directory` when running some of the examples below, run the following command ([source](https://github.com/ethz-asl/reinmav-gym/issues/35)):
+**NOTE:** If you get an error about `GL/osmesa.h: No such file or directory` when running some of the examples below, run the following command ([source](https://github.com/ethz-asl/reinmav-gym/issues/35)):
 
 ```bash
 sudo apt-get install libosmesa6-dev
