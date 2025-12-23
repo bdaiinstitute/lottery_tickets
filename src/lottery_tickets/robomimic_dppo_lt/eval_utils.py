@@ -10,7 +10,17 @@ def evaluate_noise_single(env, noise_vec, save_vid=False, noise_idx=0, eval_num=
 	"""Evaluate noise vector for one episode. Success if any step reward > -rew_offset.
 	
 	Args:
+		env: Gym environment with diffusion policy wrapper
+		noise_vec: Noise vector to evaluate
+		save_vid: Whether to save video
+		noise_idx: Index of the noise vector
+		eval_num: Evaluation number for naming purposes
+		rew_offset: Reward offset for success determination
 		initial_obs: If provided, use this observation instead of calling env.reset()
+
+	Returns:
+		episode_reward: Total reward for the episode
+		success: Boolean indicating if episode was successful
 	"""
 	if save_vid:
 		env.env.name_prefix = f"noise_{noise_idx}_eval_{eval_num}"
@@ -47,10 +57,19 @@ def evaluate_gaussian_single(env, mean, cov, rng, save_vid=False, noise_idx=0, e
 	"""Evaluate by sampling from Gaussian at every step. Success if any step reward > -rew_offset.
 	
 	Args:
+		env: Gym environment with diffusion policy wrapper
 		mean: Gaussian mean vector
 		cov: Gaussian covariance matrix
 		rng: numpy random generator
+		save_vid: Whether to save video
+		noise_idx: Index of the noise vector
+		eval_num: Evaluation number for naming purposes
+		rew_offset: Reward offset for success determination
 		initial_obs: If provided, use this observation instead of calling env.reset()
+
+	Returns:
+		episode_reward: Total reward for the episode
+		success: Boolean indicating if episode was successful
 	"""
 	if save_vid:
 		env.env.name_prefix = f"noise_{noise_idx}_eval_{eval_num}"
@@ -84,7 +103,22 @@ def evaluate_gaussian_single(env, mean, cov, rng, save_vid=False, noise_idx=0, e
 
 
 def save_eval_serial(out_dir, per_seed_rewards_all, per_seed_success_flags, episode_seeds, **kwargs):
-	"""Save serial rollout results (n_seeds x n_evals_per_seed). Returns reward_mean, reward_std, success_mean, success_std."""
+	"""Save serial rollout results (n_seeds x n_evals_per_seed). Returns reward_mean, reward_std, success_mean, success_std.
+	
+	Args:
+		out_dir: Output directory to save results
+		per_seed_rewards_all: List of lists of rewards per seed
+		per_seed_success_flags: List of lists of success flags per seed
+		episode_seeds: List of episode seeds used
+		**kwargs: Additional metadata to save in summary.json
+
+	Returns:
+		reward_mean: Mean reward across seeds
+		reward_std: Std of reward across seeds
+		success_mean: Mean success rate across seeds
+		success_std: Std of success rate across seeds
+	
+	"""
 	os.makedirs(out_dir, exist_ok=True)
 	# Convert to arrays
 	reward_matrix = np.array(per_seed_rewards_all, dtype=np.float32)  # shape (n_seeds, n_evals_per_seed)
@@ -128,7 +162,15 @@ def save_eval_serial(out_dir, per_seed_rewards_all, per_seed_success_flags, epis
 
 
 def load_noise_idx(eval_path: str, eval_idx: int = 0):
-	"""Load noise vector at eval_idx from noise_samples.npy in eval_path."""
+	"""Load noise vector at eval_idx from noise_samples.npy in eval_path.
+	
+	Args:
+		eval_path: Path to evaluation directory
+		eval_idx: Index of noise vector to load
+	
+	Returns:
+		noise_vec: Loaded noise vector
+	"""
 	noise_path = os.path.join(eval_path, "noise_samples.npy")
 	if not os.path.exists(noise_path):
 		raise FileNotFoundError(f"No noise_samples.npy found in {eval_path}")

@@ -16,6 +16,21 @@ import robomimic.utils.obs_utils as ObsUtils
 
 
 def make_robomimic_env(render=False, env="square", normalization_path=None, low_dim_keys=None, dppo_path=None, reward_shaping=False):
+	"""
+	Create a Robomimic environment with specified wrappers and configurations.
+
+	Args:
+		render (bool): Whether to render the environment offscreen.
+		env (str): Name of the environment.
+		normalization_path (Optional[str]): Path to normalization statistics.
+		low_dim_keys (Optional[list]): List of low-dimensional observation keys.
+		dppo_path : (str): Path to the DPPO repository.
+		reward_shaping (bool): Whether to enable reward shaping.
+
+	Returns:
+		gym.Env: Configured Robomimic environment.
+
+	"""
 	wrappers = OmegaConf.create({
 		"robomimic_lowdim": {
 			"normalization_path": normalization_path,
@@ -54,23 +69,47 @@ def make_robomimic_env(render=False, env="square", normalization_path=None, low_
 
 
 class ObservationWrapperRobomimic(gym.Env):
+	"""
+	Wrapper to extract and flatten the 'state' observation from Robomimic environments.
+	"""
 	def __init__(
 		self,
 		env,
 		reward_offset=1,
 	):
+		"""
+		Args:
+			env (gym.Env): The Robomimic environment to wrap.
+			reward_offset (float): Offset to subtract from the reward.
+		"""
+
 		self.env = env
 		self.action_space = env.action_space
 		self.observation_space = env.observation_space
 		self.reward_offset = reward_offset
 
 	def seed(self, seed=None):
+		"""
+		Set the random seed for the environment.
+
+		Args:
+			seed (Optional[int]): The seed value.
+		"""
 		if seed is not None:
 			np.random.seed(seed=seed)
 		else:
 			np.random.seed()
 
 	def reset(self, **kwargs):
+		"""
+		Reset the environment and return the initial observation.
+
+		Args:
+			**kwargs: Additional arguments for the reset method.
+
+		Returns:
+			np.ndarray: The initial flattened observation.
+		"""
 		# options = kwargs.get("options", {})
 		# new_seed = options.get("seed", None)
 		new_seed = kwargs.get("seed", None)
@@ -81,17 +120,46 @@ class ObservationWrapperRobomimic(gym.Env):
 		return obs
 
 	def step(self, action):
+		"""
+		Take a step in the environment using the given action.
+
+		Args:
+			action (np.ndarray): The action to take.
+		
+		Returns:
+			tuple: A tuple containing the flattened observation, modified reward, done flag, and info dictionary.
+		"""
+
 		raw_obs, reward, done, info = self.env.step(action)
 		reward = (reward - self.reward_offset)
 		obs = raw_obs["state"].flatten()
 		return obs, reward, done, info
 
 	def render(self, **kwargs):
+		"""
+		Render the environment.
+
+		Args:
+			**kwargs: Additional arguments for the render method.
+		
+		Returns:
+			The rendered frame.
+		"""
 		return self.env.render()	
 
 
 class ActionChunkWrapper(gymnasium.Env):
+	"""
+	Wrapper that chunks multiple action steps into a single environment step.
+	"""
 	def __init__(self, env, cfg, max_episode_steps=300, fixed_seed=None):
+		"""
+		Args:
+			env (gym.Env): The environment to wrap.
+			cfg: Configuration object containing action step information.
+			max_episode_steps (int): Maximum number of steps per episode.
+			fixed_seed (Optional[int]): Fixed seed for environment resets.
+		"""
 		self.max_episode_steps = max_episode_steps
 		self.env = env
 		self.act_steps = cfg.act_steps
@@ -121,6 +189,16 @@ class ActionChunkWrapper(gymnasium.Env):
 		return obs, {}
 	
 	def step(self, action):
+		"""
+		Take a step in the environment using chunked actions.
+
+		Args:
+			action (np.ndarray): The chunked action to take.
+
+		Returns:
+			tuple: A tuple containing the flattened observation, aggregated reward, 
+			terminated flag, truncated flag, and info dictionary.
+		"""
 		# ------------------------------------------------------------
 		# Original implementation
 		# Kept here for reference; it used a single 'done' boolean and
@@ -187,9 +265,18 @@ class ActionChunkWrapper(gymnasium.Env):
 		return obs, reward, terminated, truncated, info
 
 	def render(self):
+		"""
+		Render the environment.
+
+		Returns:
+			The rendered frame.
+		"""
 		return self.env.render()
 	
 	def close(self):
+		"""
+		Close the environment.
+		"""
 		return
 	
 
@@ -200,6 +287,13 @@ class DiffusionPolicyEnvWrapper(VecEnvWrapper):
 	and incoming integer actions index into the library. Otherwise a continuous Box space is exposed identical to prior implementation.
 	"""
 	def __init__(self, env, cfg, base_policy, noise_library: np.ndarray | None = None):
+		"""
+		Args:
+			env: The vectorized environment to wrap.
+			cfg: Configuration object containing action and observation dimensions.
+			base_policy: The diffusion policy model to use for action generation.
+			noise_library (Optional[np.ndarray]): Predefined noise library for discrete action selection.
+		"""
 		super().__init__(env)
 		self.action_horizon = cfg.act_steps
 		self.action_dim = cfg.action_dim
@@ -225,7 +319,13 @@ class DiffusionPolicyEnvWrapper(VecEnvWrapper):
 		self.obs = None
 		self.max_episode_steps = cfg.env.max_episode_steps
 
-	def step_async(self, actions):
+	def step_async(self, actions) -> None:
+		"""
+		Feed actions through the diffusion policy and step the environment.
+
+		Args:
+			actions: The actions to process (either discrete indices or continuous noise).
+		"""
 		if self.discrete_mode:
 			# actions expected shape (n_env,) int indices
 			if isinstance(actions, np.ndarray):
@@ -240,6 +340,12 @@ class DiffusionPolicyEnvWrapper(VecEnvWrapper):
 		self.venv.step_async(diffused_actions)
 
 	def step_wait(self):
+		"""
+		Wait for the environment step to complete and return the results.
+
+		Returns:
+			tuple: A tuple containing the observation, reward, done flag, and info dictionary.
+		"""
 		# this done is truncated or terminated, set in _worker of SB3
 		obs, rewards, dones, infos = self.venv.step_wait()
 		self.obs = torch.tensor(obs, device=self.device, dtype=torch.float32)
@@ -247,6 +353,12 @@ class DiffusionPolicyEnvWrapper(VecEnvWrapper):
 		return obs_out.detach().cpu().numpy(), rewards, dones, infos
 
 	def reset(self):
+		"""
+		Reset the environment and return the initial observation.
+
+		Returns:
+			np.ndarray: The initial observation.
+		"""
 		obs = self.venv.reset()
 		self.obs = torch.tensor(obs, device=self.device, dtype=torch.float32)
 		obs_out = self.obs
@@ -257,6 +369,15 @@ def build_lt_env(policy, cfg, n_envs, video_dir, save_vid=True, fixed_seeds=None
 	"""
 	Build vectorized environment with optional fixed seeds per env.
 	IMP: This is for lottery ticket search where each env must have a fixed seed across resets.
+
+	Args:
+		policy: The diffusion policy model to use.
+		cfg: Configuration object containing environment parameters.
+		n_envs (int): Number of parallel environments.
+		video_dir (str): Directory to save videos.
+		save_vid (bool): Whether to save videos.
+		fixed_seeds (Optional[list]): List of fixed seeds for each environment.
+		reward_shaping (bool): Whether to enable reward shaping.
 	"""
 	def make_env_fn(seed=None):
 		def f():
@@ -292,7 +413,18 @@ def build_lt_env(policy, cfg, n_envs, video_dir, save_vid=True, fixed_seeds=None
 
 
 def build_single_env(policy, cfg, video_dir, seed, save_vid=True):
-	"""Build single environment for serial rollouts."""
+	"""Build single environment for serial rollouts.
+	
+	Args:
+		policy: The diffusion policy model to use.
+		cfg: Configuration object containing environment parameters.
+		video_dir (str): Directory to save videos.
+		seed (int): Random seed for the environment.
+		save_vid (bool): Whether to save videos.
+	
+	Returns:
+		gym.Env: The constructed environment.
+	"""
 	def make_env_fn():
 		def f():
 			env = make_robomimic_env(
@@ -318,7 +450,18 @@ def build_single_env(policy, cfg, video_dir, seed, save_vid=True):
 
 
 def build_single_env_with_reward_shaping(base_policy, cfg, video_dir, seed, save_vid=False):
-	"""Build single environment with reward shaping enabled for multi-stage evaluation."""
+	"""Build single environment with reward shaping enabled for multi-stage evaluation.
+	
+	Args:
+		base_policy: The diffusion policy model to use.
+		cfg: Configuration object containing environment parameters.
+		video_dir (str): Directory to save videos.
+		seed (int): Random seed for the environment.
+		save_vid (bool): Whether to save videos.
+
+	Returns:
+		gym.Env: The constructed environment.
+	"""
 	def make_env_fn():
 		def f():
 			env = make_robomimic_env(

@@ -48,7 +48,11 @@ TASK_CONFIGS = {
 }
 
 def parse_args() -> argparse.Namespace:
-	"""Helper function to parse arguments."""
+	"""Helper function to parse arguments.
+	
+	Returns:
+		argparse.Namespace: Parsed arguments.
+	"""
 	p = argparse.ArgumentParser()
 	p.add_argument("--task_name", default="can", choices=list(TASK_CONFIGS.keys()))
 	p.add_argument("--n_evals_per_seed", type=int, default=100)
@@ -62,6 +66,7 @@ def parse_args() -> argparse.Namespace:
 	return p.parse_args()
 
 def main():
+	"""Main function for noise evaluation."""
 	args = parse_args()
 	base_path = BASE_DIR.as_posix()
 	config_path = os.path.join(f"{base_path}/lottery_tickets/robomimic_dppo_lt", TASK_CONFIGS[args.task_name])

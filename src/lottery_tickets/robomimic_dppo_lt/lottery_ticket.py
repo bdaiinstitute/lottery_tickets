@@ -39,7 +39,11 @@ TASK_CONFIGS = {
 }
 
 def parse_args() -> argparse.Namespace:
-	"""Helper function to parse arguments."""
+	"""Helper function to parse arguments.
+	
+	Returns:
+		argparse.Namespace: Parsed arguments.
+	"""
 	p = argparse.ArgumentParser()
 	p.add_argument("--task_name", default="lift", choices=list(TASK_CONFIGS.keys()))
 	p.add_argument("--n_envs", type=int, default=100)
@@ -53,6 +57,21 @@ def parse_args() -> argparse.Namespace:
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int, seed: int, ddim_steps: int, exp_name: str = "") -> str:
+	"""
+	Helper function to resolve output directory path.
+
+	Args:
+		out_path (str): Base output path.
+		task_name (str): Name of the task.
+		n_envs (int): Number of environments.
+		noise_samples (int): Number of noise samples.
+		seed (int): Random seed.
+		ddim_steps (int): Number of DDIM steps.
+		exp_name (str): Optional experiment name to append.
+	
+	Returns:
+		str: Resolved output directory path.
+	"""
 	ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 	run_name = f"envs{n_envs}_samples{noise_samples}_seed{seed}_ddim{ddim_steps}_{ts}"
 	if exp_name:
@@ -61,7 +80,22 @@ def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int,
 
 
 def save_results(out_dir, all_noise, all_rewards, all_success, all_success_rates, all_lengths, main_seed=None, env_seeds=None, noise_idx=None):
-	"""Persist full noise search results with ranking and summary statistics."""
+	"""Persist full noise search results with ranking and summary statistics.
+	
+	Args:
+		out_dir: Base output directory
+		all_noise: List of noise vectors
+		all_rewards: List of lists of per-env rewards
+		all_success: List of lists of per-env success flags
+		all_success_rates: List of success rates per noise vector
+		all_lengths: List of lists of per-env episode lengths
+		main_seed: Main seed used for the search (optional)
+		env_seeds: List of per-env seeds used (optional)
+		noise_idx: If provided, creates a subdirectory checkpoint_{noise_idx} to save results
+
+	Returns:
+		success_rates_sorted: List of success rates sorted in descending order
+	"""
 	# Create subdirectory with noise index if provided
 	if noise_idx is not None:
 		out_dir = os.path.join(out_dir, f"checkpoint_{noise_idx}")
@@ -131,11 +165,25 @@ def save_results(out_dir, all_noise, all_rewards, all_success, all_success_rates
 def evaluate_noise(env, noise_vec, n_envs, save_vid=False, noise_idx=0, rew_offset=0.0, expected_initial_obs=None):
 	"""Evaluate a single noise vector across parallel envs.
 
-	Mirrors the reward & success accounting used in utils.LoggingCallback.evaluate:
+	Performs reward & success accounting:
 	- Accumulates episode reward until done per env
 	- Success flagged if any step reward > -rew_offset
 	- Stops when all envs finished or max_steps reached
 	Returns per-env episode rewards and success booleans.
+
+	Args:
+		env: The vectorized environment
+		noise_vec: The noise vector to apply 
+		n_envs: Number of parallel environments
+		save_vid: Whether to save video 
+		noise_idx: Index of the noise sample 
+		rew_offset: Reward offset for success determination
+		expected_initial_obs: If provided, asserts initial obs matches this
+
+	Returns:
+		per_env_reward: List of episode rewards per env
+		success_flag: List of success booleans per env
+		per_env_length: List of episode lengths per env
 	"""
 	if save_vid:
 		env.env.name_prefix = f"noise_{noise_idx}"
@@ -190,6 +238,9 @@ def evaluate_noise(env, noise_vec, n_envs, save_vid=False, noise_idx=0, rew_offs
 	return per_env_reward, success_flag, per_env_length
 
 def main():
+	"""
+	Main function to run lottery ticket noise search evaluation.
+	"""
 	args = parse_args()
 	base_path = BASE_DIR.as_posix()
 	config_path = os.path.join(f"{base_path}/src/lottery_tickets/robomimic_dppo_lt", TASK_CONFIGS[args.task_name])
