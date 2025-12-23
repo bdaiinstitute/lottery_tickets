@@ -1,3 +1,7 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
+from typing import Any
+
 import franka_sim.envs  # noqa: F401 required import for franka sim envs
 import gymnasium as gym
 from gymnasium.wrappers import RecordEpisodeStatistics
@@ -6,7 +10,14 @@ from lottery_tickets.franka_sim_lt.wrappers.chunking import ChunkingWrapper
 from lottery_tickets.franka_sim_lt.wrappers.obs import ObsWrapper
 
 
-def make_frankasim_env(env_name, env_kwargs) -> gym.Env:
+def make_frankasim_env(env_name: str, env_kwargs: dict[str, Any]) -> gym.Env:
+    """
+    Makes a Franka sim environment.
+    
+    Args:
+        env_name: The name of the environment to create.
+        env_kwargs: The dictionary of keyword arguments to pass into the environment.
+    """
     env = gym.make(env_name, **env_kwargs)
 
     if not has_wrapper(env, ObsWrapper):
@@ -25,12 +36,12 @@ def make_frankasim_env(env_name, env_kwargs) -> gym.Env:
     return env
 
 
-def has_wrapper(env, wrapper_class: type, max_depth: int = 10000) -> bool:
+def has_wrapper(env: gym.Env, wrapper_class: type, max_depth: int = 10000) -> bool:
     """Check if the environment or any of its wrappers is an instance of the specified wrapper class.
 
     Args:
-        env (gym.Env): The environment to check.
-        wrapper_class (type): The wrapper class to look for.
+        env: The environment to check.
+        wrapper_class: The wrapper class to look for.
 
     Returns:
         bool: True if the environment or any of its wrappers is an instance of the specified class, False otherwise.

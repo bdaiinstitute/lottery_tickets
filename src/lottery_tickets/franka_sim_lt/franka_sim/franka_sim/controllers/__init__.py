@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 from franka_sim.controllers.opspace import opspace
 
 __all__ = [

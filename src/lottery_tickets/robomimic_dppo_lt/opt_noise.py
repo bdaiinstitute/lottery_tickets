@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """
 Eval for noise search
 -------------------------
@@ -21,21 +23,20 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-import hydra
 import numpy as np
 import torch
 from hydra import compose, initialize_config_dir
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False
 os.environ["MUJOCO_GL"] = "egl"
 
 BASE_DIR = Path(__file__).resolve().parents[2]
-if str(BASE_DIR) not in sys.path:
-	sys.path.append(str(BASE_DIR))
+if BASE_DIR.as_posix() not in sys.path:
+	sys.path.append(BASE_DIR.as_posix())
 
-from env_util import build_lt_env, build_single_env
+from env_util import build_single_env
 from policy_util import load_base_policy
 from eval_utils import evaluate_noise_single, load_noise_idx, save_eval_serial
 
@@ -46,7 +47,8 @@ TASK_CONFIGS = {
 	"transport": "cfg/robomimic/dsrl_transport.yaml",
 }
 
-def p_args():
+def parse_args() -> argparse.Namespace:
+	"""Helper function to parse arguments."""
 	p = argparse.ArgumentParser()
 	p.add_argument("--task_name", default="can", choices=list(TASK_CONFIGS.keys()))
 	p.add_argument("--n_evals_per_seed", type=int, default=100)
@@ -54,34 +56,33 @@ def p_args():
 	p.add_argument("--seed", type=int, default=1619, help="Random seed for environment")
 	p.add_argument("--out", default="logs_res_rm/noise_eval_results/")
 	p.add_argument("--eval", type=str, default=None)
-	p.add_argument("--eval_idx", type=int, nargs='+', default=[0], help="List of noise indices to evaluate")
+	p.add_argument("--eval_idx", type=int, nargs="+", default=[0], help="List of noise indices to evaluate")
 	p.add_argument("--save_vid", action="store_true", help="Save evaluation videos")
 	p.add_argument("--ddim_steps", type=int, default=None, help="DDIM steps to override config value")
 	return p.parse_args()
 
 def main():
-	args = p_args()
-	base_path = str(BASE_DIR)
-	# config_path = os.path.join(base_path, TASK_CONFIGS[args.task_name])
+	args = parse_args()
+	base_path = BASE_DIR.as_posix()
 	config_path = os.path.join(f"{base_path}/lottery_tickets/robomimic_dppo_lt", TASK_CONFIGS[args.task_name])
 
 	OmegaConf.register_new_resolver("eval", eval)
 	config_dir = os.path.dirname(config_path)
-	config_name = os.path.basename(config_path).replace('.yaml', '')
+	config_name = os.path.basename(config_path).replace(".yaml", "")
 	
 	with initialize_config_dir(version_base=None, config_dir=config_dir):
 		cfg = compose(config_name=config_name)
 	OmegaConf.set_struct(cfg, False)
 	cfg.seed = args.seed
-	if not hasattr(cfg, 'device') or cfg.device is None:
-		cfg.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'
+	if not hasattr(cfg, "device") or cfg.device is None:
+		cfg.device = "cuda:0" if torch.cuda.is_available() else "cpu"
 	
 	# Override ddim_steps if provided
 	if args.ddim_steps is not None:
 		cfg.model.ddim_steps = args.ddim_steps
 	
 	# Extract ticket name from eval path (last folder in the path)
-	ticket_name = os.path.basename(args.eval.rstrip('/')) if args.eval else None
+	ticket_name = os.path.basename(args.eval.rstrip("/")) if args.eval else None
 	
 	timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 	if ticket_name:

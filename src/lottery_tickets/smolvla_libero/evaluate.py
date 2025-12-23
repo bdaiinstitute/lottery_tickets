@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """Evaluate smolvla baseline, new tickets, or saved tickets on libero environments.
 
 This is a modified version of lerobot_eval.py to support fixed initial noise vectors for the entire eval.
@@ -77,7 +80,6 @@ from lerobot.utils.utils import (
 )
 
 from functools import partial
-from types import MethodType
 
 
 def rollout(
@@ -486,6 +488,7 @@ def _compile_episode_data(
 
     return data_dict
 
+
 class EvalMode(Enum):
     NEW_TICKET = "NEW_TICKET"
     LOAD_TICKET = "LOAD_TICKET"
@@ -496,6 +499,7 @@ class EvalMode(Enum):
 class EvalPipelineConfigNoisePath(EvalPipelineConfig):
     eval_mode : EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
+
 
 @parser.wrap()
 def eval_main(cfg: EvalPipelineConfigNoisePath):

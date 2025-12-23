@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 """
 - Noise search is configured in a way that every reset of the environment resets to the same seed
 assigned to that environment instance. All the environment instances are stepped in parallel,
@@ -11,21 +13,20 @@ import json
 import os
 import random
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
-import hydra
 import numpy as np
 import torch
 import wandb
 from hydra import compose, initialize_config_dir
-from omegaconf import DictConfig, OmegaConf
+from omegaconf import OmegaConf
 
 os.environ["MUJOCO_GL"] = "egl"
 
 BASE_DIR = Path(__file__).resolve().parents[3]
-if str(BASE_DIR) not in sys.path:
-	sys.path.append(str(BASE_DIR))
+if BASE_DIR.as_posix() not in sys.path:
+	sys.path.append(BASE_DIR.as_posix())
 
 from env_util import build_lt_env
 from policy_util import load_base_policy
@@ -37,7 +38,8 @@ TASK_CONFIGS = {
 	"transport": "cfg/robomimic/dsrl_transport.yaml",
 }
 
-def p_args():
+def parse_args() -> argparse.Namespace:
+	"""Helper function to parse arguments."""
 	p = argparse.ArgumentParser()
 	p.add_argument("--task_name", default="lift", choices=list(TASK_CONFIGS.keys()))
 	p.add_argument("--n_envs", type=int, default=100)
@@ -51,11 +53,11 @@ def p_args():
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int, seed: int, ddim_steps: int, exp_name: str = "") -> str:
-	ts = datetime.utcnow().strftime('%Y%m%d_%H%M%S')
+	ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 	run_name = f"envs{n_envs}_samples{noise_samples}_seed{seed}_ddim{ddim_steps}_{ts}"
 	if exp_name:
 		run_name = f"{run_name}_{exp_name}"
-	return os.path.join(out_path.rstrip('/'), task_name, run_name)
+	return os.path.join(out_path.rstrip("/"), task_name, run_name)
 
 
 def save_results(out_dir, all_noise, all_rewards, all_success, all_success_rates, all_lengths, main_seed=None, env_seeds=None, noise_idx=None):
@@ -188,8 +190,8 @@ def evaluate_noise(env, noise_vec, n_envs, save_vid=False, noise_idx=0, rew_offs
 	return per_env_reward, success_flag, per_env_length
 
 def main():
-	args = p_args()
-	base_path = str(BASE_DIR)
+	args = parse_args()
+	base_path = BASE_DIR.as_posix()
 	config_path = os.path.join(f"{base_path}/src/lottery_tickets/robomimic_dppo_lt", TASK_CONFIGS[args.task_name])
 	
 	# Register the eval resolver for OmegaConf
@@ -197,7 +199,7 @@ def main():
 	
 	# Use Hydra to load config with proper interpolation support
 	config_dir = os.path.dirname(config_path)
-	config_name = os.path.basename(config_path).replace('.yaml', '')
+	config_name = os.path.basename(config_path).replace(".yaml", "")
 	
 	with initialize_config_dir(version_base=None, config_dir=config_dir):
 		cfg = compose(config_name=config_name)
@@ -231,8 +233,8 @@ def main():
 			tags=[args.task_name, "lottery_ticket"],
 		)
 	
-	if not hasattr(cfg, 'device') or cfg.device is None:
-		cfg.device = 'cuda:0' if torch.cuda.is_available() else 'cpu'	
+	if not hasattr(cfg, "device") or cfg.device is None:
+		cfg.device = "cuda:0" if torch.cuda.is_available() else "cpu"	
 	
 	random.seed(args.seed)
 	torch.manual_seed(args.seed)

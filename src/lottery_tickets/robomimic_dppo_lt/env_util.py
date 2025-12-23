@@ -1,10 +1,9 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import json
-import os
-import sys
 
 import gym
 import gymnasium
-import hydra
 import numpy as np
 import torch
 from gymnasium import spaces
@@ -16,11 +15,11 @@ import robomimic.utils.env_utils as EnvUtils
 import robomimic.utils.obs_utils as ObsUtils
 
 
-def make_robomimic_env(render=False, env='square', normalization_path=None, low_dim_keys=None, dppo_path=None, reward_shaping=False):
+def make_robomimic_env(render=False, env="square", normalization_path=None, low_dim_keys=None, dppo_path=None, reward_shaping=False):
 	wrappers = OmegaConf.create({
-		'robomimic_lowdim': {
-			'normalization_path': normalization_path,
-			'low_dim_keys': low_dim_keys,
+		"robomimic_lowdim": {
+			"normalization_path": normalization_path,
+			"low_dim_keys": low_dim_keys,
 		},
 	})
 	obs_modality_dict = {
@@ -38,7 +37,7 @@ def make_robomimic_env(render=False, env='square', normalization_path=None, low_
 	if obs_modality_dict["rgb"] is None:
 		obs_modality_dict.pop("rgb")
 	ObsUtils.initialize_obs_modality_mapping_from_dict(obs_modality_dict)
-	robomimic_env_cfg_path = f'{dppo_path}/cfg/robomimic/env_meta/{env}.json'
+	robomimic_env_cfg_path = f"{dppo_path}/cfg/robomimic/env_meta/{env}.json"
 	with open(robomimic_env_cfg_path, "r") as f:
 		env_meta = json.load(f)
 	env_meta["env_kwargs"]["reward_shaping"] = reward_shaping
@@ -78,13 +77,13 @@ class ObservationWrapperRobomimic(gym.Env):
 		if new_seed is not None:
 			self.seed(seed=new_seed)
 		raw_obs = self.env.reset()
-		obs = raw_obs['state'].flatten()
+		obs = raw_obs["state"].flatten()
 		return obs
 
 	def step(self, action):
 		raw_obs, reward, done, info = self.env.step(action)
 		reward = (reward - self.reward_offset)
-		obs = raw_obs['state'].flatten()
+		obs = raw_obs["state"].flatten()
 		return obs, reward, done, info
 
 	def render(self, **kwargs):
@@ -108,7 +107,7 @@ class ActionChunkWrapper(gymnasium.Env):
 		)
 		self.count = 0
 		self.ns_seed = int(fixed_seed) if fixed_seed is not None else None
-		self.reward_offset = getattr(cfg.env, 'reward_offset', 1.0)
+		self.reward_offset = getattr(cfg.env, "reward_offset", 1.0)
 		self._episode_success = False  # track success across chunked steps until termination
 
 	# Implemented for noise-search
@@ -148,7 +147,7 @@ class ActionChunkWrapper(gymnasium.Env):
 		# if self.count >= self.max_episode_steps:
 		# 	done = True
 		# if done:
-		# 	info['terminal_observation'] = obs
+		# 	info["terminal_observation"] = obs
 		# return obs, reward, done, False, info
 		# ------------------------------------------------------------
 		# Updated implementation below adds success flag and separates
@@ -184,7 +183,7 @@ class ActionChunkWrapper(gymnasium.Env):
 		# annotate success for logging callbacks
 		info["is_success"] = bool(self._episode_success)
 		if terminated or truncated:
-			info['terminal_observation'] = obs
+			info["terminal_observation"] = obs
 		return obs, reward, terminated, truncated, info
 
 	def render(self):
@@ -280,7 +279,7 @@ def build_lt_env(policy, cfg, n_envs, video_dir, save_vid=True, fixed_seeds=None
 		env_fns = [make_env_fn() for _ in range(n_envs)]
 	
 	if n_envs > 1:
-		env = SubprocVecEnv(env_fns, start_method='spawn')
+		env = SubprocVecEnv(env_fns, start_method="spawn")
 	else:
 		env = DummyVecEnv(env_fns)
 	

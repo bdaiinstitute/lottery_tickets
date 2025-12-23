@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import copy
 import io
 import json
@@ -7,20 +9,33 @@ import random
 import time
 from multiprocessing import Pool
 from pathlib import Path
-
+from typing import Any
 import h5py
 import hydra
 import numpy as np
 from omegaconf import DictConfig, OmegaConf
 from PIL import Image
 
+from franka_sim.mujoco_gym_env import MujocoGymEnv
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 
 
 def reach_cube(
-    orig_env, action_mag: float, epsilon: float, noise_mag: float
+    orig_env: MujocoGymEnv, action_mag: float, epsilon: float, noise_mag: float
 ) -> tuple[np.ndarray, np.ndarray, bool]:
-    """Move the robot gripper towards the target cube."""
+    """Move the robot gripper towards the target cube.
+    
+    Args:
+        orig_env: The original MujocoGymEnv environment.
+        action_mag: Maximum magnitude of the action.
+        epsilon: Distance threshold to consider the reach done.
+        noise_mag: Magnitude of noise to add to the action.
+
+    Returns:
+        target_pos: Target position action for the gripper.
+        target_gripper: Target gripper action.
+        done: Whether the reach is complete.
+    """
     tcp_pos = orig_env._data.sensor("2f85/pinch_pos").data
     block_pos = orig_env._data.sensor("block_pos").data
 
@@ -38,9 +53,20 @@ def reach_cube(
 
 
 def grasp_cube(
-    orig_env, planner_state, wait_steps: int
+    orig_env: MujocoGymEnv, planner_state : dict[str,Any], wait_steps: int
 ) -> tuple[np.ndarray, np.ndarray, bool]:
-    """Close the gripper to grasp the cube and wait for specified steps."""
+    """Close the gripper to grasp the cube and wait for specified steps.
+    
+    Args:
+        orig_env: The original MujocoGymEnv environment.
+        planner_state: Dictionary maintaining the state of the planner.
+        wait_steps: Number of steps to wait after closing the gripper.
+
+    Returns:
+        target_pos: Target position action for the gripper (zero).
+        target_gripper: Target gripper action (closed).
+        done: Whether the wait is complete.
+    """
     target_pos = np.zeros(3, dtype=np.float32)
     target_gripper = np.array([1.0]) / orig_env._action_scale[1]
 
@@ -51,9 +77,22 @@ def grasp_cube(
 
 
 def lift_cube(
-    orig_env, action_mag: float, epsilon: float, height: float, noise_mag: float
+    orig_env: MujocoGymEnv, action_mag: float, epsilon: float, height: float, noise_mag: float
 ) -> tuple[np.ndarray, np.ndarray, bool]:
-    """Lift the grasped cube to the specified height."""
+    """Lift the grasped cube to the specified height.
+    
+    Args:
+        orig_env: The original MujocoGymEnv environment.
+        action_mag: Maximum magnitude of the action.
+        epsilon: Distance threshold to consider the lift done.
+        height: Target height to lift the cube to.
+        noise_mag: Magnitude of noise to add to the action.
+    
+    Returns:
+        target_pos: Target position action for the gripper.
+        target_gripper: Target gripper action.
+        done: Whether the lift is complete.
+    """
     tcp_pos = orig_env._data.sensor("2f85/pinch_pos").data
     block_pos = orig_env._data.sensor("block_pos").data
 
@@ -71,17 +110,35 @@ def lift_cube(
     return target_pos, target_gripper, done
 
 
-def do_nothing(orig_env) -> tuple[np.ndarray, np.ndarray]:
-    """Keep the gripper stationary with the cube grasped."""
+def do_nothing(orig_env: MujocoGymEnv) -> tuple[np.ndarray, np.ndarray]:
+    """Keep the gripper stationary with the cube grasped.
+    
+    Args:
+        orig_env: The original MujocoGymEnv environment.
+
+    Returns:
+        target_pos: Target position action for the gripper (zero).
+        target_gripper: Target gripper action (closed).
+    """
     target_pos = np.zeros(3, dtype=np.float32)
     target_gripper = np.array([0.0]) / orig_env._action_scale[1]
     return target_pos, target_gripper
 
 
 def collect_single_demo(
-    env, planner_cfg: DictConfig, success_threshold: float
+    env: MujocoGymEnv, planner_cfg: DictConfig, success_threshold: float
 ) -> tuple[list[dict], bool]:
-    """Collect a single demonstration episode."""
+    """Collect a single demonstration episode.
+    
+    Args:
+        env: The MujocoGymEnv environment.
+        planner_cfg: Configuration for the planner behavior.
+        success_threshold: Reward threshold to consider the demo successful.
+    
+    Returns:
+        transitions: List of transition dictionaries.
+        success: Whether the demo was successful.
+    """
     orig_env = env.unwrapped
 
     planner_state = {
@@ -152,8 +209,12 @@ def collect_single_demo(
     return transitions, success
 
 
-def worker_collect_demo(args: tuple) -> None:
-    """Worker function for multiprocessing pool to collect a single demo."""
+def worker_collect_demo(args: tuple) -> dict:
+    """Worker function for multiprocessing pool to collect a single demo.
+    
+    Args:
+        args: Tuple containing (env_name, env_kwargs, planner_cfg, success_threshold)
+    """
     env_name, env_kwargs, planner_cfg, success_threshold = args
 
     # This will ensure different random seeds even if we fork processes.
@@ -253,13 +314,23 @@ def process_pending_results(
 
 
 def write_pickle(demo_file: Path, transitions: list[dict]) -> None:
-    """Save an episode of transitions as a pickle."""
+    """Save an episode of transitions as a pickle.
+    
+    Args:
+        demo_file: Path to save the pickle file.
+        transitions: List of transition dictionaries.
+    """
     with open(demo_file, "wb") as f:
         pickle.dump(transitions, f)
 
 
 def write_hdf5(demo_file: Path, transitions: list[dict]) -> None:
-    """Save an episode of transitions as a VPL hdf5 dataset."""
+    """Save an episode of transitions as a VPL hdf5 dataset.
+    
+    Args:
+        demo_file: Path to save the hdf5 file.
+        transitions: List of transition dictionaries.
+    """
     COLOR_KEY = "color"
     NEXT_COLOR_KEY = "next_color"
     KEY_MAPPING = {"actions": "action"}  # VPL expects 'action'.
@@ -350,6 +421,15 @@ def write_hdf5(demo_file: Path, transitions: list[dict]) -> None:
 
 
 def compress_image_jpeg(image: np.ndarray, quality: int = 90) -> np.ndarray:
+    """Compress a numpy array image into JPEG bytes.
+    
+    Args:
+        image: Numpy array image to compress.
+        quality: JPEG quality (1-100).
+
+    Returns:
+        Compressed JPEG bytes as a numpy array.
+    """
     assert image.dtype == np.uint8, "We can only compress 8-bit images."
     im = Image.fromarray(image)
     output = io.BytesIO()
@@ -358,7 +438,14 @@ def compress_image_jpeg(image: np.ndarray, quality: int = 90) -> np.ndarray:
 
 
 def decode_image(png_bytes: np.uint8) -> np.ndarray:
-    """Decode JPEG bytes into a numpy array image."""
+    """Decode JPEG bytes into a numpy array image.
+    
+    Args:
+        png_bytes: Compressed JPEG bytes as a numpy array.
+    
+    Returns:
+        Decoded image as a numpy array.
+    """
     stream = io.BytesIO(png_bytes.tobytes())
     img = Image.open(stream)
     # Ensure that image data is fully loaded.
@@ -374,6 +461,7 @@ def create_metadata_json(
     Args:
         output_dir: Directory containing the episode subdirectories
         successful_demo_files: List of paths to HDF5 files
+        cfg: Configuration dictionary
     """
     num_episodes = len(successful_demo_files)
     num_timesteps = []
@@ -403,7 +491,11 @@ def create_metadata_json(
 
 @hydra.main(version_base="1.1", config_path="cfgs", config_name="mg_demos.yaml")
 def main(cfg: DictConfig) -> None:
-    """Main function to collect multiple demonstration episodes and save to file."""
+    """Main function to collect multiple demonstration episodes and save to file.
+    
+    Args:
+        cfg: Configuration dictionary.
+    """
     env_cfg = cfg.evaluation
     output_dir = Path(".").resolve()
     print(f"Output directory: {output_dir}")
@@ -413,7 +505,7 @@ def main(cfg: DictConfig) -> None:
     planner_cfg = cfg.planner
     num_workers = demo_cfg.num_workers
 
-    successful_demo_files = []
+    successful_demo_files : list = []
     attempts = 0
 
     logging.info(
@@ -431,7 +523,7 @@ def main(cfg: DictConfig) -> None:
     # Use multiprocessing pool for parallel demo collection
     with Pool(processes=num_workers) as pool:
         # Keep submitting tasks until we have enough successful demos or reach max attempts
-        pending_results = []
+        pending_results : list[tuple]= []
 
         while (
             len(successful_demo_files) < demo_cfg.num_demos

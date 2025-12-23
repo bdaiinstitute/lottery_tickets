@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import numpy as np
 
 from franka_sim.envs import PandaPickCubeGymEnv
@@ -6,7 +8,10 @@ REWARD_THRESHOLD = 0.8
 
 
 class PandaPickCubeSparseGymEnv(PandaPickCubeGymEnv):
+    """Overrides PandaPickCubeGymEnv with a sparse reward."""
+
     def _compute_reward(self) -> float:
+        """Computes a sparse reward for picking up a block, based on the environment's reward threshold."""
         block_pos = self._data.sensor("block_pos").data
         tcp_pos = self._data.sensor("2f85/pinch_pos").data
         dist = np.linalg.norm(block_pos - tcp_pos)

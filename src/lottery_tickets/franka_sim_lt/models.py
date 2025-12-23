@@ -4,8 +4,18 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-def dict_to_device(dict: dict[str, torch.Tensor], device: str | torch.device):
-    return {k: v.to(device) for k, v in dict.items()}
+def dict_to_device(tensor_dict: dict[str, torch.Tensor], device: str | torch.device) -> dict[str, torch.Tensor]:
+    """
+    Utility function that moves all entries in a tensor dictionary to a specific device and returns a new tensor.
+    
+    Args:
+        tensor_dict: The dictionary mapping string keys to torch tensor values.
+        device: The target device to move the tensors to.
+
+    Returns:
+        A new dictionary with all tensors moved to the specified device.
+    """
+    return {k: v.to(device) for k, v in tensor_dict.items()}
 
 
 class DiffusionBackboneSimple(nn.Module):
@@ -16,7 +26,15 @@ class DiffusionBackboneSimple(nn.Module):
         hidden_dim: int = 128,
         num_layers: int = 4,
     ):
-        """Initialize a simple MLP backbone for diffusion models."""
+        """
+        Initialize a simple MLP backbone for diffusion models.
+        
+        Args:
+            x_dim: The dimension of the noise vector.
+            state_dim: The dimension of the state vector.
+            hidden_dim: The hidden layer dimension.
+            num_layers: The total number of layers in the MLP.
+        """
         super().__init__()
         # MLP on concatenated [x, state, time_emb]
         layers = []
@@ -33,7 +51,17 @@ class DiffusionBackboneSimple(nn.Module):
     def forward(
         self, x: torch.Tensor, state: torch.Tensor, t: torch.Tensor
     ) -> torch.Tensor:
-        """Forward pass through the MLP with concatenated inputs."""
+        """
+        Forward pass through the MLP with concatenated inputs.
+        
+        Args:
+            x: The noise tensor.
+            state: The state tensor.
+            t: The diffusion time step.
+
+        Returns:
+            The output tensor from the MLP.
+        """
         h = torch.cat([x, state, t.unsqueeze(-1)], dim=-1)
         return self.mlp(h)
 
@@ -49,7 +77,18 @@ class FM(nn.Module):
         use_bridge: bool = False,
         bridge_alpha: float = 0.1,
     ) -> None:
-        """Initialize the Flow Matching model with specified backbone and parameters."""
+        """
+        Initialize the Flow Matching model with specified backbone and parameters.
+        
+        Args:
+            backbone: The backbone network.
+            sample_shape: The shape of the noise sample tensor.
+            state_shape: The shape of the state tensor.
+            n_inference_steps: The number of flow steps to use at inference time.
+            use_midpoint: Use midpoint method for integration steps.
+            use_bridge: Use stochastic bridge sampling.
+            bridge_alpha: The bridge diffusion coefficient (if use_bridge is True).
+        """
         super().__init__()
         self.backbone = backbone
         self.sample_shape = sample_shape
@@ -60,7 +99,15 @@ class FM(nn.Module):
         self.bridge_alpha = bridge_alpha
 
     def compute_loss(self, x_1: torch.Tensor, state: torch.Tensor) -> torch.Tensor:
-        """Compute the flow matching loss between predicted and target flow."""
+        """Compute the flow matching loss between predicted and target flow.
+        
+        Args:
+            x_1: The target sample tensor at time t=1 (denoised object)
+            state: The state tensor, used for conditioning.
+
+        Returns:
+            The computed MSE loss tensor on predicted vs target flow.
+        """
         x_0 = torch.randn_like(x_1)
         t = torch.rand(x_1.shape[0], device=x_1.device)
         t_ext = t.unsqueeze(-1)
@@ -77,7 +124,17 @@ class FM(nn.Module):
         t_start: torch.Tensor,
         t_end: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor | None]:
-        """Compute the drift and diffusion terms for one integration step."""
+        """Compute the drift and diffusion terms for one integration step.
+        
+        Args:
+            x_t: The current sample tensor at time t_start.
+            state: The state tensor, used for conditioning.
+            t_start: The start time tensor for the integration step.
+            t_end: The end time tensor for the integration step.
+
+        Returns:
+            A tuple of (drift tensor, diffusion std tensor or None).
+        """
         delta_t = t_end - t_start
         delta_t_ext = delta_t.unsqueeze(-1)
 
@@ -107,7 +164,17 @@ class FM(nn.Module):
         t_start: torch.Tensor,
         t_end: torch.Tensor,
     ) -> torch.Tensor:
-        """One integration step using the midpoint method."""
+        """One integration step using the midpoint method.
+        
+        Args:
+            x_t: The current sample tensor at time t_start.
+            state: The state tensor, used for conditioning.
+            t_start: The start time tensor for the integration step.
+            t_end: The end time tensor for the integration step.
+
+        Returns:
+            The updated sample tensor at time t_end.
+        """
         drift, std = self.step_dist(x_t=x_t, state=state, t_start=t_start, t_end=t_end)
 
         noise = 0.0
@@ -123,7 +190,14 @@ class FM(nn.Module):
         device: torch.device | str | None = None,
         init_x: torch.Tensor | None = None,
     ) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
-        """Sample actions from the flow model given state observations."""
+        """Sample actions from the flow model given state observations.
+        
+        Args:
+            state: The state tensor for conditioning.
+            batch_size: The batch size for sampling. If None, inferred from state.
+            device: The torch device to perform sampling on. If None, uses model device.
+            init_x: Optional initial noise tensor to start the sampling from.
+        """
         if device is None:
             device = next(self.parameters()).device
 
@@ -169,27 +243,54 @@ class FM(nn.Module):
     def append_init_noise_to_traces(
         metadata: dict[str, torch.Tensor], traces_key: str
     ) -> torch.Tensor:
-        """Append initial noise to the trajectory traces for visualization."""
+        """Append initial noise to the trajectory traces for visualization.
+        
+        Args:
+            metadata: The metadata dictionary containing 'init_noise' and traces.
+            traces_key: The key in metadata for the trajectory traces.
+
+        Returns:
+            The concatenated tensor of shape [T+1, B, D] with initial noise prepended.
+        """
         init_noise = metadata["init_noise"]  # shape: [B, D]
         traces = metadata[traces_key]  # shape: [T, B, D]
         return torch.cat([init_noise.unsqueeze(0), traces], dim=0)  # shape: [T+1, B, D]
 
     def get_trainable_parameters(self) -> list[torch.nn.Parameter]:
-        """Get trainable parameters from the backbone network."""
+        """Get trainable parameters from the backbone network.
+        
+        Returns:
+            A list of trainable parameters.
+        """
         return list(self.backbone.parameters())
 
     def get_timesteps(self) -> torch.Tensor:
-        """Generate linearly spaced timesteps for the integration process."""
+        """Generate linearly spaced timesteps for the integration process.
+        
+        Returns:
+            A tensor of shape [n_inference_steps + 1] with linearly spaced timesteps.
+        """
         return torch.linspace(0, 1.0, self.n_inference_steps + 1)
 
     @staticmethod
     def get_bridge_sigma(tt: torch.Tensor) -> torch.Tensor:
-        """Compute the bridge variance schedule as a function of time."""
+        """Compute the bridge variance schedule as a function of time.
+        
+        Args:
+            tt: The time tensor.
+
+        Returns:
+            The bridge standard deviation tensor.
+        """
         return torch.sqrt(
             torch.clamp(tt, 1e-6, 1 - 1e-6) * (1 - torch.clamp(tt, 1e-6, 1 - 1e-6))
         )
 
     def set_bridge_alpha(self, alpha: float) -> None:
-        """Set the bridge diffusion coefficient for stochastic sampling."""
+        """Set the bridge diffusion coefficient for stochastic sampling.
+        
+        Args:
+            alpha: The new bridge diffusion coefficient.
+        """
         assert self.use_bridge, "Bridge is not enabled."
         self.bridge_alpha = alpha

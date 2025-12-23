@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 from typing import Any
 
 import gymnasium as gym
@@ -10,7 +12,15 @@ from franka_sim.envs.panda_reach_gym_env import PandaReachCubeGymEnv
 
 
 class PandaReachCubeCtrlrGymEnv(PandaReachCubeGymEnv):
+    """Overrides PandaPickCubeGymEnv by using an operational-space controller."""
+
     def __init__(self, **kwargs):
+        """
+        Initializes a PandaReachCubeCtrlrGymEnv.
+        
+        The action space in this environment is a tuple (x, y, z) position, as well
+        as a damping ratio for the operational-space controller.
+        """
         super().__init__(**kwargs)
 
         # Remove gripper action from action space
@@ -24,6 +34,19 @@ class PandaReachCubeCtrlrGymEnv(PandaReachCubeGymEnv):
     def step(
         self, action: np.ndarray
     ) -> tuple[dict[str, np.ndarray], float, bool, bool, dict[str, Any]]:
+        """
+        Take a step in the environment.
+
+        Args:
+            action: np.ndarray
+
+        Returns:
+            observation: dict[str, np.ndarray],
+            reward: float,
+            done: bool,
+            truncated: bool,
+            info: dict[str, Any]
+        """
         # x, y, z, grasp, damping_ratio = action
         x, y, z, damping_ratio = action
 

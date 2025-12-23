@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 import pickle
 from pathlib import Path
 
@@ -48,7 +50,7 @@ def save_checkpoint(
     }
 
     torch.save(checkpoint, save_path / filename)
-    print(f"saved ckpt to: {save_path / filename}")
+    print(f"saved checkpoint to: {save_path / filename}")
 
 
 class ActionChunkDataset(Dataset):
@@ -91,9 +93,19 @@ class ActionChunkDataset(Dataset):
                 self.indices.append((episode_idx, step_idx))
 
     def __len__(self):
+        """Get length of self.indices."""
         return len(self.indices)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx : int) -> dict:
+        """
+        Get state and action chunk for the given index.
+
+        Args:
+            idx: Index of the data point
+        
+        Returns:
+            dict containing "state" and "action_chunk"
+        """
         episode_idx, step_idx = self.indices[idx]
 
         episode = self.episodes[episode_idx]
@@ -148,8 +160,13 @@ class ActionChunkDataset(Dataset):
         }
 
 
-def train_fm_policy(cfg: DictConfig):
-    """Train Flow Matching policy on state-action data."""
+def train_flow_matching_policy(cfg: DictConfig) -> None:
+    """
+    Train Flow Matching policy on state-action data.
+    
+    Args:
+        cfg: The policy configuration dictionary.
+    """
 
     # Set device
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
@@ -178,7 +195,7 @@ def train_fm_policy(cfg: DictConfig):
     print(f"State dimension: {state_dim}")
     print(f"Action chunk dimension: {action_dim}")
 
-    # Create FM model using hydra instantiate
+    # Create Flow Matching model using hydra instantiate
     backbone = instantiate(
         cfg.model.backbone,
         x_dim=action_dim,
@@ -260,7 +277,11 @@ def train_fm_policy(cfg: DictConfig):
 
 @hydra.main(version_base=None, config_path="cfgs", config_name="fm")
 def main(cfg: DictConfig):
-    """Main training script with Hydra configuration."""
+    """Main training script with Hydra configuration.
+    
+    Args:
+        cfg: The configuration object.
+    """
 
     # Print configuration
     print("Configuration:")
@@ -272,7 +293,7 @@ def main(cfg: DictConfig):
         np.random.seed(cfg.seed)
 
     print("Starting training...")
-    train_fm_policy(cfg)
+    train_flow_matching_policy(cfg)
 
 
 if __name__ == "__main__":

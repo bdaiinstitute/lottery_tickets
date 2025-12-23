@@ -1,3 +1,5 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 from typing import Optional, Tuple, Union
 
 import mujoco
@@ -12,6 +14,16 @@ def pd_control(
     kp_kv: np.ndarray,
     ddx_max: float = 0.0,
 ) -> np.ndarray:
+    """
+    Implements a proportional-derivative (PD) control law.
+    
+    Args:
+        x: The current positions.
+        x_des: The desired positions.
+        dx: The current velocities.
+        kp_kv: The proportional and derivative (velocity) gains.
+        ddx_max: The maximum allowable error.
+    """
     # Compute error.
     x_err = x - x_des
     dx_err = dx
@@ -37,6 +49,16 @@ def pd_control_orientation(
     kp_kv: np.ndarray,
     dw_max: float = 0.0,
 ) -> np.ndarray:
+    """
+    Implements a proportional-derivative (PD) control law using quaternion orientations.
+    
+    Args:
+        quat: The current orientation, as a quaternion.
+        quat_des: The desired orientation, as a quaternion.
+        w: The current angular velocities.
+        kp_kv: The proportional and derivative (velocity) gains.
+        dw_max: The maximum allowable rotation error.
+    """
     # Compute error.
     quat_err = tr.quat_diff_active(source_quat=quat_des, target_quat=quat)
     ori_err = tr.quat_to_axisangle(quat_err)
@@ -57,9 +79,9 @@ def pd_control_orientation(
 
 
 def opspace(
-    model,
-    data,
-    site_id,
+    model : mujoco.MjModel,
+    data : mujoco.MjData,
+    site_id : int,
     dof_ids: np.ndarray,
     pos: Optional[np.ndarray] = None,
     ori: Optional[np.ndarray] = None,
@@ -72,6 +94,25 @@ def opspace(
     max_ori_acceleration: Optional[float] = None,
     gravity_comp: bool = True,
 ) -> np.ndarray:
+    """
+    Implements an operational-space control law.
+
+    Args:
+        model: The mujoco model.
+        data: The associated data for the mujoco model.
+        site_id: The ID of the site to control.
+        dof_ids: The IDs of the actuated degrees of freedom.
+        pos: The desired position of the controlled site.
+        ori: The desired orientation of the controlled site.
+        joint: The desired joint configuration in the nullspace of the site control law.
+        pos_gains: Proportional gains for position control.
+        ori_gains: Proportional gains for orientation control.
+        damping_ratio: Damping ratio to compute derivative gains from proportional gains.
+        nullspace_stiffness: Stiffness term for joint control in nullspace projection.
+        max_pos_acceleration: The maximum translational acceleration.
+        max_ori_acceleration: The maximum rotational acceleration.
+        gravity_comp: If True, enables gravity compensation.
+    """
     if pos is None:
         x_des = data.site_xpos[site_id]
     else:

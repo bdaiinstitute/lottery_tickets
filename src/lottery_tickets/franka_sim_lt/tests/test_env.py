@@ -1,7 +1,16 @@
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 
 
 def print_dict(d: dict, prefix: str = "") -> None:
+    """
+    Utility function to print a dictionary in a readable format.
+    
+    Args:
+        d: The dictionary to print.
+        prefix: An optional prefix string to include.
+    """
     for k, v in d.items():
         if isinstance(v, dict):
             print_dict(v, f"{prefix} {k}")

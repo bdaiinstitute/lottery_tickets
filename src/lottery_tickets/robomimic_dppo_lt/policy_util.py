@@ -1,17 +1,28 @@
-import os
+# Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
 
+import os
+from typing import Any
+
+from omegaconf import DictConfig
 import hydra
 import numpy as np
 import torch
 import wandb
+
+from model.diffusion.diffusion import DiffusionModel
 from stable_baselines3.common.callbacks import BaseCallback
 
 
 class DPPOBasePolicyWrapper:
-	def __init__(self, base_policy):
+	def __init__(self, base_policy: DiffusionModel):
+		"""Initializes a wrapper policy.
+		
+		Args:
+			base_policy: The base diffusion policy to wrap.
+		"""
 		self.base_policy = base_policy
 
-	def __call__(self, obs, initial_noise, return_numpy=True):
+	def __call__(self, obs: torch.Tensor, initial_noise: torch.Tensor, return_numpy: bool = True):
 		cond = {
 			"state": obs,
 			"noise_action": initial_noise,
@@ -24,17 +35,27 @@ class DPPOBasePolicyWrapper:
 		return diffused_actions	
 
 
-def load_base_policy(cfg):
+def load_base_policy(cfg: DictConfig) -> DPPOBasePolicyWrapper:
+	"""Loads a base policy from a Hydra configuration and returns a policy wrapper instance.
+	
+	Args:
+		cfg: The Hydra configuration for the policy.
+	"""
 	base_policy = hydra.utils.instantiate(cfg.model)
 	base_policy = base_policy.eval()
 	print(f">>> Is base policy noise controllable: {base_policy.controllable_noise}")
 	return DPPOBasePolicyWrapper(base_policy)
 
 
-def build_noise_library(cfg):
-	"""Load or generate noise library for discrete action space."""
-	top_k = getattr(cfg, 'top_k', None)
-	noise_path = getattr(cfg, 'noise_path', None)
+def build_noise_library(cfg: DictConfig) -> np.ndarray[Any, np.dtype[np.float32]]:
+	"""
+	Load or generate noise library for discrete action space.
+
+	Args:
+		cfg: The Hydra configuration for the policy.
+	"""
+	top_k = getattr(cfg, "top_k", None)
+	noise_path = getattr(cfg, "noise_path", None)
 	if top_k is None or noise_path is None:
 		return None
 	
@@ -42,13 +63,13 @@ def build_noise_library(cfg):
 	action_dim = cfg.action_dim
 	flat_dim = action_horizon * action_dim
 	
-	if str(noise_path).lower() == 'random':
+	if str(noise_path).lower() == "random":
 		rng = np.random.default_rng(cfg.seed)
 		noise_lib = rng.standard_normal(size=(top_k, flat_dim)).astype(np.float32)
 		print(f">>> Generated {top_k} random noises for discrete action space (dim={flat_dim})")
 		return noise_lib
 	
-	noise_samples_path = os.path.join(noise_path, 'noise_samples.npy')
+	noise_samples_path = os.path.join(noise_path, "noise_samples.npy")
 	if not os.path.exists(noise_samples_path):
 		raise FileNotFoundError(f"noise_samples.npy not found at {noise_samples_path}")
 	
@@ -75,7 +96,7 @@ class LoggingCallback(BaseCallback):
 		rew_offset=0, 
 		num_train_env=1,
 		num_eval_env=1,
-		algorithm='dsrl_sac',
+		algorithm="dsrl_sac",
 		max_steps=-1,
 		deterministic_eval=False,
 	):
@@ -101,14 +122,14 @@ class LoggingCallback(BaseCallback):
 		self.deterministic_eval = deterministic_eval
 
 	def _on_step(self):
-		for info in self.locals['infos']:
-			if 'episode' in info:
-				self.episode_rewards.append(info['episode']['r'])
-				self.episode_lengths.append(info['episode']['l'])
-		rew = self.locals['rewards']
+		for info in self.locals["infos"]:
+			if "episode" in info:
+				self.episode_rewards.append(info["episode"]["r"])
+				self.episode_lengths.append(info["episode"]["l"])
+		rew = self.locals["rewards"]
 		self.total_reward += np.mean(rew)
 		self.episode_success[rew > -self.rew_offset] = 1
-		self.episode_completed[self.locals['dones']] = 1
+		self.episode_completed[self.locals["dones"]] = 1
 		self.total_timesteps += self.action_chunk * self.model.n_envs
 		if self.n_calls % self.log_freq == 0:
 			if len(self.episode_rewards) > 0:
@@ -120,18 +141,18 @@ class LoggingCallback(BaseCallback):
 						"train/ep_rew_mean": np.mean(self.episode_rewards),
 						"train/rew_mean": np.mean(self.total_reward),
 						"train/timesteps": self.total_timesteps,
-						"train/ent_coef": self.locals['self'].logger.name_to_value['train/ent_coef'],
-						"train/actor_loss": self.locals['self'].logger.name_to_value['train/actor_loss'],
-						"train/critic_loss": self.locals['self'].logger.name_to_value['train/critic_loss'],
-						"train/ent_coef_loss": self.locals['self'].logger.name_to_value['train/ent_coef_loss'],
+						"train/ent_coef": self.locals["self"].logger.name_to_value["train/ent_coef"],
+						"train/actor_loss": self.locals["self"].logger.name_to_value["train/actor_loss"],
+						"train/critic_loss": self.locals["self"].logger.name_to_value["train/critic_loss"],
+						"train/ent_coef_loss": self.locals["self"].logger.name_to_value["train/ent_coef_loss"],
 					}, step=self.log_count)
 					if np.sum(self.episode_completed) > 0:
 						wandb.log({
 							"train/success_rate": np.sum(self.episode_success) / np.sum(self.episode_completed),
 						}, step=self.log_count)
-					if self.algorithm == 'dsrl_na':
+					if self.algorithm == "dsrl_na":
 						wandb.log({
-							"train/noise_critic_loss": self.locals['self'].logger.name_to_value['train/noise_critic_loss'],
+							"train/noise_critic_loss": self.locals["self"].logger.name_to_value["train/noise_critic_loss"],
 						}, step=self.log_count)
 				self.episode_rewards = []
 				self.episode_lengths = []
@@ -140,9 +161,9 @@ class LoggingCallback(BaseCallback):
 				self.episode_completed = np.zeros(self.num_train_env)
 
 		if self.n_calls % self.eval_freq == 0:
-			self.evaluate(self.locals['self'], deterministic=False)
+			self.evaluate(self.locals["self"], deterministic=False)
 			if self.deterministic_eval:
-				self.evaluate(self.locals['self'], deterministic=True)
+				self.evaluate(self.locals["self"], deterministic=True)
 		return True
 
 	def evaluate(self, agent, deterministic=False):
@@ -157,9 +178,9 @@ class LoggingCallback(BaseCallback):
 					success_i = np.zeros(obs.shape[0])
 					r = []
 					for _ in range(self.max_steps):
-						if self.algorithm == 'dsrl_sac':
+						if self.algorithm == "dsrl_sac":
 							action, _ = agent.predict(obs, deterministic=deterministic)
-						elif self.algorithm == 'dsrl_na':
+						elif self.algorithm == "dsrl_na":
 							action, _ = agent.predict_diffused(obs, deterministic=deterministic)
 						next_obs, reward, done, info = env.step(action)
 						obs = next_obs
@@ -171,14 +192,14 @@ class LoggingCallback(BaseCallback):
 						r.append(reward)
 					success.append(success_i.mean())
 					rews.append(np.mean(np.array(r)))
-					print(f'eval episode {i} at timestep {self.total_timesteps}')
+					print(f"eval episode {i} at timestep {self.total_timesteps}")
 				success_rate = np.mean(success)
 				if total_ep > 0:
 					avg_rew = rew_total / total_ep
 				else:
 					avg_rew = 0
 				if self.use_wandb:
-					name = 'eval'
+					name = "eval"
 					if deterministic:
 						wandb.log({
 							f"{name}/success_rate_deterministic": success_rate,
@@ -199,17 +220,17 @@ def collect_rollouts(model, env, num_steps, base_policy, cfg):
 	obs = env.reset()
 	for i in range(num_steps):
 		noise = torch.randn(cfg.env.n_envs, cfg.act_steps, cfg.action_dim).to(device=cfg.device)
-		if cfg.algorithm == 'dsrl_sac':
+		if cfg.algorithm == "dsrl_sac":
 			noise[noise < -cfg.train.action_magnitude] = -cfg.train.action_magnitude
 			noise[noise > cfg.train.action_magnitude] = cfg.train.action_magnitude
 		action = base_policy(torch.tensor(obs, device=cfg.device, dtype=torch.float32), noise)
 		next_obs, reward, done, info = env.step(action)
-		if cfg.algorithm == 'dsrl_na':
+		if cfg.algorithm == "dsrl_na":
 			action_store = action
-		elif cfg.algorithm == 'dsrl_sac':
+		elif cfg.algorithm == "dsrl_sac":
 			action_store = noise.detach().cpu().numpy()
 		action_store = action_store.reshape(-1, action_store.shape[1] * action_store.shape[2])
-		if cfg.algorithm == 'dsrl_sac':
+		if cfg.algorithm == "dsrl_sac":
 			action_store = model.policy.scale_action(action_store)
 		model.replay_buffer.add(
 				obs=obs,
@@ -223,15 +244,14 @@ def collect_rollouts(model, env, num_steps, base_policy, cfg):
 	model.replay_buffer.final_offline_step()
 	
 
-
 def load_offline_data(model, offline_data_path, n_env):
 	# this function should only be applied with dsrl_na
 	offline_data = np.load(offline_data_path)
-	obs = offline_data['states']
-	next_obs = offline_data['states_next']
-	actions = offline_data['actions']
-	rewards = offline_data['rewards']
-	terminals = offline_data['terminals']
+	obs = offline_data["states"]
+	next_obs = offline_data["states_next"]
+	actions = offline_data["actions"]
+	rewards = offline_data["rewards"]
+	terminals = offline_data["terminals"]
 	for i in range(int(obs.shape[0]/n_env)):
 		model.replay_buffer.add(
 				obs=obs[n_env*i:n_env*i+n_env],

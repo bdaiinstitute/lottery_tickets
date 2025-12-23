@@ -2,26 +2,30 @@
 
 from pathlib import Path
 
-import gymnasium as gym
 import hydra
 import imageio
 import torch
 from omegaconf import DictConfig, OmegaConf
 
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
-from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_fm_model
+from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_flow_matching_model
 import numpy as np
 
-def evaluate_fm_policy(cfg: DictConfig):
-    """Evaluate Flow Matching policy in the environment."""
+def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
+    """
+    Evaluates a Flow Matching policy in the environment.
+    
+    Args:
+        cfg: The policy configuration dictionary.
+    """
 
     # Set device
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    # Load the trained FM model
+    # Load the trained Flow Matching model
     print(f"Loading model from {cfg.evaluation.model_path}")
-    fm_model, config = load_fm_model(cfg.evaluation.model_path, device)
+    fm_model, config = load_flow_matching_model(cfg.evaluation.model_path, device)
     print(f"Model config: {config}")
 
     # Create policy interface
@@ -95,7 +99,7 @@ def evaluate_fm_policy(cfg: DictConfig):
     total_reward_list_np = np.array(total_reward_list)
     np.save(video_path.parent / "total_reward_list.npy", total_reward_list_np)
 
-    if 'new_noise' in cfg.keys() or 'noise_path' in cfg.keys():
+    if "new_noise" in cfg.keys() or "noise_path" in cfg.keys():
         torch.save(init_x, video_path.parent / "init_x.pt")
 
     env.close()
@@ -110,7 +114,7 @@ def main(cfg: DictConfig):
     print(OmegaConf.to_yaml(cfg))
 
     # Run evaluation
-    evaluate_fm_policy(cfg)
+    evaluate_flow_matching_policy(cfg)
 
     print("Evaluation complete!")
 
