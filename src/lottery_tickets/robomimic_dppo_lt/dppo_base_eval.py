@@ -30,7 +30,11 @@ TASK_CONFIGS = {
 }
 
 def parse_args() -> argparse.Namespace:
-	"""Helper function to parse arguments."""
+	"""Helper function to parse arguments.
+	
+	Returns:
+		argparse.Namespace: Parsed arguments.
+	"""
 	p = argparse.ArgumentParser()
 	p.add_argument("--task_name", default="can", choices=list(TASK_CONFIGS.keys()))
 	p.add_argument("--n_evals_per_seed", type=int, default=100)
@@ -42,11 +46,35 @@ def parse_args() -> argparse.Namespace:
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_seeds: int, n_evals_per_seed: int, seed: int, ddim_steps: int) -> str:
+	"""
+	Helper function to resolve output directory path.
+
+	Args:
+		out_path (str): Base output path.
+		task_name (str): Name of the task.
+		n_seeds (int): Number of seeds.
+		n_evals_per_seed (int): Number of evaluations per seed.
+		seed (int): Starting seed.
+		ddim_steps (int): Number of DDIM steps.
+	
+	Returns:
+		str: Resolved output directory path.
+	"""
+
 	ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 	run_name = f"base_policy_seeds{n_seeds}_evals{n_evals_per_seed}_seed{seed}_ddim{ddim_steps}_{ts}"
 	return os.path.join(out_path.rstrip("/"), task_name, run_name)
 
-def evaluate_policy_single(env, save_vid=False, eval_num=0, rew_offset=0.0):
+def evaluate_policy_single(env, save_vid : bool = False, eval_num : int =0, rew_offset : float=0.0):
+	"""
+	Evaluate the policy in the given environment for a single episode.
+
+	Args:
+		env: The environment to evaluate the policy in.
+		save_vid (bool): Whether to save the video of the episode.
+		eval_num (int): Evaluation number for naming purposes.
+		rew_offset (float): Reward offset for success determination.
+	"""
 	if save_vid:
 		env.env.name_prefix = f"ep_{eval_num}"
 	
@@ -74,6 +102,9 @@ def evaluate_policy_single(env, save_vid=False, eval_num=0, rew_offset=0.0):
 	return episode_reward, success
 
 def main():
+	"""
+	Main function to evaluate the base policy using Robomimic DPPO.
+	"""
 	args = parse_args()
 	base_path = BASE_DIR.as_posix()
 	config_path = os.path.join(f"{base_path}/lottery_tickets/robomimic_dppo_lt", TASK_CONFIGS[args.task_name])
