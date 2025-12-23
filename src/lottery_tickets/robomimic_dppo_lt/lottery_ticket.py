@@ -13,7 +13,7 @@ import json
 import os
 import random
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -53,7 +53,7 @@ def parse_args() -> argparse.Namespace:
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int, seed: int, ddim_steps: int, exp_name: str = "") -> str:
-	ts = datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
+	ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 	run_name = f"envs{n_envs}_samples{noise_samples}_seed{seed}_ddim{ddim_steps}_{ts}"
 	if exp_name:
 		run_name = f"{run_name}_{exp_name}"

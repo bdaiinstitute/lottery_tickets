@@ -51,7 +51,7 @@ cd src/lottery_tickets/smolvla_libero
 
 
 ## 🐛 Debugging SmolVLA + LIBERO setup
-When install the `smolvla-libero` depedencies, if you run into an isuse wih building `hf-egl-probe` and `egl-probe`, you may need to do:
+When installing the `smolvla-libero` depedencies, if you run into an isuse wih building `hf-egl-probe` and `egl-probe`, you may need to do:
 
 ```bash
 pip install egl_probe --no-build-isolation

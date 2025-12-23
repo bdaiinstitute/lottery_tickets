@@ -4,7 +4,7 @@ import argparse
 import os
 import random
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 import numpy as np
@@ -42,7 +42,7 @@ def parse_args() -> argparse.Namespace:
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_seeds: int, n_evals_per_seed: int, seed: int, ddim_steps: int) -> str:
-	ts = datetime.now(datetime.timezone.utc).strftime("%Y%m%d_%H%M%S")
+	ts = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 	run_name = f"base_policy_seeds{n_seeds}_evals{n_evals_per_seed}_seed{seed}_ddim{ddim_steps}_{ts}"
 	return os.path.join(out_path.rstrip("/"), task_name, run_name)
 
