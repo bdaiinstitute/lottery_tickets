@@ -117,6 +117,13 @@ def rollout(
         policy: The policy. Must be a PyTorch nn module.
         seeds: The environments are seeded once at the start of the rollout. If provided, this argument
             specifies the seeds for each of the environments.
+        env_preprocessor: Environment-specific preprocessor to be applied before the main preprocessor.
+        env_postprocessor: Environment-specific postprocessor to be applied after the main postprocessor.
+        preprocessor: The main preprocessor to be applied to observations before passing them to the
+            policy.
+        postprocessor: The main postprocessor to be applied to actions output by the policy before
+            passing them to the environment.
+        seeds: Optional list of seeds for each environment in the batch.
         return_observations: Whether to include all observations in the returned rollout data. Observations
             are returned optionally because they typically take more memory to cache. Defaults to False.
         render_callback: Optional rendering callback to be used after the environments are reset, and after
@@ -258,6 +265,12 @@ def eval_policy(
     Args:
         env: The batch of environments.
         policy: The policy.
+        env_preprocessor: Environment-specific preprocessor to be applied before the main preprocessor.
+        env_postprocessor: Environment-specific postprocessor to be applied after the main postprocessor.
+        preprocessor: The main preprocessor to be applied to observations before passing them to the
+            policy.
+        postprocessor: The main postprocessor to be applied to actions output by the policy before
+            passing them to the environment.
         n_episodes: The number of episodes to evaluate.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
@@ -452,6 +465,15 @@ def _compile_episode_data(
     Compiles all the rollout data into a Hugging Face dataset.
 
     Similar logic is implemented when datasets are pushed to hub (see: `push_to_hub`).
+
+    Args:
+        rollout_data: The rollout data dictionary returned by `rollout()`.
+        done_indices: A (batch,) tensor indicating the first done index for each batch element.
+        start_episode_index: The starting episode index to use for the first episode in this batch.
+        start_data_index: The starting data index to use for the first frame in this batch.
+        fps: The environment fps for timestamp calculation.
+    Returns:
+        A dictionary of tensors representing the compiled episode data.
     """
     ep_dicts = []
     total_frames = 0
@@ -490,6 +512,7 @@ def _compile_episode_data(
 
 
 class EvalMode(Enum):
+    """Evaluation mode for the policy."""
     NEW_TICKET = "NEW_TICKET"
     LOAD_TICKET = "LOAD_TICKET"
     ORIGINAL_POLICY = "ORIGINAL_POLICY"
@@ -497,12 +520,20 @@ class EvalMode(Enum):
 
 @dataclass 
 class EvalPipelineConfigNoisePath(EvalPipelineConfig):
+    """
+    Eval pipeline config with noise path for loading saved tickets.
+    """
     eval_mode : EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
 
 
 @parser.wrap()
 def eval_main(cfg: EvalPipelineConfigNoisePath):
+    """Main evaluation pipeline for smolvla libero with lottery tickets.
+    
+    Args:
+        cfg: Evaluation pipeline configuration.
+    """
     global noise
     logging.info(pformat(asdict(cfg)))
 
@@ -616,6 +647,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
 
 # ---- typed payload returned by one task eval ----
 class TaskMetrics(TypedDict):
+    """
+    Metrics returned by eval_one for one task.
+    """
     sum_rewards: list[float]
     max_rewards: list[float]
     successes: list[bool]
@@ -639,7 +673,27 @@ def eval_one(
     return_episode_data: bool,
     start_seed: int | None,
 ) -> TaskMetrics:
-    """Evaluates one task_id of one suite using the provided vec env."""
+    """Evaluates one task_id of one suite using the provided vec env.
+    
+    Args:
+        env: The batch of environments.
+        policy: The policy.
+        env_preprocessor: Environment-specific preprocessor to be applied before the main preprocessor.
+        env_postprocessor: Environment-specific postprocessor to be applied after the main postprocessor.
+        preprocessor: The main preprocessor to be applied to observations before passing them to the
+            policy.
+        postprocessor: The main postprocessor to be applied to actions output by the policy before
+            passing them to the environment.
+        n_episodes: The number of episodes to evaluate.
+        max_episodes_rendered: Maximum number of episodes to render into videos.
+        videos_dir: Where to save rendered videos.
+        return_episode_data: Whether to return episode data 
+        start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
+            seed is incremented by 1. If not provided, the environments are not manually seeded.
+
+    Returns:
+        TaskMetrics: Metrics for the evaluated task.
+    """
 
     task_videos_dir = videos_dir
 
@@ -686,6 +740,24 @@ def run_one(
     Run eval_one for a single (task_group, task_id, env).
     Returns (task_group, task_id, task_metrics_dict).
     This function is intentionally module-level to make it easy to test.
+
+    Args:
+        task_group: The task group name.
+        task_id: The task id.
+        env: The batch of environments.
+        policy: The policy.
+        env_preprocessor: Environment-specific preprocessor to be applied before the main preprocessor.
+        env_postprocessor: Environment-specific postprocessor to be applied after the main postprocessor.
+        preprocessor: The main preprocessor to be applied to observations before passing them to the
+            policy.
+        postprocessor: The main postprocessor to be applied to actions output by the policy before
+            passing them to the environment.
+        n_episodes: The number of episodes to evaluate.
+        max_episodes_rendered: Maximum number of episodes to render into videos.
+        videos_dir: Where to save rendered videos.
+        return_episode_data: Whether to return episode data 
+        start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
+            seed is incremented by 1. If not provided, the environments are not manually seeded.
     """
     task_videos_dir = None
     if videos_dir is not None:
@@ -733,6 +805,26 @@ def eval_policy_all(
     accumulates per-group and overall statistics, and returns the same aggregate metrics
     schema as the single-env evaluator (avg_sum_reward / avg_max_reward / pc_success / timings)
     plus per-task infos.
+
+    Args:
+        envs: Nested dict of vector envs to evaluate.
+        policy: The policy.
+        env_preprocessor: Environment-specific preprocessor to be applied before the main preprocessor.
+        env_postprocessor: Environment-specific postprocessor to be applied after the main postprocessor.
+        preprocessor: The main preprocessor to be applied to observations before passing them to the
+            policy.
+        postprocessor: The main postprocessor to be applied to actions output by the policy before
+            passing them to the environment.
+        n_episodes: The number of episodes to evaluate per task.
+        max_episodes_rendered: Maximum number of episodes to render into videos.
+        videos_dir: Where to save rendered videos.
+        return_episode_data: Whether to return episode data 
+        start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
+            seed is incremented by 1. If not provided, the environments are not manually seeded.
+        max_parallel_tasks: Maximum number of parallel tasks to run. If <= 1, runs sequentially.
+
+    Returns:
+        Dictionary with per-task, per-group, and overall aggregated metrics.
     """
     start_t = time.time()
 
@@ -839,6 +931,7 @@ def eval_policy_all(
 
 
 def main():
+    """Main function for evaluation."""
     init_logging()
     register_third_party_plugins()
     eval_main()
