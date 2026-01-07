@@ -77,6 +77,13 @@ The policy used in our experiments comes from an off-the-shelf LIBERO checkpoint
 We provide golden tickets for these policies, and code for generating new tickets and comparing against the base policy. 
 This reflects a setting of using a model we didn't create.
 
+# Getting started
+
+We use some features of the [`uv`](https://docs.astral.sh/uv/) package manager in our `pyproject.toml`.
+The easiest way to get started is to install `uv` using [these instructions](https://docs.astral.sh/uv/getting-started/installation/).
+
+You can then install the individual experiment setups using `uv sync --extra $EXPERIMENT_NAME`; see the individual READMEs for more details.
+
 # Contribution and Maintenance
 
 This repository is released as-is to accompany a paper submission.
