@@ -84,7 +84,7 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
 
         while not done:
             if ticket_epsilon := cfg.get("ticket_epsilon", None) is not None:
-                if torch.rand() < ticket_epsilon:
+                if torch.rand(()) < ticket_epsilon:
                     action = policy(obs)
                 else:
                     action = policy(obs, init_x=init_x)
