@@ -4,17 +4,21 @@ from pathlib import Path
 
 import hydra
 import imageio
+import numpy as np
 import torch
 from omegaconf import DictConfig, OmegaConf
 
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
-from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_flow_matching_model
-import numpy as np
+from lottery_tickets.franka_sim_lt.models_utils import (
+    FMPolicyInterface,
+    load_flow_matching_model,
+)
+
 
 def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
     """
     Evaluates a Flow Matching policy in the environment.
-    
+
     Args:
         cfg: The policy configuration dictionary.
     """
@@ -63,7 +67,9 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
         init_x = None
         print("Evaluating original policy without lottery ticket.")
     else:
-        raise RuntimeError("Need to either test original policy, test a new ticket, or eval an existing ticket")
+        raise RuntimeError(
+            "Need to either test original policy, test a new ticket, or eval an existing ticket"
+        )
 
     # Evaluate policy
     num_episodes = cfg.evaluation.num_episodes
@@ -77,7 +83,12 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
         frames = []
 
         while not done:
-            action = policy(obs, init_x=init_x)
+            if ticket_epsilon := config.get("ticket_epsilon", None) is not None:
+                if torch.rand() < ticket_epsilon:
+                    action = policy(obs)
+                else:
+                    action = policy(obs, init_x=init_x)
+
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
             total_reward += reward
