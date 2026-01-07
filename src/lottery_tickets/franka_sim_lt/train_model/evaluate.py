@@ -88,6 +88,8 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
                     action = policy(obs)
                 else:
                     action = policy(obs, init_x=init_x)
+            else:
+                action = policy(obs, init_x=init_x)
 
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
