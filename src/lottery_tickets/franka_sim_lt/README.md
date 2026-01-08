@@ -22,7 +22,7 @@ The codebase supports the following:
 2. [Generating a new lottery ticket for franka-sim](#generating-a-new-lottery-ticket-for-franka-sim)
 3. [Evaluating an existing franka-sim lottery ticket](#evaluating-an-existing-franka-sim-lottery-ticket)
 4. [Visualize ticket and original policy performance](#visualize-ticket-and-original-policy-performance)
-5. [Generate data and train your own base policy](#generate-data-and-train-your-own-base-policy)
+5. [Generate data and train your own base policy](#generating-data-and-training-your-own-base-policy)
 
 ## Evaluating pretrained flow matching policy
 First, go into the `train_model` folder and download a checkpoint.
