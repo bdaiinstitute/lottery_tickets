@@ -9,53 +9,42 @@ There are 5 libero environments you can use as your `env.task`:
 - `libero_90`
 - `libero_10`
 
-We have a Python script (pretty much exact copy of `lerobot_eval.py`) you can run that can be used in 1 of 3 ways:
+All experiment scripts run from the `smolvla_libero` folder, `src/lottery_tickets/smolvla_libero/`. We have a Python script (a lightly modified copy of `lerobot_eval.py`) that can be used to:
 1. [Generate a new lottery ticket (i.e: get performance on a task suite)](#generating-a-new-ticket)
 2. [Evaluate a saved lottery ticket on other tasks](#evaluating-a-saved-ticket)
 3. [Running the original policy](#running-the-original-policy)
 4. TODO: Visualize the results
 
 ## Setup
-
-Clone the repo and go into it.
-
-```bash
-git clone https://github.com/rai-inst/lottery_tickets.git
-cd lottery_tickets
-```
-
-Make and activate conda environment.
-
-```bash
-conda create -n lottery_tickets python=3.10
-conda activate lottery_tickets
-```
-
-Install package with smolvla + libero dependencies
-
-```bash
-pip install -e .[smolvla-libero]
-```
-
-It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
+We include setup instructions for uv (which we recommend), and conda. Additionally, it helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
 
 ```bash
 export MUJOCO_GL=egl
 ```
 
-Finally, go into the `smolvla_libero` directory.
+### uv setup
+From the repo root, create a virtual environment with `uv`, and install the `smolvla` and `libero` dependencies:
 
 ```bash
-cd src/lottery_tickets/smolvla_libero
+uv sync --extra smolvla-libero
+source .venv/bin/activate
 ```
 
+### conda setup
+You can also setup with conda if you prefer:
+
+```
+conda create -n lottery_tickets python=3.10
+conda activate lottery_tickets
+pip install -e .[smolvla-libero]
+```
 
 ## 🐛 Debugging SmolVLA + LIBERO setup
 When installing the `smolvla-libero` depedencies, if you run into an isuse wih building `hf-egl-probe` and `egl-probe`, you may need to do:
 
 ```bash
-pip install egl_probe --no-build-isolation
-pip install hf_egl_probe --no-build-isolation
+uv pip install egl_probe --no-build-isolation
+uv pip install hf_egl_probe --no-build-isolation
 ```
 
 
@@ -64,9 +53,9 @@ pip install hf_egl_probe --no-build-isolation
 Set `eval_mode=NEW_TICKET` to generate a new noise vector (it will be sampled from standard normal), and run `n_episodes` of eval on it for the `env.task` list.
 You can set the seed for the environments by passing `seed` parameter an integer argument (`1000` is the default value).
 The noise vector will be saved to `{output_dir}/{A_UNIQUE_ID}/initial_noise.pt` for future use, along with videos and results.
-(TODO: batch_size for now is always assumed to be 1, but could be adjusted).
+(**TODO: batch_size for now is always assumed to be 1, but could be adjusted**).
 
-If you are asked to specify a custom path for the dataset folder, recommend "n".
+You will be prompted to optionally specify a custom dataset folder path; the default is generally fine.
 
 ```bash
 python evaluate.py \
