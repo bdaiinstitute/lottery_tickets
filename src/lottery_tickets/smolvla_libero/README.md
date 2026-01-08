@@ -9,14 +9,20 @@ There are 5 libero environments you can use as your `env.task`:
 - `libero_90`
 - `libero_10`
 
-We have a Python script (a lightly modified copy of `lerobot_eval.py`) that can be used to:
+All experiment scripts run from the `smolvla_libero` folder, `src/lottery_tickets/smolvla_libero/`. We have a Python script (a lightly modified copy of `lerobot_eval.py`) that can be used to:
 1. [Generate a new lottery ticket (i.e: get performance on a task suite)](#generating-a-new-ticket)
 2. [Evaluate a saved lottery ticket on other tasks](#evaluating-a-saved-ticket)
 3. [Running the original policy](#running-the-original-policy)
 4. TODO: Visualize the results
 
 ## Setup
+We include setup instructions for uv (which we recommend), and conda. Additionally, it helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
 
+```bash
+export MUJOCO_GL=egl
+```
+
+### uv setup
 From the repo root, create a virtual environment with `uv`, and install the `smolvla` and `libero` dependencies:
 
 ```bash
@@ -24,14 +30,14 @@ uv sync --extra smolvla-libero
 source .venv/bin/activate
 ```
 
-It helps to set `MUJOCO_GL` to use gpu rendering for faster performance:
+### conda setup
+You can also setup with conda if you prefer:
 
-```bash
-export MUJOCO_GL=egl
 ```
-
-
-All experiment scripts run from the `smolvla_libero` folder, `src/lottery_tickets/smolvla_libero/`
+conda create -n lottery_tickets python=3.10
+conda activate lottery_tickets
+pip install -e .[smolvla-libero]
+```
 
 ## 🐛 Debugging SmolVLA + LIBERO setup
 When installing the `smolvla-libero` depedencies, if you run into an isuse wih building `hf-egl-probe` and `egl-probe`, you may need to do:

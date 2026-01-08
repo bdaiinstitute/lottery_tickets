@@ -48,8 +48,8 @@ python evaluate.py \
 ```
 
 You will see the policy's total rewards for each episode get printed out.
-This policy typically has an average episode reward of 20-40, whereas success normally (i.e., **TODO: What does "normal" mean?**) is >80%.
-It occasionally succeeds, slowly, but is in general not a good policy.
+This policy typically has an average episode returns of 20-40, whereas as a policy that succesfully lifts the cube gets >80 episode returns.
+`fm_seed_1001` occasionally succeeds, slowly, but is in general not a good policy.
 
 ## Generating a new lottery ticket for `franka-sim`
 
@@ -99,13 +99,13 @@ python evaluate.py \
     hydra.run.dir=outputs/fm_seed_1001_example/golden_ticket
 ```
 
-This golden ticket typically averages at least above 100, which is normally a success.
+This golden ticket typically averages at least above 100 episode returns, which is normally a success.
 It does still occasionally fail, but it is much more reliable than the original policy. 
 
 ## Visualize ticket and original policy performance
-You can visualize performance results in a 2D scatter plot, where the x-axis represents the rewards/success rate for the first 50% of episodes, and the y-axis is the rewards/success rate for the second 50% of episodes.
-**TODO: Explain this 50% split**
+We can test how well a ticket generalizes to unseen (during ticket selection) states by evaluating a ticket on `num_episodes` different starting states, and then splitting the episode results into two, equally sized groups, and calculating average performance for each group. Tickets that effectively generalize should have similar performance in both groups.
 
+You can visualize performance results in a 2D scatter plot, where the x-axis represents the rewards/success rate for the first 50% of episodes, and the y-axis is the rewards/success rate for the second 50% of episodes.
 The more linear this plot is, the more predictably the performance of a golden ticket for this base policy on a set of environment states will generalize to unseen (during ticket selection) states.
 To help with checking for this linearity, our graph includes a best-fit line along with r^2 value.
 Also, if the results of the original policy are also in the folder (and named `original_policy`), they will be added to the plot with specialized coloring to compare tickets and original policy performance.
@@ -146,7 +146,7 @@ python generate_data.py
 ```
 
 This will use a simple task expert to generate demonstrations of the Franka picking up the cube.
-By default, the script will run until it has collected 1000 successful demos.
+By default, the script will run until it has collected 1000 successful demos (i.e., the script throws away failed demos).
 All successful demos (and other saved data) will be placed in the `outputs` folder by default.
 There will be a pickle file `demos.pkl` that contains all the demonstrations and will be used for training.
 
