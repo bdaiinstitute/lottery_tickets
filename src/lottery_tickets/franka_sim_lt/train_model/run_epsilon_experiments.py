@@ -39,7 +39,7 @@ def main():
         f"+noise_path={args.ticket_path}",
         f"evaluation.num_episodes={args.episodes}",
         "+ticket_epsilon={}",
-        "hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/{}/outputs",
+        "hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/frankasim/{}/outputs",
     ]
 
 
