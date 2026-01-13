@@ -1,14 +1,14 @@
 import argparse
 import subprocess
 import sys
-from tqdm import tqdm
+from pathlib import Path
+
 import numpy as np
+from tqdm import tqdm
 
 
 def main():
-    parser = argparse.ArgumentParser(
-        description="Run evaluation for epsilon-tickets"
-    )
+    parser = argparse.ArgumentParser(description="Run evaluation for epsilon-tickets")
     parser.add_argument(
         "--episodes",
         type=int,
@@ -24,8 +24,8 @@ def main():
     parser.add_argument(
         "--ticket-path",
         type=str,
-        default="./golden_tickets/fm_seed_1001/init_x.pt",
-        help="Path to a saved ticket to use",
+        default="./golden_tickets",
+        help="Path to a directory containing saved tickets",
     )
 
     args = parser.parse_args()
@@ -36,30 +36,34 @@ def main():
         "python",
         "evaluate.py",
         "evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt",
-        f"+noise_path={args.ticket_path}",
         f"evaluation.num_episodes={args.episodes}",
-        "+ticket_epsilon={}",
-        "hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/frankasim/{}/outputs",
+        "hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/frankasim/{}/{}/outputs",
     ]
 
+    tickets = [p for p in Path(args.ticket_path).iterdir() if p.suffix == ".pt"]
 
     for eps in tqdm(epsilons, desc="Epsilon values", unit="value", leave=True):
         # Format epsilon to avoiding scientific notation (e.g., 0.0000 instead of 0e+00)
         eps_str = f"{eps:.4f}"
 
-        tqdm.write(f"\n>>> Running trial for ticket_epsilon = {eps_str}")
-        cmd = base_command.copy()
-        cmd[-2] = cmd[-2].format(eps_str)
-        cmd[-1] = cmd[-1].format(eps_str)
+        for ticket_path in tickets:
+            tqdm.write(
+                f"\n>>> Running trial for ticket = {ticket_path.name} and ticket_epsilon = {eps_str}"
+            )
+            cmd = base_command.copy()
+            cmd[-1] = cmd[-1].format(ticket_path.name, eps_str)
+            cmd.append(f"+ticket_epsilon={eps_str}")
+            cmd.append(f"+ticket_path={ticket_path}")
 
-        try:
-            subprocess.run(cmd, check=True)
-        except subprocess.CalledProcessError as e:
-            print(f"    !! Error: Command failed with exit code {e.returncode}")
-            return
-        except KeyboardInterrupt:
-            print("\n    Script interrupted by user. Exiting...")
-            sys.exit(1)
+            try:
+                subprocess.run(cmd, check=True)
+            except subprocess.CalledProcessError as e:
+                print(f"    !! Error: Command failed with exit code {e.returncode}")
+                return
+            except KeyboardInterrupt:
+                print("\n    Script interrupted by user. Exiting...")
+                sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
