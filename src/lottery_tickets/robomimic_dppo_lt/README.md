@@ -11,10 +11,10 @@ We have scripts for:
 
 ## Setup
 
-Clone the repo and go into it.
+Clone the repo **with submodules** and go into it.
 
 ```bash
-git clone https://github.com/rai-inst/lottery_tickets.git
+git clone --recursive https://github.com/rai-inst/lottery_tickets.git
 cd lottery_tickets
 ```
 
