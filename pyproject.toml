@@ -9,7 +9,7 @@ description = "The Lottery Ticket Hypothesis for Improving Pretrained Robot Diff
 readme = "README.md"
 authors = [{ name = "Eric Rosen", email = "erosen@theaiinstitute.com" }]
 requires-python = ">=3.10"
-dependencies = ["numba>=0.63.1", "tyro>=1.0.3"]
+dependencies = ["tyro>=1.0.3"]
 
 [project.optional-dependencies]
 franka-sim = [
@@ -24,18 +24,19 @@ franka-sim = [
 dppo-robomimic = [
   "stable-baselines3 @ git+https://github.com/ajwagen/stable-baselines3-dsrl.git@10e5d311b5c42fe571ff3eeb72f622ca616a149d",
   "moviepy==2.1.2",
-  "dppo[gym,robomimic]",
+  "dppo[gym,robomimic] @ git+https://github.com/ajwagen/dppo-dsrl.git",
+  "numba>=0.54.1"
 ]
 
 smolvla-libero = [
   "egl_probe",
   "hf_egl_probe",
   "lerobot[smolvla,libero] @ git+https://github.com/huggingface/lerobot.git@56b43cc88844cab4f231cf370a6c8eb8103bc9b8",
+  "numba>=0.54.1"
 ]
 
 [tool.uv.sources]
 franka-sim = { workspace = true }
-dppo = { git = "https://github.com/ajwagen/dppo-dsrl.git" }
 
 [tool.uv.workspace]
 members = ["src/lottery_tickets/franka_sim_lt/franka_sim"]
