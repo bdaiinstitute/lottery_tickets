@@ -37,8 +37,8 @@ if BASE_DIR.as_posix() not in sys.path:
 	sys.path.append(BASE_DIR.as_posix())
 
 from env_util import build_single_env
-from policy_util import load_base_policy
 from eval_utils import evaluate_noise_single, load_noise_idx, save_eval_serial
+from policy_util import load_base_policy
 
 TASK_CONFIGS = {
 	"lift": "cfg/robomimic/dsrl_lift.yaml",
@@ -63,6 +63,7 @@ def parse_args() -> argparse.Namespace:
 	p.add_argument("--eval_idx", type=int, nargs="+", default=[0], help="List of noise indices to evaluate")
 	p.add_argument("--save_vid", action="store_true", help="Save evaluation videos")
 	p.add_argument("--ddim_steps", type=int, default=None, help="DDIM steps to override config value")
+	p.add_argument("--epsilon", type=float, default=None, help="DDIM steps to override config value")
 	return p.parse_args()
 
 def main():
@@ -156,10 +157,17 @@ def main():
 			
 			for eval_iter in range(args.n_evals_per_seed):
 				print(f"  Evaluation {eval_iter + 1}/{args.n_evals_per_seed}")
-				episode_reward, success = evaluate_noise_single(
-					env, noise_vec, save_vid, noise_idx=eval_idx, 
-					eval_num=eval_iter, rew_offset=cfg.env.reward_offset
-				)
+				if (epsilon := args.epsilon) is not None:
+          if torch.rand(()) < epsilon:
+            episode_reward, success = evaluate_noise_single(
+              env, torch.randn(noise_vec.shape), save_vid, noise_idx=eval_idx, 
+              eval_num=eval_iter, rew_offset=cfg.env.reward_offset
+            )
+          else:
+            episode_reward, success = evaluate_noise_single(
+              env, noise_vec, save_vid, noise_idx=eval_idx, 
+              eval_num=eval_iter, rew_offset=cfg.env.reward_offset
+            )
 				seed_rewards.append(float(episode_reward))
 				seed_successes.append(bool(success))
 				print(f"    Reward: {episode_reward:.4f}, Success: {success}")

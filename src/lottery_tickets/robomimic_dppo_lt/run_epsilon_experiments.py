@@ -36,21 +36,13 @@ def main():
     base_command = [
         "python",
         "opt_noise.py",
-        "--eval",
-        f"{args.ticket_path}",
-        "--eval_idx",
-        "{ticket_idx}" "--task_name",
-        "can",
-        "--n_evals_per_seed",
-        f"{args.episodes}",
-        "--n_seeds",
-        "50",
-        "--seed",
-        "1619",
-        "--ddim_steps",
-        "8" "--out",
-        "/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/robomimic/ticket_{}/{}/outputs",
-        "--epsilon",
+        f"--eval={args.ticket_path}",
+        "--task_name=can",
+        f"--n_evals_per_seed={args.episodes}",
+        "--n_seeds=50",
+        "--seed=1619",
+        "--ddim_steps=8",
+        "--out=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/robomimic/ticket_{}/{}/outputs",
     ]
 
     for eps in tqdm(epsilons, desc="Epsilon values", unit="value", leave=True):
@@ -63,8 +55,11 @@ def main():
                 f"\n>>> Running trial for ticket = {ticket_idx} and ticket_epsilon = {eps_str}"
             )
             cmd = base_command.copy()
-            cmd[-2] = cmd[-2].format(ticket_idx, eps_str)
-            cmd.append(eps_str)
+            cmd[-1] = cmd[-1].format(ticket_idx, eps_str)
+            cmd.append(f"--epsilon={eps_str}")
+            # TODO: Would it be better to pass all ticket indices at once and evaluate that way?
+            # Probably
+            cmd.append(f"--eval_idx={ticket_idx}")
 
             try:
                 subprocess.run(cmd, check=True)
