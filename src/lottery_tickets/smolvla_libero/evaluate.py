@@ -133,6 +133,7 @@ def rollout(
     """
     assert isinstance(policy, nn.Module), "Policy must be a PyTorch nn module."
     global noise
+    global epsilon
 
     # Reset the policy and environments.
     policy.reset()
@@ -173,7 +174,11 @@ def rollout(
         observation = preprocessor(observation)
         with torch.inference_mode():
             if noise != None:
-                action = policy.select_action(observation, noise=noise.clone().detach())
+                if epsilon is not None:
+                  if torch.rand(()) < epsilon:
+                    action = policy.select_action(observation, noise=None)
+                  else:
+                    action = policy.select_action(observation, noise=noise.clone().detach())
             else:
                 action = policy.select_action(observation, noise=None)
         action = postprocessor(action)
@@ -525,6 +530,7 @@ class EvalPipelineConfigNoisePath(EvalPipelineConfig):
     """
     eval_mode : EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
+    epsilon: int | None = None
 
 
 @parser.wrap()
@@ -535,7 +541,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         cfg: Evaluation pipeline configuration.
     """
     global noise
+    global epsilon
     logging.info(pformat(asdict(cfg)))
+    epsilon = cfg.epsilon
 
     # Check device is available
     device = get_safe_torch_device(cfg.policy.device, log=True)
