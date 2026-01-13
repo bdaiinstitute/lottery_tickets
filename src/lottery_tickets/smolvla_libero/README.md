@@ -40,7 +40,7 @@ pip install -e .[smolvla-libero]
 ```
 
 ## 🐛 Debugging SmolVLA + LIBERO setup
-When installing the `smolvla-libero` depedencies, if you run into an isuse wih building `hf-egl-probe` and `egl-probe`, you may need to do:
+When installing the `smolvla-libero` dependencies, if you run into an issue with building `hf-egl-probe` and `egl-probe`, you may need to do:
 
 ```bash
 uv pip install egl_probe --no-build-isolation
