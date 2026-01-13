@@ -18,10 +18,10 @@ git clone https://github.com/rai-inst/lottery_tickets.git
 cd lottery_tickets
 ```
 
-From the repo root, create a virtual environment with `uv`, and install the `robomimic-dppo` dependencies:
+From the repo root, create a virtual environment with `uv`, and install the `dppo-robomimic` dependencies:
 
 ```bash
-uv sync --extra robomimic-dppo
+uv sync --extra dppo-robomimic
 source .venv/bin/activate
 ```
 
