@@ -56,7 +56,7 @@ def main():
             cmd = base_command.copy()
             cmd[-1] = cmd[-1].format(ticket_path.parent.name, eps_str)
             cmd.append(f"+ticket_epsilon={eps_str}")
-            cmd.append(f"+ticket_path={ticket_path}")
+            cmd.append(f"+noise_path={ticket_path}")
 
             try:
                 subprocess.run(cmd, check=True)
