@@ -9,7 +9,10 @@ description = "The Lottery Ticket Hypothesis for Improving Pretrained Robot Diff
 readme = "README.md"
 authors = [{ name = "Eric Rosen", email = "erosen@theaiinstitute.com" }]
 requires-python = ">=3.10"
-dependencies = ["tyro>=1.0.3"]
+dependencies = [
+    "tqdm>=4.66.5",
+    "tyro>=1.0.3",
+]
 
 [project.optional-dependencies]
 franka-sim = [
