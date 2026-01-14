@@ -37,7 +37,7 @@ def main():
 
     args = parser.parse_args()
     num_epsilons = int(1.0 / args.step_size) + 1
-    num_tickets = np.load(Path(args.ticket_path) / "noise_samples.npy").shape[0]
+    num_tickets = min(np.load(Path(args.ticket_path) / "noise_samples.npy").shape[0], 10)
     epsilons = np.linspace(0, 1, num_epsilons)
 
     base_command = [
@@ -46,7 +46,7 @@ def main():
         f"--eval={args.ticket_path}",
         f"--task_name={args.task_name}",
         f"--n_evals_per_seed={args.episodes}",
-        "--n_seeds=50",
+        "--n_seeds=10",
         "--seed=1619",
         "--ddim_steps=8",
         f"--out=/project/wthomason/lottery/epsilon/robomimic/{args.task_name}/ticket_{{}}/{{}}/outputs",
