@@ -42,7 +42,7 @@ def main():
         f"--eval.n_episodes={args.episodes}",
         "--eval_mode=LOAD_TICKET",
         "--seed=100000",
-        "--output_dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/smolvla-libero/{}/{}/outputs",
+        "--output_dir=/project/wthomason/lottery/epsilon/smolvla-libero/libero_spatial/{}/{}/outputs",
     ]
 
     tickets = [p for p in Path(args.ticket_path).iterdir() if p.suffix == ".pt"]

@@ -27,6 +27,13 @@ def main():
         default="./envs100_samples5000_seed999_ddim8_20251130_221846_ddim8",
         help="Path to a directory containing saved tickets",
     )
+    parser.add_argument(
+        "--task-name",
+        type=str,
+        default="can",
+        help="Task to evaluate",
+    )
+
 
     args = parser.parse_args()
     num_epsilons = int(1.0 / args.step_size) + 1
@@ -37,12 +44,12 @@ def main():
         "python",
         "opt_noise.py",
         f"--eval={args.ticket_path}",
-        "--task_name=can",
+        f"--task_name={args.task_name}",
         f"--n_evals_per_seed={args.episodes}",
         "--n_seeds=50",
         "--seed=1619",
         "--ddim_steps=8",
-        "--out=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/robomimic/ticket_{}/{}/outputs",
+        f"--out=/project/wthomason/lottery/epsilon/robomimic/{args.task_name}/ticket_{{}}/{{}}/outputs",
     ]
 
     for eps in tqdm(epsilons, desc="Epsilon values", unit="value", leave=True):
@@ -58,7 +65,7 @@ def main():
             cmd[-1] = cmd[-1].format(ticket_idx, eps_str)
             cmd.append(f"--epsilon={eps_str}")
             # TODO: Would it be better to pass all ticket indices at once and evaluate that way?
-            # Probably
+            # Probably, but it complicates the output directory structure
             cmd.append(f"--eval_idx={ticket_idx}")
 
             try:

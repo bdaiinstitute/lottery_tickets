@@ -43,7 +43,7 @@ def main():
         "evaluate.py",
         f"evaluation.model_path=checkpoints/{args.checkpoint}/checkpoints/fm_policy_final.pt",
         f"evaluation.num_episodes={args.episodes}",
-        f"hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/frankasim/{args.checkpoint}/{{}}/{{}}/outputs",
+        f"hydra.run.dir=/project/wthomason/lottery/epsilon/frankasim/{args.checkpoint}/{{}}/{{}}/outputs",
     ]
 
     for eps in tqdm(epsilons, desc="Epsilon values", unit="value", leave=True):
