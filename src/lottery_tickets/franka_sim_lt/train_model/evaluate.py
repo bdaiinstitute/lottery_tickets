@@ -61,8 +61,14 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
         print("Evaluating new lottery ticket with new noise initialization.")
         init_x = torch.randn((1, init_x_size), device=cfg.device)
     elif cfg.get("noise_path", False):
-        init_x = torch.load(cfg.noise_path)
-        print(f"Evaluating {cfg.noise_path}.")
+        loaded_noise = torch.load(cfg.noise_path)
+        num_tickets_to_use = cfg.get("num_tickets", None)
+        if num_tickets_to_use is not None:
+            init_x = loaded_noise[:num_tickets_to_use]
+        else:
+            init_x = loaded_noise
+
+        print(f"Evaluating with {init_x.shape} lottery tickets from {cfg.noise_path}.")
     elif cfg.get("original_policy", False):
         init_x = None
         print("Evaluating original policy without lottery ticket.")
@@ -83,13 +89,20 @@ def evaluate_flow_matching_policy(cfg: DictConfig) -> None:
         frames = []
 
         while not done:
+            # Select init_x for this step
+            current_init_x = init_x
+            if init_x is not None and init_x.ndim >= 2  and init_x.shape[0] > 1:
+                # Randomly sample one ticket from the array
+                ticket_idx = int(torch.randint(0, init_x.shape[0], (1,)).item())
+                current_init_x = init_x[ticket_idx]
+            
             if (ticket_epsilon := cfg.get("ticket_epsilon", None)) is not None:
-                if torch.rand(()).item() < ticket_epsilon:
+                if torch.rand(()) < ticket_epsilon:
                     action = policy(obs)
                 else:
-                    action = policy(obs, init_x=init_x)
+                    action = policy(obs, init_x=current_init_x)
             else:
-                action = policy(obs, init_x=init_x)
+                action = policy(obs, init_x=current_init_x)
 
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
