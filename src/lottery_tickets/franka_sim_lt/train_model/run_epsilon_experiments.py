@@ -27,6 +27,12 @@ def main():
         default="./golden_tickets",
         help="Path to a directory containing saved tickets",
     )
+    parser.add_argument(
+        "--checkpoint",
+        type=str,
+        default="fm_seed_1001",
+        help="Name of a saved checkpoint to evaluate",
+    )
 
     args = parser.parse_args()
     num_epsilons = int(1.0 / args.step_size) + 1
@@ -35,23 +41,20 @@ def main():
     base_command = [
         "python",
         "evaluate.py",
-        "evaluation.model_path=checkpoints/fm_seed_1001/checkpoints/fm_policy_final.pt",
+        f"evaluation.model_path=checkpoints/{args.checkpoint}/checkpoints/fm_policy_final.pt",
         f"evaluation.num_episodes={args.episodes}",
-        "hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/frankasim/{}/{}/outputs",
+        f"hydra.run.dir=/lam-248-lambdafs/teams/proj-compose/wthomason/lottery/epsilon/frankasim/{args.checkpoint}/{{}}/{{}}/outputs",
     ]
-
-    tickets = [p for p in Path(args.ticket_path).iterdir() if p.suffix == ".pt"]
 
     for eps in tqdm(epsilons, desc="Epsilon values", unit="value", leave=True):
         # Format epsilon to avoiding scientific notation (e.g., 0.0000 instead of 0e+00)
         eps_str = f"{eps:.4f}"
-
-        for ticket_path in tickets:
+        for ticket_path in (Path(args.ticket_path) / args.checkpoint).glob("**/init_x.pt"):
             tqdm.write(
-                f"\n>>> Running trial for ticket = {ticket_path.name} and ticket_epsilon = {eps_str}"
+                f"\n>>> Running trial for ticket = {ticket_path.parent.name} and ticket_epsilon = {eps_str}"
             )
             cmd = base_command.copy()
-            cmd[-1] = cmd[-1].format(ticket_path.name, eps_str)
+            cmd[-1] = cmd[-1].format(ticket_path.parent.name, eps_str)
             cmd.append(f"+ticket_epsilon={eps_str}")
             cmd.append(f"+ticket_path={ticket_path}")
 
