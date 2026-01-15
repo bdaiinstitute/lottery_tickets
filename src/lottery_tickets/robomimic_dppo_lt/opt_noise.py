@@ -158,7 +158,7 @@ def main():
 			for eval_iter in range(args.n_evals_per_seed):
 				print(f"  Evaluation {eval_iter + 1}/{args.n_evals_per_seed}")
 				if (epsilon := args.epsilon) is not None:
-					if torch.rand(()) < epsilon:
+					if torch.rand(()).item() < epsilon:
 						episode_reward, success = evaluate_noise_single(
 							env, torch.randn(noise_vec.shape), save_vid, noise_idx=eval_idx, 
 							eval_num=eval_iter, rew_offset=cfg.env.reward_offset

@@ -175,7 +175,7 @@ def rollout(
         with torch.inference_mode():
             if noise != None:
                 if epsilon is not None:
-                  if torch.rand(()) < epsilon:
+                  if torch.rand(()).item() < epsilon:
                     action = policy.select_action(observation, noise=None)
                   else:
                     action = policy.select_action(observation, noise=noise.clone().detach())
