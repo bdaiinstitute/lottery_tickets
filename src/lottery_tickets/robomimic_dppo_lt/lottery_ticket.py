@@ -54,6 +54,7 @@ def parse_args() -> argparse.Namespace:
 	p.add_argument("--ddim_steps", type=int, default=None, help="DDIM steps to override config value")
 	p.add_argument("--no_wandb", action="store_true", help="Disable wandb logging")
 	p.add_argument("--save_vid", action="store_true", help="Save evaluation videos")
+	p.add_argument("--epsilon", type=float, default=None, help="Use epsilon-ticket search")
 	return p.parse_args()
 
 def _resolve_out(out_path: str, task_name: str, n_envs: int, noise_samples: int, seed: int, ddim_steps: int, exp_name: str = "") -> str:
@@ -162,7 +163,8 @@ def save_results(out_dir, all_noise, all_rewards, all_success, all_success_rates
 
 	return success_rates_sorted
 
-def evaluate_noise(env, noise_vec, n_envs, save_vid=False, noise_idx=0, rew_offset=0.0, expected_initial_obs=None):
+def evaluate_noise(env, noise_vec, n_envs, rng: np.random.Generator, save_vid=False, noise_idx=0, rew_offset=0.0,
+                   expected_initial_obs=None, epsilon: float|None=None):
 	"""Evaluate a single noise vector across parallel envs.
 
 	Performs reward & success accounting:
@@ -179,6 +181,7 @@ def evaluate_noise(env, noise_vec, n_envs, save_vid=False, noise_idx=0, rew_offs
 		noise_idx: Index of the noise sample 
 		rew_offset: Reward offset for success determination
 		expected_initial_obs: If provided, asserts initial obs matches this
+    epsilon: If provided, uses the base policy epsilon % of the time
 
 	Returns:
 		per_env_reward: List of episode rewards per env
@@ -211,7 +214,11 @@ def evaluate_noise(env, noise_vec, n_envs, save_vid=False, noise_idx=0, rew_offs
 
 	steps = 0
 	while not all(finished):
-		_, r, d, info = env.step(actions)
+		if epsilon is not None and rng.random() < epsilon:
+			_, r, d, info = env.step(rng.standard_normal(actions.shape, dtype=actions.dtype))
+		else:
+			_, r, d, info = env.step(actions)
+
 		steps += 1
 
 		r_np = np.array(r, dtype=np.float32)
@@ -270,7 +277,7 @@ def main():
 	if not args.no_wandb:
 		run_name = args.task_name + "_" + os.path.basename(args.out)
 		wandb.init(
-			project="lottery_ticket_rm",
+			project="epsilon_lottery_ticket_rm",
 			name=run_name,
 			config={
 				"task_name": args.task_name,
@@ -280,8 +287,9 @@ def main():
 				"ddim_steps": cfg.model.ddim_steps,
 				"exp_name": args.exp_name,
 				"output_dir": args.out,
+        "epsilon": args.epsilon
 			},
-			tags=[args.task_name, "lottery_ticket"],
+			tags=[args.task_name, "epsilon_lottery_ticket"],
 		)
 	
 	if not hasattr(cfg, "device") or cfg.device is None:
@@ -334,8 +342,8 @@ def main():
 		# ideally should not be clipped, but kept for backcompatibility
 		# noise_vec = np.clip(noise_vec, env.action_space.low, env.action_space.high)
 		per_env_reward, per_env_success, per_env_length = evaluate_noise(
-			env, noise_vec, args.n_envs, save_vid, noise_idx, rew_offset=cfg.env.reward_offset,
-			expected_initial_obs=initial_obs
+			env, noise_vec, args.n_envs, save_vid, noise_idx, rng, rew_offset=cfg.env.reward_offset,
+			expected_initial_obs=initial_obs, epsilon=args.epsilon,
 		)
 		
 		all_noise.append(noise_vec)

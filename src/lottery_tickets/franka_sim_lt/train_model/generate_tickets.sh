@@ -23,6 +23,9 @@ for arg in "$@"; do
         --new_noise=*)
             NEW_NOISE="${arg#*=}"
             ;;
+        --epsilon=*)
+            EPSILON="${arg#*=}"
+            ;;
         *)
             echo "Unknown argument: $arg"
             exit 1
@@ -34,11 +37,13 @@ done
 : "${MODEL_PATH:?Missing --model_path}"
 : "${OUTPUT_BASE_DIR:?Missing --output_dir}"
 : "${NUM_EPISODES:?Missing --num_episodes}"
+: "${EPSILON:?None}"
 
 for ((i=1; i<=N; i++)); do
     python evaluate.py \
         evaluation.model_path="$MODEL_PATH" \
         +new_noise="$NEW_NOISE" \
         evaluation.num_episodes="$NUM_EPISODES" \
-        hydra.run.dir="$OUTPUT_BASE_DIR/$i"
+        hydra.run.dir="$OUTPUT_BASE_DIR/$i" \
+        +ticket_epsilon="$EPSILON"
 done
