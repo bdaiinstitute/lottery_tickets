@@ -25,12 +25,14 @@ def load_ticket_results(task_name: str, results_path: Path) -> TicketResult | No
     rewards = []
     successes = []
     for epsilon_dir in sorted(results_path.iterdir()):
-        epsilon_results_prefix = list((epsilon_dir / "outputs" / task_name).glob(
-            "envs**/eval_**/noise_idx_*/"
-        ))
+        epsilon_results_prefix = list(
+            (epsilon_dir / "outputs" / task_name).glob("envs*/eval_*/noise_idx_*/")
+        )
         if len(epsilon_results_prefix) < 1:
-          print(f"Warning! {epsilon_dir} doesn't contain the expected results files; skipping!")
-          continue
+            print(
+                f"Warning! {epsilon_dir} doesn't contain the expected results files; skipping!"
+            )
+            continue
 
         assert len(epsilon_results_prefix) == 1
         rewards_path = epsilon_results_prefix[0] / "reward_matrix.npy"
@@ -61,7 +63,7 @@ def load_ticket_results(task_name: str, results_path: Path) -> TicketResult | No
 def plot_ticket_success(axes: Axes, results: TicketResult) -> None:
     axes.scatter(
         results.epsilons,
-        100 * results.successes.mean(axis=1),
+        100 * results.successes.mean(axis=(1, 2)),
         label=results.ticket,
     )
 
@@ -71,8 +73,8 @@ def plot_ticket_rewards(axes: Axes, results: TicketResult) -> None:
     # ticket to the given axes
     axes.errorbar(
         results.epsilons,
-        results.rewards.mean(axis=1),
-        yerr=results.rewards.std(axis=1),
+        results.rewards.mean(axis=(1, 2)),
+        yerr=results.rewards.std(axis=(1, 2)),
         label=results.ticket,
     )
 
