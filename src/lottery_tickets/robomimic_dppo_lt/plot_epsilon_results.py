@@ -25,22 +25,22 @@ def load_ticket_results(results_path: Path) -> TicketResult | None:
     rewards = []
     successes = []
     for epsilon_dir in sorted(results_path.iterdir()):
-        epsilons.append(float(epsilon_dir.name))
         rewards_path = epsilon_dir / "outputs/rewards.npy"
-        if not rewards_path.exists():
-            raise RuntimeError(
-                f"{results_path} was given as a results path but doesn't have the expected results files!"
+        successes_path = epsilon_dir / "outputs/success_rates.npy"
+        if not rewards_path.exists() or not successes_path.exists():
+            print(
+                f"Warning! {epsilon_dir} doesn't contain the expected results files; skipping!"
             )
+            continue
 
         rewards.append(np.load(rewards_path))
-
-        successes_path = epsilon_dir / "outputs/success_rates.npy"
-        if not successes_path.exists():
-            raise RuntimeError(
-                f"{results_path} was given as a results path but doesn't have the expected results files!"
-            )
-
+        epsilons.append(float(epsilon_dir.name))
         successes.append(np.load(successes_path))
+
+    if not epsilons:
+        raise RuntimeError(
+            f"{results_path} was given as a results path but contained no results files!"
+        )
 
     return TicketResult(
         ticket=ticket_name,
