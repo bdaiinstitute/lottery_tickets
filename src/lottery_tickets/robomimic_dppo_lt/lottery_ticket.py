@@ -342,7 +342,7 @@ def main():
 		# ideally should not be clipped, but kept for backcompatibility
 		# noise_vec = np.clip(noise_vec, env.action_space.low, env.action_space.high)
 		per_env_reward, per_env_success, per_env_length = evaluate_noise(
-			env, noise_vec, args.n_envs, save_vid, noise_idx, rng, rew_offset=cfg.env.reward_offset,
+			env, noise_vec, args.n_envs, rng, save_vid, noise_idx, rew_offset=cfg.env.reward_offset,
 			expected_initial_obs=initial_obs, epsilon=args.epsilon,
 		)
 		
