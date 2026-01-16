@@ -25,13 +25,7 @@ The codebase supports the following:
 5. [Generate data and train your own base policy](#generating-data-and-training-your-own-base-policy)
 
 ## Evaluating pretrained flow matching policy
-First, go into the `train_model` folder and download a checkpoint.
-**(TODO: Make this accessible to public)**
-
-```bash
-cd train_model
-gsutil -m cp -r  "gs://bdai-common-storage/lottery_tickets/checkpoints" .
-```
+We supply 4 pretrained policy checkpoints located in `lottery_tickets/src/lottery_tickets/franka_sim_lt/train_model/checkpoints`. Their performance varies, with `fm_seed_1001` being the worst.
 
 You can evaluate that checkpoint by running `evaluate.py` and setting `evaluation.model_path` to your chosen checkpoint.
 You can set `num_episodes` to determine how many block poses the policy is evaluated on.
@@ -83,13 +77,9 @@ This will create a directory containing a subdirectory for the results of each t
 
 ## Evaluating an existing `franka-sim` lottery ticket
 You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via the `noise_path` parameter.
-For example, you can download a golden ticket for the `fm_seed_1001` checkpoint (and others):
+For example, we have golden tickets for all 4 pretrained models located in `lottery_tickets/src/lottery_tickets/franka_sim_lt/train_model/golden_tickets`.
 
-```bash
-gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/golden_tickets" .
-```
-
-Now you can evaluate the golden tickets, for example:
+You can evaluate the golden tickets, for example:
 
 ```bash
 python evaluate.py \
