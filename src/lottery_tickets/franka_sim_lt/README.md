@@ -140,13 +140,6 @@ By default, the script will run until it has collected 1000 successful demos (i.
 All successful demos (and other saved data) will be placed in the `outputs` folder by default.
 There will be a pickle file `demos.pkl` that contains all the demonstrations and will be used for training.
 
-You can also download the data we used to train our checkpoints if you'd prefer not to generate your own data:
-
-(**TODO: Make accessible to public**)
-```bash
-gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/data" .
-```
-
 Now we can train a policy by using the `train.py` script inside `train_model`, and passing the path to `demo.pkl` via the `dataset.data_path` parameter.
 For example:
 
@@ -161,16 +154,7 @@ You can [evaluate your newly trained checkpoint](#evaluating-pretrained-flow-mat
 
 ## Generate demos using state-based planner
 
-`mg_frankasim.py` works for all variants of the SQUIRL FrankaSim env, such as `PandaPickCube-v0` and `PandaPickCubeVision-v0`.
-
-**TODO: Link SQUIRL**
+`mg_frankasim.py` works for all variants of the FrankaSim env, such as `PandaPickCube-v0` and `PandaPickCubeVision-v0`.
 
 It's configured using hydra; see the `cfgs` directory for examples.
 Demos get saved into hydra output directories.
-
-## Datasets:
-
-- demos_1k_PandaPickCube-v0.pkl, action_mag=\[0.004, 0.004\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_PandaPickCube-v0.pkl`
-- demos_1k_PandaPickCubeRealisticControl-v0.pkl, action_mag=\[0.004, 0.004\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_PandaPickCubeRealisticControl-v0.pkl`
-- demos_1k_PandaPickCube-v0.pkl, action_mag=\[0.002, 0.008\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_am_PandaPickCube-v0.pkl`
-- demos_1k_PandaPickCubeRealisticControl-v0.pkl, action_mag=\[0.002, 0.008\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_am_PandaPickCubeRealisticControl-v0.pkl`
