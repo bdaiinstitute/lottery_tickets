@@ -16,7 +16,7 @@ class TicketResult:
     successes: NDArray
 
 
-def load_ticket_results(results_path: Path) -> TicketResult | None:
+def load_ticket_results(task_name: str, results_path: Path) -> TicketResult | None:
     if not results_path.is_dir():
         return None
 
@@ -25,8 +25,16 @@ def load_ticket_results(results_path: Path) -> TicketResult | None:
     rewards = []
     successes = []
     for epsilon_dir in sorted(results_path.iterdir()):
-        rewards_path = epsilon_dir / "outputs/rewards.npy"
-        successes_path = epsilon_dir / "outputs/success_rates.npy"
+        epsilon_results_prefix = list((epsilon_dir / "outputs" / task_name).glob(
+            "envs**/eval_**/noise_idx_*/"
+        ))
+        if len(epsilon_results_prefix) < 1:
+          print(f"Warning! {epsilon_dir} doesn't contain the expected results files; skipping!")
+          continue
+
+        assert len(epsilon_results_prefix) == 1
+        rewards_path = epsilon_results_prefix[0] / "reward_matrix.npy"
+        successes_path = epsilon_results_prefix[0] / "success_matrix.npy"
         if not rewards_path.exists() or not successes_path.exists():
             print(
                 f"Warning! {epsilon_dir} doesn't contain the expected results files; skipping!"
@@ -69,20 +77,20 @@ def plot_ticket_rewards(axes: Axes, results: TicketResult) -> None:
     )
 
 
-def main(results_root: Path, output_dir: Path) -> None:
+def main(task_name: str, results_root: Path, output_dir: Path) -> None:
     success_plot, success_axes = plt.subplots(tight_layout=True)
-    success_axes.title.set_text("Success Rate vs. Epsilon")
+    success_axes.title.set_text(f"{task_name}: Success Rate vs. Epsilon")
     success_axes.set_xlabel("Epsilon")
     success_axes.set_ylabel("Success Percentage")
     success_axes.grid(True)
 
     reward_plot, reward_axes = plt.subplots(tight_layout=True)
-    reward_axes.title.set_text("Reward vs. Epsilon")
+    reward_axes.title.set_text(f"{task_name}: Reward vs. Epsilon")
     reward_axes.set_xlabel("Epsilon")
     reward_axes.set_ylabel("Average Reward")
 
-    for ticket_dir in results_root.iterdir():
-        if (ticket_result := load_ticket_results(ticket_dir)) is not None:
+    for ticket_dir in (results_root / task_name).iterdir():
+        if (ticket_result := load_ticket_results(task_name, ticket_dir)) is not None:
             plot_ticket_success(success_axes, ticket_result)
             plot_ticket_rewards(reward_axes, ticket_result)
 
