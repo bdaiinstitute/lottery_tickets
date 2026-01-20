@@ -530,7 +530,7 @@ class EvalPipelineConfigNoisePath(EvalPipelineConfig):
     """
     eval_mode : EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
-    epsilon: int | None = None
+    epsilon: float | None = None
 
 
 @parser.wrap()
