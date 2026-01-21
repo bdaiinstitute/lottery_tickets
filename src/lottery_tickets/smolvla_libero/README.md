@@ -75,7 +75,7 @@ python evaluate.py \
 Set `eval_mode=LOAD_TICKET` and load a ticket by passing `initial_noise.pt` into `noise_path`.
 You can change the `--seed` argument to rollout on different environment seeds.
 
-We provide golden tickets for the different task suites in `/lam-248-lambdafs/teams/proj-maple/erosen/lottery_tickets/src/lottery_tickets/smolvla_libero/golden_tickets`. Each folder contains folders that contain `initial_noise.pt` you can try.
+We provide golden tickets for the different task suites in `lottery_tickets/src/lottery_tickets/smolvla_libero/golden_tickets`. Each folder contains folders that contain `initial_noise.pt` you can try.
 
 ```bash
 python evaluate.py \
