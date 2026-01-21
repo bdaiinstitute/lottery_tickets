@@ -1,25 +1,18 @@
 #!/usr/bin/env python
 
 # Copyright (c) 2025 Robotics and AI Institute LLC dba RAI Institute. All rights reserved.
+"""
+Lottery ticket search with the batched dim as the task instance axis.
+--------------------------------------------------------------------
+Some notes
+- batch_size is basically n_envs, so set it to a value you think will maximize GPU usage without OOMing.
+- n_episodes is the total number of episodes to eval including those in the batch_size.
+- This code sets a unique seed for every batch_dim at every env reset.
+- For policy eval, set the n_episodes to the totola number of episodes to be evaluated on, with a reasonable batch size.
+    - Seeding is handled by eval_policy as every batch is incremented with the batch_idx*batch_size seeds, making them unique 
+    - For lottery ticket search always set n_episodes=batch_size so that every env in the batch gets evaluated once.
 
-"""Evaluate smolvla baseline, new tickets, or saved tickets on libero environments.
-
-This is a modified version of lerobot_eval.py to support fixed initial noise vectors for the entire eval.
-
-For our experiments, we use LeRobot's finetuned version of SmolVLA for LIBERO: "HuggingFaceVLA/smolvla_libero" 
-
-There are 5 libero environments you can use as your env.task:
-- libero_object
-- libero_spatial
-- libero_goal
-- libero_90
-- libero_10
-
-Usage examples:
-
-Generate a new noise vector (it will be sampled from standard normal), and run eval on it. The noise vector will be saved to output_dir/A_UNIQUE_ID/initial_noise.pt for future use, along with videos and results.
-
-python evaluate.py \
+python lt_search_instance_batch.py \
         --policy.path="HuggingFaceVLA/smolvla_libero" \
         --env.type=libero \
         --env.task=libero_spatial \
@@ -27,7 +20,6 @@ python evaluate.py \
         --eval.n_episodes=5 \
         --output_dir=10000_libero_object_tickets \
         --noise_path="new"
-
 """
 
 import concurrent.futures as cf
@@ -219,9 +211,13 @@ def rollout(
 
         step += 1
         running_success_rate = (
-            einops.reduce(torch.stack(all_successes, dim=1), "b n -> b", "any").numpy().mean()
+            einops.reduce(torch.stack(all_successes, dim=1), "b n -> b", "any")
+            .numpy()
+            .mean()
         )
-        progbar.set_postfix({"running_success_rate": f"{running_success_rate.item() * 100:.1f}%"})
+        progbar.set_postfix(
+            {"running_success_rate": f"{running_success_rate.item() * 100:.1f}%"}
+        )
         progbar.update()
 
     # Track the final observation.
@@ -239,7 +235,9 @@ def rollout(
     if return_observations:
         stacked_observations = {}
         for key in all_observations[0]:
-            stacked_observations[key] = torch.stack([obs[key] for obs in all_observations], dim=1)
+            stacked_observations[key] = torch.stack(
+                [obs[key] for obs in all_observations], dim=1
+            )
         ret[OBS_STR] = stacked_observations
 
     if hasattr(policy, "use_original_modules"):
@@ -311,7 +309,9 @@ def eval_policy(
             return
         n_to_render_now = min(max_episodes_rendered - n_episodes_rendered, env.num_envs)
         if isinstance(env, gym.vector.SyncVectorEnv):
-            ep_frames.append(np.stack([env.envs[i].render() for i in range(n_to_render_now)]))  # noqa: B023
+            ep_frames.append(
+                np.stack([env.envs[i].render() for i in range(n_to_render_now)])
+            )  # noqa: B023
         elif isinstance(env, gym.vector.AsyncVectorEnv):
             # Here we must render all frames and discard any we don't need.
             ep_frames.append(np.stack(env.call("render")[:n_to_render_now]))
@@ -323,7 +323,9 @@ def eval_policy(
         episode_data: dict | None = None
 
     # we dont want progress bar when we use slurm, since it clutters the logs
-    progbar = trange(n_batches, desc="Stepping through eval batches", disable=inside_slurm())
+    progbar = trange(
+        n_batches, desc="Stepping through eval batches", disable=inside_slurm()
+    )
     for batch_ix in progbar:
         # Cache frames for rendering videos. Each item will be (b, h, w, c), and the list indexes the rollout
         # step.
@@ -334,7 +336,8 @@ def eval_policy(
             seeds = None
         else:
             seeds = range(
-                start_seed + (batch_ix * env.num_envs), start_seed + ((batch_ix + 1) * env.num_envs)
+                start_seed + (batch_ix * env.num_envs),
+                start_seed + ((batch_ix + 1) * env.num_envs),
             )
         rollout_data = rollout(
             env=env,
@@ -356,13 +359,22 @@ def eval_policy(
 
         # Make a mask with shape (batch, n_steps) to mask out rollout data after the first done
         # (batch-element-wise). Note the `done_indices + 1` to make sure to keep the data from the done step.
-        mask = (torch.arange(n_steps) <= einops.repeat(done_indices + 1, "b -> b s", s=n_steps)).int()
+        mask = (
+            torch.arange(n_steps)
+            <= einops.repeat(done_indices + 1, "b -> b s", s=n_steps)
+        ).int()
         # Extend metrics.
-        batch_sum_rewards = einops.reduce((rollout_data["reward"] * mask), "b n -> b", "sum")
+        batch_sum_rewards = einops.reduce(
+            (rollout_data["reward"] * mask), "b n -> b", "sum"
+        )
         sum_rewards.extend(batch_sum_rewards.tolist())
-        batch_max_rewards = einops.reduce((rollout_data["reward"] * mask), "b n -> b", "max")
+        batch_max_rewards = einops.reduce(
+            (rollout_data["reward"] * mask), "b n -> b", "max"
+        )
         max_rewards.extend(batch_max_rewards.tolist())
-        batch_successes = einops.reduce((rollout_data["success"] * mask), "b n -> b", "any")
+        batch_successes = einops.reduce(
+            (rollout_data["success"] * mask), "b n -> b", "any"
+        )
         all_successes.extend(batch_successes.tolist())
         if seeds:
             all_seeds.extend(seeds)
@@ -375,17 +387,27 @@ def eval_policy(
                 rollout_data,
                 done_indices,
                 start_episode_index=batch_ix * env.num_envs,
-                start_data_index=(0 if episode_data is None else (episode_data["index"][-1].item() + 1)),
+                start_data_index=(
+                    0
+                    if episode_data is None
+                    else (episode_data["index"][-1].item() + 1)
+                ),
                 fps=env.unwrapped.metadata["render_fps"],
             )
             if episode_data is None:
                 episode_data = this_episode_data
             else:
                 # Some sanity checks to make sure we are correctly compiling the data.
-                assert episode_data["episode_index"][-1] + 1 == this_episode_data["episode_index"][0]
+                assert (
+                    episode_data["episode_index"][-1] + 1
+                    == this_episode_data["episode_index"][0]
+                )
                 assert episode_data["index"][-1] + 1 == this_episode_data["index"][0]
                 # Concatenate the episode data.
-                episode_data = {k: torch.cat([episode_data[k], this_episode_data[k]]) for k in episode_data}
+                episode_data = {
+                    k: torch.cat([episode_data[k], this_episode_data[k]])
+                    for k in episode_data
+                }
 
         # Maybe render video for visualization.
         if max_episodes_rendered > 0 and len(ep_frames) > 0:
@@ -403,7 +425,9 @@ def eval_policy(
                     target=write_video,
                     args=(
                         str(video_path),
-                        stacked_frames[: done_index + 1],  # + 1 to capture the last observation
+                        stacked_frames[
+                            : done_index + 1
+                        ],  # + 1 to capture the last observation
                         env.unwrapped.metadata["render_fps"],
                     ),
                 )
@@ -412,7 +436,9 @@ def eval_policy(
                 n_episodes_rendered += 1
 
         progbar.set_postfix(
-            {"running_success_rate": f"{np.mean(all_successes[:n_episodes]).item() * 100:.1f}%"}
+            {
+                "running_success_rate": f"{np.mean(all_successes[:n_episodes]).item() * 100:.1f}%"
+            }
         )
 
     # Wait till all video rendering threads are done.
@@ -458,7 +484,11 @@ def eval_policy(
 
 
 def _compile_episode_data(
-    rollout_data: dict, done_indices: Tensor, start_episode_index: int, start_data_index: int, fps: float
+    rollout_data: dict,
+    done_indices: Tensor,
+    start_episode_index: int,
+    start_data_index: int,
+    fps: float,
 ) -> dict:
     """Convenience function for `eval_policy(return_episode_data=True)`
 
@@ -485,7 +515,9 @@ def _compile_episode_data(
         # Here we do `num_frames - 1` as we don't want to include the last observation frame just yet.
         ep_dict = {
             ACTION: rollout_data[ACTION][ep_ix, : num_frames - 1],
-            "episode_index": torch.tensor([start_episode_index + ep_ix] * (num_frames - 1)),
+            "episode_index": torch.tensor(
+                [start_episode_index + ep_ix] * (num_frames - 1)
+            ),
             "frame_index": torch.arange(0, num_frames - 1, 1),
             "timestamp": torch.arange(0, num_frames - 1, 1) / fps,
             DONE: rollout_data["done"][ep_ix, : num_frames - 1],
@@ -506,31 +538,35 @@ def _compile_episode_data(
     for key in ep_dicts[0]:
         data_dict[key] = torch.cat([x[key] for x in ep_dicts])
 
-    data_dict["index"] = torch.arange(start_data_index, start_data_index + total_frames, 1)
+    data_dict["index"] = torch.arange(
+        start_data_index, start_data_index + total_frames, 1
+    )
 
     return data_dict
 
 
 class EvalMode(Enum):
     """Evaluation mode for the policy."""
+
     NEW_TICKET = "NEW_TICKET"
     LOAD_TICKET = "LOAD_TICKET"
     ORIGINAL_POLICY = "ORIGINAL_POLICY"
 
 
-@dataclass 
+@dataclass
 class EvalPipelineConfigNoisePath(EvalPipelineConfig):
     """
     Eval pipeline config with noise path for loading saved tickets.
     """
-    eval_mode : EvalMode = EvalMode.NEW_TICKET
+
+    eval_mode: EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
 
 
 @parser.wrap()
 def eval_main(cfg: EvalPipelineConfigNoisePath):
     """Main evaluation pipeline for smolvla libero with lottery tickets.
-    
+
     Args:
         cfg: Evaluation pipeline configuration.
     """
@@ -545,7 +581,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     set_seed(cfg.seed)
 
     logging.info("Making environment.")
-    envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=cfg.eval.use_async_envs)
+    envs = make_env(
+        cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=cfg.eval.use_async_envs
+    )
 
     logging.info("Making policy.")
 
@@ -558,9 +596,13 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     policy.eval()
     # Use the config seed for reproducible noise generation
     noise_rng = np.random.default_rng(seed=cfg.seed)
-    actions_shape = (cfg.eval.batch_size, policy.config.chunk_size, policy.config.max_action_dim)
+    actions_shape = (
+        cfg.eval.batch_size,
+        policy.config.chunk_size,
+        policy.config.max_action_dim,
+    )
 
-    if cfg.eval_mode is EvalMode.ORIGINAL_POLICY: 
+    if cfg.eval_mode is EvalMode.ORIGINAL_POLICY:
         # Run base policy (i.e: sampling gaussian noise as usual)
         noise = None
         print("Running base policy (i.e: sampling gaussian noise as usual!")
@@ -576,7 +618,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         print(f"Loaded noise from path: {cfg.noise_path}!")
         output_dir = cfg.output_dir
     else:
-        raise RuntimeError("eval_mode must be one of NEW_TICKET, LOAD_TICKET, or ORIGINAL_POLICY")
+        raise RuntimeError(
+            "eval_mode must be one of NEW_TICKET, LOAD_TICKET, or ORIGINAL_POLICY"
+        )
 
     logging.info(colored("Output dir:", "yellow", attrs=["bold"]) + f" {output_dir}")
 
@@ -593,10 +637,22 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     )
 
     # Create environment-specific preprocessor and postprocessor (e.g., for LIBERO environments)
-    env_preprocessor, env_postprocessor = make_env_pre_post_processors(env_cfg=cfg.env, policy_cfg=cfg.policy)
+    env_preprocessor, env_postprocessor = make_env_pre_post_processors(
+        env_cfg=cfg.env, policy_cfg=cfg.policy
+    )
 
-    with torch.no_grad(), torch.autocast(device_type=device.type) if cfg.policy.use_amp else nullcontext():
-        if cfg.eval_mode is EvalMode.ORIGINAL_POLICY or cfg.eval_mode is EvalMode.LOAD_TICKET:
+    with (
+        torch.no_grad(),
+        (
+            torch.autocast(device_type=device.type)
+            if cfg.policy.use_amp
+            else nullcontext()
+        ),
+    ):
+        if (
+            cfg.eval_mode is EvalMode.ORIGINAL_POLICY
+            or cfg.eval_mode is EvalMode.LOAD_TICKET
+        ):
             # Single evaluation
             info = eval_policy_all(
                 envs=envs,
@@ -641,6 +697,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
 
                 # Save this noise vector
                 torch.save(noise, episode_output_dir / "initial_noise.pt")
+                # Save the evaluation info for this noise
+                with open(episode_output_dir / "eval_info.json", "w") as f:
+                    json.dump(info, f, indent=2)
 
         # Aggregate results across all noise evaluations
         print("Overall Aggregated Metrics:")
@@ -654,10 +713,14 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     summary_info = {
         "all_results": all_results,
         "summary": {
-            "mean_success_rate": float(np.mean([r["overall"]["pc_success"] for r in all_results])),
-            "std_success_rate": float(np.std([r["overall"]["pc_success"] for r in all_results])),
+            "mean_success_rate": float(
+                np.mean([r["overall"]["pc_success"] for r in all_results])
+            ),
+            "std_success_rate": float(
+                np.std([r["overall"]["pc_success"] for r in all_results])
+            ),
             "n_noise_evaluations": len(all_results),
-        }
+        },
     }
     with open(Path(output_dir) / "eval_info.json", "w") as f:
         json.dump(summary_info, f, indent=2)
@@ -670,6 +733,7 @@ class TaskMetrics(TypedDict):
     """
     Metrics returned by eval_one for one task.
     """
+
     sum_rewards: list[float]
     max_rewards: list[float]
     successes: list[bool]
@@ -694,7 +758,7 @@ def eval_one(
     start_seed: int | None,
 ) -> TaskMetrics:
     """Evaluates one task_id of one suite using the provided vec env.
-    
+
     Args:
         env: The batch of environments.
         policy: The policy.
@@ -707,7 +771,7 @@ def eval_one(
         n_episodes: The number of episodes to evaluate.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
-        return_episode_data: Whether to return episode data 
+        return_episode_data: Whether to return episode data
         start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
             seed is incremented by 1. If not provided, the environments are not manually seeded.
 
@@ -775,7 +839,7 @@ def run_one(
         n_episodes: The number of episodes to evaluate.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
-        return_episode_data: Whether to return episode data 
+        return_episode_data: Whether to return episode data
         start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
             seed is incremented by 1. If not provided, the environments are not manually seeded.
     """
@@ -838,7 +902,7 @@ def eval_policy_all(
         n_episodes: The number of episodes to evaluate per task.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
-        return_episode_data: Whether to return episode data 
+        return_episode_data: Whether to return episode data
         start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
             seed is incremented by 1. If not provided, the environments are not manually seeded.
         max_parallel_tasks: Maximum number of parallel tasks to run. If <= 1, runs sequentially.
@@ -852,7 +916,9 @@ def eval_policy_all(
     tasks = [(tg, tid, vec) for tg, group in envs.items() for tid, vec in group.items()]
 
     # accumulators: track metrics at both per-group level and across all groups
-    group_acc: dict[str, dict[str, list]] = defaultdict(lambda: {k: [] for k in ACC_KEYS})
+    group_acc: dict[str, dict[str, list]] = defaultdict(
+        lambda: {k: [] for k in ACC_KEYS}
+    )
     overall: dict[str, list] = {k: [] for k in ACC_KEYS}
     per_task_infos: list[dict] = []
 
@@ -901,7 +967,9 @@ def eval_policy_all(
         for task_group, task_id, env in tasks:
             tg, tid, metrics = task_runner(task_group, task_id, env)
             _accumulate_to(tg, metrics)
-            per_task_infos.append({"task_group": tg, "task_id": tid, "metrics": metrics})
+            per_task_infos.append(
+                {"task_group": tg, "task_id": tid, "metrics": metrics}
+            )
     else:
         # threaded path: submit all tasks, consume completions on main thread and accumulate there
         with cf.ThreadPoolExecutor(max_workers=max_parallel_tasks) as executor:
@@ -912,7 +980,9 @@ def eval_policy_all(
             for fut in cf.as_completed(fut2meta):
                 tg, tid, metrics = fut.result()
                 _accumulate_to(tg, metrics)
-                per_task_infos.append({"task_group": tg, "task_id": tid, "metrics": metrics})
+                per_task_infos.append(
+                    {"task_group": tg, "task_id": tid, "metrics": metrics}
+                )
 
     # compute aggregated metrics helper (robust to lists/scalars)
     def _agg_from_list(xs):
@@ -927,7 +997,11 @@ def eval_policy_all(
         groups_aggregated[group] = {
             "avg_sum_reward": _agg_from_list(acc["sum_rewards"]),
             "avg_max_reward": _agg_from_list(acc["max_rewards"]),
-            "pc_success": _agg_from_list(acc["successes"]) * 100 if acc["successes"] else float("nan"),
+            "pc_success": (
+                _agg_from_list(acc["successes"]) * 100
+                if acc["successes"]
+                else float("nan")
+            ),
             "n_episodes": len(acc["sum_rewards"]),
             "video_paths": list(acc["video_paths"]),
         }
@@ -936,7 +1010,11 @@ def eval_policy_all(
     overall_agg = {
         "avg_sum_reward": _agg_from_list(overall["sum_rewards"]),
         "avg_max_reward": _agg_from_list(overall["max_rewards"]),
-        "pc_success": _agg_from_list(overall["successes"]) * 100 if overall["successes"] else float("nan"),
+        "pc_success": (
+            _agg_from_list(overall["successes"]) * 100
+            if overall["successes"]
+            else float("nan")
+        ),
         "n_episodes": len(overall["sum_rewards"]),
         "eval_s": time.time() - start_t,
         "eval_ep_s": (time.time() - start_t) / max(1, len(overall["sum_rewards"])),
