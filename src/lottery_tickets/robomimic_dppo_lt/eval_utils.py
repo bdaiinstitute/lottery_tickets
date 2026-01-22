@@ -6,7 +6,7 @@ import json
 import numpy as np
 
 
-def evaluate_noise_single(env, noise_vec, save_vid=False, noise_idx=0, eval_num=0, rew_offset=1.0, initial_obs=None):
+def evaluate_noise_single(env, noise_vec, rng: np.random.Generator, save_vid=False, noise_idx=0, eval_num=0, rew_offset=1.0, initial_obs=None, epsilon:float|None=None):
 	"""Evaluate noise vector for one episode. Success if any step reward > -rew_offset.
 	
 	Args:
@@ -17,6 +17,7 @@ def evaluate_noise_single(env, noise_vec, save_vid=False, noise_idx=0, eval_num=
 		eval_num: Evaluation number for naming purposes
 		rew_offset: Reward offset for success determination
 		initial_obs: If provided, use this observation instead of calling env.reset()
+    epsilon: If provided, use the base policy epsilon% of the time
 
 	Returns:
 		episode_reward: Total reward for the episode
@@ -39,7 +40,11 @@ def evaluate_noise_single(env, noise_vec, save_vid=False, noise_idx=0, eval_num=
 
 	steps = 0
 	while not done:
-		_, r, d, info = env.step(action)
+		if epsilon is not None and rng.random() < epsilon:
+			_, r, d, info = env.step(rng.standard_normal(action.shape, dtype=action.dtype))
+		else:
+			_, r, d, info = env.step(action)
+
 		steps += 1
 		r_val = float(r[0])  # Extract scalar from array
 		episode_reward += r_val

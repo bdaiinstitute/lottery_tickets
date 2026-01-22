@@ -150,6 +150,7 @@ def main():
 			# Build new environment for this seed
 			env = build_single_env(base_policy, cfg, video_dir, current_seed, save_vid=save_vid)
 			# noise_vec_clipped = np.clip(noise_vec, env.action_space.low, env.action_space.high)
+			rng = np.random.default_rng(seed=current_seed)
 			
 			# Collect results for this seed across n_evals_per_seed
 			seed_rewards = []
@@ -157,17 +158,10 @@ def main():
 			
 			for eval_iter in range(args.n_evals_per_seed):
 				print(f"  Evaluation {eval_iter + 1}/{args.n_evals_per_seed}")
-				if (epsilon := args.epsilon) is not None:
-					if torch.rand(()).item() < epsilon:
-						episode_reward, success = evaluate_noise_single(
-							env, torch.randn(noise_vec.shape), save_vid, noise_idx=eval_idx, 
-							eval_num=eval_iter, rew_offset=cfg.env.reward_offset
-						)
-					else:
-						episode_reward, success = evaluate_noise_single(
-							env, noise_vec, save_vid, noise_idx=eval_idx, 
-							eval_num=eval_iter, rew_offset=cfg.env.reward_offset
-						)
+				episode_reward, success = evaluate_noise_single(
+          env, noise_vec, rng, save_vid, noise_idx=eval_idx, 
+          eval_num=eval_iter, rew_offset=cfg.env.reward_offset, epsilon=args.epsilon
+        )
 				seed_rewards.append(float(episode_reward))
 				seed_successes.append(bool(success))
 				print(f"    Reward: {episode_reward:.4f}, Success: {success}")
