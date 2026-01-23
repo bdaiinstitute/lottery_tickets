@@ -1,0 +1,94 @@
+name: transport_${algorithm}_${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+logdir: ${log_dir}/robomimic-dsrl/${name}/${now:%Y-%m-%d}_${now:%H-%M-%S}_${seed}
+base_policy_path: ./dppo/log/robomimic-pretrain/transport/transport_pre_diffusion_mlp_ta8_td100_ddim-100steps_size2048/2025-04-21_08-40-08_47/checkpoint/state_3000.pt
+normalization_path: ./dppo/log/robomimic/${env_name}/normalization.npz
+dppo_path: ./dppo
+exp_name: transport_dsrl
+algorithm: dsrl_sac
+seed: 1619
+device: cuda:0
+use_wandb: true
+env_name: transport
+log_dir: ./logs
+obs_dim: 59
+action_dim: 14
+cond_steps: 1
+act_steps: 8
+load_offline_data: false
+deterministic_eval: false
+eval_interval: 8000
+num_evals: 200
+save_model_interval: 500000
+save_replay_buffer: false
+env:
+  n_envs: 4
+  n_eval_envs: 25
+  name: ${env_name}
+  max_episode_steps: 800
+  reset_at_iteration: false
+  save_video: false
+  best_reward_threshold_for_success: 1
+  reward_offset: 1
+  wrappers:
+    robomimic_lowdim:
+      normalization_path: ${normalization_path}
+      low_dim_keys:
+      - robot0_eef_pos
+      - robot0_eef_quat
+      - robot0_gripper_qpos
+      - robot1_eef_pos
+      - robot1_eef_quat
+      - robot1_gripper_qpos
+      - object
+    multi_step:
+      n_obs_steps: ${cond_steps}
+      n_action_steps: ${act_steps}
+      max_episode_steps: ${env.max_episode_steps}
+      reset_within_step: true
+wandb:
+  project: dsrl_robomimic
+  run: ${now:%H-%M-%S}_${name}
+  group: robomimic-transport
+train:
+  tau: 0.005
+  actor_lr: 0.0003
+  batch_size: 256
+  train_freq: 1
+  utd: 20
+  use_layer_norm: true
+  layer_size: 128
+  num_layers: 3
+  discount: 0.99
+  ent_coef: -1
+  target_ent: 0.0
+  init_rollout_steps: 20001
+  action_magnitude: 1
+  n_critics: 2
+  critic_backup_combine_type: min
+  noise_critic_grad_steps: 10
+model:
+  _target_: model.diffusion.diffusion_eval.DiffusionEval
+  ft_denoising_steps: 0
+  predict_epsilon: true
+  denoised_clip_value: 1.0
+  randn_clip_value: 3
+  network_path: ${base_policy_path}
+  network:
+    _target_: model.diffusion.mlp_diffusion.DiffusionMLP
+    time_dim: 32
+    mlp_dims:
+    - 2048
+    - 2048
+    - 2048
+    residual_style: true
+    cond_dim: ${eval:'${obs_dim} * ${cond_steps}'}
+    horizon_steps: ${act_steps}
+    action_dim: ${action_dim}
+  horizon_steps: ${act_steps}
+  obs_dim: ${obs_dim}
+  action_dim: ${action_dim}
+  denoising_steps: 100
+  device: ${device}
+  use_ddim: true
+  ddim_steps: 8
+  controllable_noise: true

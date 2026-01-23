@@ -1,0 +1,32 @@
+{
+  "n_noise_indices": 3,
+  "eval_indices": [
+    0,
+    1,
+    2
+  ],
+  "reward_mean_across_indices": -201.94133504231772,
+  "reward_std_across_indices": 14.206424033554368,
+  "success_mean_across_indices": 0.7173333333333334,
+  "success_std_across_indices": 0.08210562303115017,
+  "per_index_results": {
+    "0": {
+      "reward_mean": -185.71600341796875,
+      "reward_std": 6.985599517822266,
+      "success_mean": 0.808,
+      "success_std": 0.046647615158762396
+    },
+    "1": {
+      "reward_mean": -212.14599609375,
+      "reward_std": 7.523906707763672,
+      "success_mean": 0.696,
+      "success_std": 0.04363484845854285
+    },
+    "2": {
+      "reward_mean": -207.96200561523438,
+      "reward_std": 7.611765384674072,
+      "success_mean": 0.648,
+      "success_std": 0.03867815921162744
+    }
+  }
+}

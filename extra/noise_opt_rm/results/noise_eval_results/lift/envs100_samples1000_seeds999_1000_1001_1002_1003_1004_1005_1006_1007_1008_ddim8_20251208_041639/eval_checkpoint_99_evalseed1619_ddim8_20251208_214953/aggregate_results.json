@@ -1,0 +1,92 @@
+{
+  "checkpoint": "checkpoint_99",
+  "n_seed_folders": 10,
+  "seed_folders": [
+    "seed_1000",
+    "seed_1001",
+    "seed_1002",
+    "seed_1003",
+    "seed_1004",
+    "seed_1005",
+    "seed_1006",
+    "seed_1007",
+    "seed_1008",
+    "seed_999"
+  ],
+  "reward_mean_across_seeds": -260.99200134277345,
+  "reward_std_across_seeds": 45.67134807948486,
+  "success_mean_across_seeds": 0.282,
+  "success_std_across_seeds": 0.27363560522060065,
+  "per_seed_results": {
+    "seed_1000": {
+      "ticket_seed": "1000",
+      "reward_mean": -277.7660217285156,
+      "reward_std": 1.2837575674057007,
+      "success_mean": 0.21399999999999997,
+      "success_std": 0.021540659228538015
+    },
+    "seed_1001": {
+      "ticket_seed": "1001",
+      "reward_mean": -224.23001098632812,
+      "reward_std": 7.639186382293701,
+      "success_mean": 0.368,
+      "success_std": 0.03969886648255841
+    },
+    "seed_1002": {
+      "ticket_seed": "1002",
+      "reward_mean": -156.6959991455078,
+      "reward_std": 5.970598220825195,
+      "success_mean": 0.9219999999999999,
+      "success_std": 0.03815756805667782
+    },
+    "seed_1003": {
+      "ticket_seed": "1003",
+      "reward_mean": -274.75,
+      "reward_std": 5.1956634521484375,
+      "success_mean": 0.23199999999999998,
+      "success_std": 0.04791659420284376
+    },
+    "seed_1004": {
+      "ticket_seed": "1004",
+      "reward_mean": -222.7480010986328,
+      "reward_std": 5.3529181480407715,
+      "success_mean": 0.5660000000000001,
+      "success_std": 0.030724582991474406
+    },
+    "seed_1005": {
+      "ticket_seed": "1005",
+      "reward_mean": -289.6000061035156,
+      "reward_std": 3.616966962814331,
+      "success_mean": 0.13799999999999998,
+      "success_std": 0.03709447398198282
+    },
+    "seed_1006": {
+      "ticket_seed": "1006",
+      "reward_mean": -295.93798828125,
+      "reward_std": 0.9918116927146912,
+      "success_mean": 0.064,
+      "success_std": 0.023323807579381205
+    },
+    "seed_1007": {
+      "ticket_seed": "1007",
+      "reward_mean": -297.9320068359375,
+      "reward_std": 1.355713129043579,
+      "success_mean": 0.036,
+      "success_std": 0.01854723699099141
+    },
+    "seed_1008": {
+      "ticket_seed": "1008",
+      "reward_mean": -289.6579895019531,
+      "reward_std": 1.935599446296692,
+      "success_mean": 0.138,
+      "success_std": 0.031240998703626618
+    },
+    "seed_999": {
+      "ticket_seed": "999",
+      "reward_mean": -280.60198974609375,
+      "reward_std": 4.360426425933838,
+      "success_mean": 0.14200000000000002,
+      "success_std": 0.029257477676655583
+    }
+  }
+}
