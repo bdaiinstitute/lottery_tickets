@@ -29,6 +29,17 @@ python evaluate.py \
         --noise_path="new"
 
 """
+# set os variables for libero async
+import os
+
+os.environ["MUJOCO_GL"] = "egl"
+import multiprocessing as mp
+
+if __name__ == "__main__":
+    try:
+        mp.set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass  # Already set
 
 import concurrent.futures as cf
 import json
@@ -60,13 +71,73 @@ from tqdm import trange
 from lerobot.configs import parser
 from lerobot.configs.eval import EvalPipelineConfig
 from lerobot.envs.factory import make_env, make_env_pre_post_processors
+from lerobot.envs import utils as lerobot_env_utils
 from lerobot.envs.utils import (
-    add_envs_task,
-    check_env_attributes_and_types,
     close_envs,
     preprocess_observation,
 )
 from lerobot.policies.factory import make_policy, make_pre_post_processors
+
+
+# Monkey-patch lerobot env utils to support AsyncVectorEnv
+def _patched_check_env_attributes_and_types(env: gym.vector.VectorEnv) -> None:
+    import warnings
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("once", UserWarning)
+        if isinstance(env, gym.vector.SyncVectorEnv):
+            has_attrs = hasattr(env.envs[0], "task_description") and hasattr(
+                env.envs[0], "task"
+            )
+        else:
+            has_attrs = True  # AsyncVectorEnv: skip check
+        if not has_attrs:
+            warnings.warn(
+                "The environment does not have 'task_description' and 'task'. Some policies require these features.",
+                UserWarning,
+                stacklevel=2,
+            )
+
+
+def _patched_add_envs_task(
+    env: gym.vector.VectorEnv, observation: dict[str, Any]
+) -> dict[str, Any]:
+    try:
+        task_result = env.call("task_description")
+        if isinstance(task_result, tuple):
+            task_result = list(task_result)
+        if not isinstance(task_result, list):
+            raise TypeError(
+                f"Expected task_description to return a list, got {type(task_result)}"
+            )
+        if not all(isinstance(item, str) for item in task_result):
+            raise TypeError("All items in task_description result must be strings")
+        observation["task"] = task_result
+    except (AttributeError, TypeError):
+        try:
+            task_result = env.call("task")
+            if isinstance(task_result, tuple):
+                task_result = list(task_result)
+            if not isinstance(task_result, list):
+                raise TypeError(
+                    f"Expected task to return a list, got {type(task_result)}"
+                )
+            if not all(isinstance(item, str) for item in task_result):
+                raise TypeError("All items in task result must be strings")
+            observation["task"] = task_result
+        except (AttributeError, TypeError):
+            num_envs = observation[list(observation.keys())[0]].shape[0]
+            observation["task"] = ["" for _ in range(num_envs)]
+    return observation
+
+
+# Apply patches
+lerobot_env_utils.check_env_attributes_and_types = (
+    _patched_check_env_attributes_and_types
+)
+lerobot_env_utils.add_envs_task = _patched_add_envs_task
+check_env_attributes_and_types = _patched_check_env_attributes_and_types
+add_envs_task = _patched_add_envs_task
 from lerobot.policies.pretrained import PreTrainedPolicy
 from lerobot.processor import PolicyAction, PolicyProcessorPipeline
 from lerobot.utils.constants import ACTION, DONE, OBS_STR, REWARD
@@ -146,6 +217,10 @@ def rollout(
     all_successes = []
     all_dones = []
 
+    # Timing accumulators
+    total_policy_time = 0.0
+    total_env_step_time = 0.0
+
     step = 0
     # Keep track of which environments are done.
     done = np.array([False] * env.num_envs)
@@ -171,12 +246,14 @@ def rollout(
         observation = env_preprocessor(observation)
 
         observation = preprocessor(observation)
+        policy_start = time.time()
         with torch.inference_mode():
             if noise != None:
                 action = policy.select_action(observation, noise=noise.clone().detach())
             else:
                 action = policy.select_action(observation, noise=None)
         action = postprocessor(action)
+        total_policy_time += time.time() - policy_start
 
         action_transition = {"action": action}
         action_transition = env_postprocessor(action_transition)
@@ -186,8 +263,11 @@ def rollout(
         action_numpy: np.ndarray = action.to("cpu").numpy()
         assert action_numpy.ndim == 2, "Action dimensions should be (batch, action_dim)"
 
-        # Apply the next action.
+        # Time environment step
+        env_step_start = time.time()
         observation, reward, terminated, truncated, info = env.step(action_numpy)
+        total_env_step_time += time.time() - env_step_start
+
         if render_callback is not None:
             render_callback(env)
 
@@ -251,6 +331,13 @@ def rollout(
     if hasattr(policy, "use_original_modules"):
         policy.use_original_modules()
 
+    # Add timing information to return dictionary
+    ret["timing"] = {
+        "total_policy_time": total_policy_time,
+        "total_env_step_time": total_env_step_time,
+        "avg_policy_time_per_step": total_policy_time / max(1, step),
+        "avg_env_step_time_per_step": total_env_step_time / max(1, step),
+    }
     return ret
 
 
@@ -589,9 +676,7 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     set_seed(cfg.seed)
 
     logging.info("Making environment.")
-    envs = make_env(
-        cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=cfg.eval.use_async_envs
-    )
+    envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=True)
 
     logging.info("Making policy.")
 
