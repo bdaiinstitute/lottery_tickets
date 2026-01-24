@@ -394,6 +394,7 @@ def eval_policy(
     max_rewards = []
     all_successes = []
     all_seeds = []
+    episode_lengths = []
     threads = []  # for video saving threads
     n_episodes_rendered = 0  # for saving the correct number of videos
 
@@ -471,6 +472,8 @@ def eval_policy(
             (rollout_data["success"] * mask), "b n -> b", "any"
         )
         all_successes.extend(batch_successes.tolist())
+        # Track episode lengths (done_indices + 1 gives the number of steps)
+        episode_lengths.extend((done_indices + 1).tolist())
         if seeds:
             all_seeds.extend(seeds)
         else:
@@ -549,13 +552,15 @@ def eval_policy(
                 "max_reward": max_reward,
                 "success": success,
                 "seed": seed,
+                "episode_length": ep_len,
             }
-            for i, (sum_reward, max_reward, success, seed) in enumerate(
+            for i, (sum_reward, max_reward, success, seed, ep_len) in enumerate(
                 zip(
                     sum_rewards[:n_episodes],
                     max_rewards[:n_episodes],
                     all_successes[:n_episodes],
                     all_seeds[:n_episodes],
+                    episode_lengths[:n_episodes],
                     strict=True,
                 )
             )
@@ -773,8 +778,14 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
             # Evaluate n_episodes different noises, each on the same environments
             all_results = []
             # Track best noise per task and overall
-            best_per_task = {}  # task_key -> {success_rate, noise_idx}
-            best_overall = {"success_rate": -1.0, "noise_idx": -1}
+            best_per_task = (
+                {}
+            )  # task_key -> {success_rate, avg_episode_length, noise_idx}
+            best_overall = {
+                "success_rate": -1.0,
+                "avg_episode_length": float("inf"),
+                "noise_idx": -1,
+            }
             search_start_time = time.time()
 
             for episode_idx in range(cfg.eval.n_episodes):
@@ -817,32 +828,56 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                 for task_info in info["per_task"]:
                     task_key = f"{task_info['task_group']}_{task_info['task_id']}"
                     successes = task_info["metrics"]["successes"]
+                    ep_lengths = task_info["metrics"]["episode_lengths"]
                     success_rate = float(np.mean(successes)) * 100
+                    avg_ep_length = float(np.mean(ep_lengths))
                     per_task_success_rates[task_key] = {
                         "task_group": task_info["task_group"],
                         "task_id": task_info["task_id"],
                         "success_rate": success_rate,
+                        "avg_episode_length": avg_ep_length,
                         "n_successes": int(np.sum(successes)),
                         "n_episodes": len(successes),
                     }
-                    # Update best per task and save noise
-                    if (
-                        task_key not in best_per_task
-                        or success_rate > best_per_task[task_key]["success_rate"]
-                    ):
+                    # Update best per task: higher success rate wins, ties broken by lower episode length
+                    if task_key not in best_per_task:
+                        is_better = True
+                    else:
+                        prev_sr = best_per_task[task_key]["success_rate"]
+                        prev_len = best_per_task[task_key]["avg_episode_length"]
+                        is_better = (success_rate > prev_sr) or (
+                            success_rate == prev_sr and avg_ep_length < prev_len
+                        )
+
+                    if is_better:
                         best_per_task[task_key] = {
                             "success_rate": success_rate,
+                            "avg_episode_length": avg_ep_length,
                             "noise_idx": episode_idx,
                         }
                         torch.save(
                             single_noise, Path(output_dir) / f"best_noise_{task_key}.pt"
                         )
 
-                # Update best overall and save noise
+                # Update best overall: higher success rate wins, ties broken by lower episode length
                 overall_success = info["overall"]["pc_success"]
-                if overall_success > best_overall["success_rate"]:
+                all_ep_lengths = []
+                for task_info in info["per_task"]:
+                    all_ep_lengths.extend(task_info["metrics"]["episode_lengths"])
+                overall_avg_ep_length = (
+                    float(np.mean(all_ep_lengths)) if all_ep_lengths else 0.0
+                )
+
+                prev_sr = best_overall["success_rate"]
+                prev_len = best_overall["avg_episode_length"]
+                is_better = (overall_success > prev_sr) or (
+                    overall_success == prev_sr and overall_avg_ep_length < prev_len
+                )
+
+                if is_better:
                     best_overall = {
                         "success_rate": overall_success,
+                        "avg_episode_length": overall_avg_ep_length,
                         "noise_idx": episode_idx,
                     }
                     torch.save(single_noise, Path(output_dir) / "best_noise_overall.pt")
@@ -894,7 +929,7 @@ class TaskMetrics(TypedDict):
     video_paths: list[str]
 
 
-ACC_KEYS = ("sum_rewards", "max_rewards", "successes", "video_paths")
+ACC_KEYS = ("sum_rewards", "max_rewards", "successes", "episode_lengths", "video_paths")
 
 
 def eval_one(
@@ -954,6 +989,7 @@ def eval_one(
         sum_rewards=[ep["sum_reward"] for ep in per_episode],
         max_rewards=[ep["max_reward"] for ep in per_episode],
         successes=[ep["success"] for ep in per_episode],
+        episode_lengths=[ep["episode_length"] for ep in per_episode],
         video_paths=task_result.get("video_paths", []),
     )
 
