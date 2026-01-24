@@ -219,9 +219,13 @@ def rollout(
 
         step += 1
         running_success_rate = (
-            einops.reduce(torch.stack(all_successes, dim=1), "b n -> b", "any").numpy().mean()
+            einops.reduce(torch.stack(all_successes, dim=1), "b n -> b", "any")
+            .numpy()
+            .mean()
         )
-        progbar.set_postfix({"running_success_rate": f"{running_success_rate.item() * 100:.1f}%"})
+        progbar.set_postfix(
+            {"running_success_rate": f"{running_success_rate.item() * 100:.1f}%"}
+        )
         progbar.update()
 
     # Track the final observation.
@@ -239,7 +243,9 @@ def rollout(
     if return_observations:
         stacked_observations = {}
         for key in all_observations[0]:
-            stacked_observations[key] = torch.stack([obs[key] for obs in all_observations], dim=1)
+            stacked_observations[key] = torch.stack(
+                [obs[key] for obs in all_observations], dim=1
+            )
         ret[OBS_STR] = stacked_observations
 
     if hasattr(policy, "use_original_modules"):
@@ -311,7 +317,9 @@ def eval_policy(
             return
         n_to_render_now = min(max_episodes_rendered - n_episodes_rendered, env.num_envs)
         if isinstance(env, gym.vector.SyncVectorEnv):
-            ep_frames.append(np.stack([env.envs[i].render() for i in range(n_to_render_now)]))  # noqa: B023
+            ep_frames.append(
+                np.stack([env.envs[i].render() for i in range(n_to_render_now)])
+            )  # noqa: B023
         elif isinstance(env, gym.vector.AsyncVectorEnv):
             # Here we must render all frames and discard any we don't need.
             ep_frames.append(np.stack(env.call("render")[:n_to_render_now]))
@@ -323,7 +331,9 @@ def eval_policy(
         episode_data: dict | None = None
 
     # we dont want progress bar when we use slurm, since it clutters the logs
-    progbar = trange(n_batches, desc="Stepping through eval batches", disable=inside_slurm())
+    progbar = trange(
+        n_batches, desc="Stepping through eval batches", disable=inside_slurm()
+    )
     for batch_ix in progbar:
         # Cache frames for rendering videos. Each item will be (b, h, w, c), and the list indexes the rollout
         # step.
@@ -334,7 +344,8 @@ def eval_policy(
             seeds = None
         else:
             seeds = range(
-                start_seed + (batch_ix * env.num_envs), start_seed + ((batch_ix + 1) * env.num_envs)
+                start_seed + (batch_ix * env.num_envs),
+                start_seed + ((batch_ix + 1) * env.num_envs),
             )
         rollout_data = rollout(
             env=env,
@@ -356,13 +367,22 @@ def eval_policy(
 
         # Make a mask with shape (batch, n_steps) to mask out rollout data after the first done
         # (batch-element-wise). Note the `done_indices + 1` to make sure to keep the data from the done step.
-        mask = (torch.arange(n_steps) <= einops.repeat(done_indices + 1, "b -> b s", s=n_steps)).int()
+        mask = (
+            torch.arange(n_steps)
+            <= einops.repeat(done_indices + 1, "b -> b s", s=n_steps)
+        ).int()
         # Extend metrics.
-        batch_sum_rewards = einops.reduce((rollout_data["reward"] * mask), "b n -> b", "sum")
+        batch_sum_rewards = einops.reduce(
+            (rollout_data["reward"] * mask), "b n -> b", "sum"
+        )
         sum_rewards.extend(batch_sum_rewards.tolist())
-        batch_max_rewards = einops.reduce((rollout_data["reward"] * mask), "b n -> b", "max")
+        batch_max_rewards = einops.reduce(
+            (rollout_data["reward"] * mask), "b n -> b", "max"
+        )
         max_rewards.extend(batch_max_rewards.tolist())
-        batch_successes = einops.reduce((rollout_data["success"] * mask), "b n -> b", "any")
+        batch_successes = einops.reduce(
+            (rollout_data["success"] * mask), "b n -> b", "any"
+        )
         all_successes.extend(batch_successes.tolist())
         if seeds:
             all_seeds.extend(seeds)
@@ -375,17 +395,27 @@ def eval_policy(
                 rollout_data,
                 done_indices,
                 start_episode_index=batch_ix * env.num_envs,
-                start_data_index=(0 if episode_data is None else (episode_data["index"][-1].item() + 1)),
+                start_data_index=(
+                    0
+                    if episode_data is None
+                    else (episode_data["index"][-1].item() + 1)
+                ),
                 fps=env.unwrapped.metadata["render_fps"],
             )
             if episode_data is None:
                 episode_data = this_episode_data
             else:
                 # Some sanity checks to make sure we are correctly compiling the data.
-                assert episode_data["episode_index"][-1] + 1 == this_episode_data["episode_index"][0]
+                assert (
+                    episode_data["episode_index"][-1] + 1
+                    == this_episode_data["episode_index"][0]
+                )
                 assert episode_data["index"][-1] + 1 == this_episode_data["index"][0]
                 # Concatenate the episode data.
-                episode_data = {k: torch.cat([episode_data[k], this_episode_data[k]]) for k in episode_data}
+                episode_data = {
+                    k: torch.cat([episode_data[k], this_episode_data[k]])
+                    for k in episode_data
+                }
 
         # Maybe render video for visualization.
         if max_episodes_rendered > 0 and len(ep_frames) > 0:
@@ -403,7 +433,9 @@ def eval_policy(
                     target=write_video,
                     args=(
                         str(video_path),
-                        stacked_frames[: done_index + 1],  # + 1 to capture the last observation
+                        stacked_frames[
+                            : done_index + 1
+                        ],  # + 1 to capture the last observation
                         env.unwrapped.metadata["render_fps"],
                     ),
                 )
@@ -412,7 +444,9 @@ def eval_policy(
                 n_episodes_rendered += 1
 
         progbar.set_postfix(
-            {"running_success_rate": f"{np.mean(all_successes[:n_episodes]).item() * 100:.1f}%"}
+            {
+                "running_success_rate": f"{np.mean(all_successes[:n_episodes]).item() * 100:.1f}%"
+            }
         )
 
     # Wait till all video rendering threads are done.
@@ -458,7 +492,11 @@ def eval_policy(
 
 
 def _compile_episode_data(
-    rollout_data: dict, done_indices: Tensor, start_episode_index: int, start_data_index: int, fps: float
+    rollout_data: dict,
+    done_indices: Tensor,
+    start_episode_index: int,
+    start_data_index: int,
+    fps: float,
 ) -> dict:
     """Convenience function for `eval_policy(return_episode_data=True)`
 
@@ -485,7 +523,9 @@ def _compile_episode_data(
         # Here we do `num_frames - 1` as we don't want to include the last observation frame just yet.
         ep_dict = {
             ACTION: rollout_data[ACTION][ep_ix, : num_frames - 1],
-            "episode_index": torch.tensor([start_episode_index + ep_ix] * (num_frames - 1)),
+            "episode_index": torch.tensor(
+                [start_episode_index + ep_ix] * (num_frames - 1)
+            ),
             "frame_index": torch.arange(0, num_frames - 1, 1),
             "timestamp": torch.arange(0, num_frames - 1, 1) / fps,
             DONE: rollout_data["done"][ep_ix, : num_frames - 1],
@@ -506,31 +546,35 @@ def _compile_episode_data(
     for key in ep_dicts[0]:
         data_dict[key] = torch.cat([x[key] for x in ep_dicts])
 
-    data_dict["index"] = torch.arange(start_data_index, start_data_index + total_frames, 1)
+    data_dict["index"] = torch.arange(
+        start_data_index, start_data_index + total_frames, 1
+    )
 
     return data_dict
 
 
 class EvalMode(Enum):
     """Evaluation mode for the policy."""
+
     NEW_TICKET = "NEW_TICKET"
     LOAD_TICKET = "LOAD_TICKET"
     ORIGINAL_POLICY = "ORIGINAL_POLICY"
 
 
-@dataclass 
+@dataclass
 class EvalPipelineConfigNoisePath(EvalPipelineConfig):
     """
     Eval pipeline config with noise path for loading saved tickets.
     """
-    eval_mode : EvalMode = EvalMode.NEW_TICKET
+
+    eval_mode: EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
 
 
 @parser.wrap()
 def eval_main(cfg: EvalPipelineConfigNoisePath):
     """Main evaluation pipeline for smolvla libero with lottery tickets.
-    
+
     Args:
         cfg: Evaluation pipeline configuration.
     """
@@ -545,7 +589,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     set_seed(cfg.seed)
 
     logging.info("Making environment.")
-    envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=cfg.eval.use_async_envs)
+    envs = make_env(
+        cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=cfg.eval.use_async_envs
+    )
 
     logging.info("Making policy.")
 
@@ -558,9 +604,10 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     policy.eval()
     # Use the config seed for reproducible noise generation
     noise_rng = np.random.default_rng(seed=cfg.seed)
-    actions_shape = (cfg.eval.batch_size, policy.config.chunk_size, policy.config.max_action_dim)
+    # Single noise vector shape (will be replicated across batch)
+    single_noise_shape = (1, policy.config.chunk_size, policy.config.max_action_dim)
 
-    if cfg.eval_mode is EvalMode.ORIGINAL_POLICY: 
+    if cfg.eval_mode is EvalMode.ORIGINAL_POLICY:
         # Run base policy (i.e: sampling gaussian noise as usual)
         noise = None
         print("Running base policy (i.e: sampling gaussian noise as usual!")
@@ -569,14 +616,27 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         # Generate new noise vectors (will be done in loop below)
         noise = None
         print(f"Will evaluate {cfg.eval.n_episodes} different noise vectors!")
-        output_dir = cfg.output_dir / uuid.uuid4().hex
+        # Create informative folder name with timestamp, task, n_episodes, batch_size, and seed
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        folder_name = f"{cfg.env.task}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
+        output_dir = cfg.output_dir / folder_name
     elif cfg.eval_mode is EvalMode.LOAD_TICKET:
         # Load an existing ticket
-        noise = torch.load(cfg.noise_path, map_location=cfg.policy.device)
-        print(f"Loaded noise from path: {cfg.noise_path}!")
+        loaded_noise = torch.load(cfg.noise_path, map_location=cfg.policy.device)
+        # Repeat the loaded noise across the batch dimension to match batch_size
+        if loaded_noise.shape[0] == 1 and cfg.eval.batch_size > 1:
+            noise = loaded_noise.repeat(cfg.eval.batch_size, 1, 1)
+            print(
+                f"Loaded noise from path: {cfg.noise_path} and repeated across batch_size={cfg.eval.batch_size}!"
+            )
+        else:
+            noise = loaded_noise
+            print(f"Loaded noise from path: {cfg.noise_path}!")
         output_dir = cfg.output_dir
     else:
-        raise RuntimeError("eval_mode must be one of NEW_TICKET, LOAD_TICKET, or ORIGINAL_POLICY")
+        raise RuntimeError(
+            "eval_mode must be one of NEW_TICKET, LOAD_TICKET, or ORIGINAL_POLICY"
+        )
 
     logging.info(colored("Output dir:", "yellow", attrs=["bold"]) + f" {output_dir}")
 
@@ -593,10 +653,22 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     )
 
     # Create environment-specific preprocessor and postprocessor (e.g., for LIBERO environments)
-    env_preprocessor, env_postprocessor = make_env_pre_post_processors(env_cfg=cfg.env, policy_cfg=cfg.policy)
+    env_preprocessor, env_postprocessor = make_env_pre_post_processors(
+        env_cfg=cfg.env, policy_cfg=cfg.policy
+    )
 
-    with torch.no_grad(), torch.autocast(device_type=device.type) if cfg.policy.use_amp else nullcontext():
-        if cfg.eval_mode is EvalMode.ORIGINAL_POLICY or cfg.eval_mode is EvalMode.LOAD_TICKET:
+    with (
+        torch.no_grad(),
+        (
+            torch.autocast(device_type=device.type)
+            if cfg.policy.use_amp
+            else nullcontext()
+        ),
+    ):
+        if (
+            cfg.eval_mode is EvalMode.ORIGINAL_POLICY
+            or cfg.eval_mode is EvalMode.LOAD_TICKET
+        ):
             # Single evaluation
             info = eval_policy_all(
                 envs=envs,
@@ -615,11 +687,21 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         else:
             # Evaluate n_episodes different noises, each on the same environments
             all_results = []
+            # Track best noise per task and overall
+            best_per_task = {}  # task_key -> {success_rate, noise_idx}
+            best_overall = {"success_rate": -1.0, "noise_idx": -1}
+            search_start_time = time.time()
+
             for episode_idx in range(cfg.eval.n_episodes):
-                # Generate new noise for this episode
-                noise = torch.from_numpy(
-                    noise_rng.standard_normal(size=actions_shape, dtype=np.float32)
+                iteration_start_time = time.time()
+
+                # Generate single noise vector and replicate across batch
+                single_noise = torch.from_numpy(
+                    noise_rng.standard_normal(size=single_noise_shape, dtype=np.float32)
                 ).to(device=cfg.policy.device)
+
+                # Replicate the single noise across batch dimension
+                noise = single_noise.repeat(cfg.eval.batch_size, 1, 1)
 
                 episode_output_dir = Path(output_dir) / f"noise_{episode_idx}"
 
@@ -639,28 +721,78 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                 )
                 all_results.append(info)
 
-                # Save this noise vector
-                torch.save(noise, episode_output_dir / "initial_noise.pt")
+                iteration_elapsed_time = time.time() - iteration_start_time
 
-        # Aggregate results across all noise evaluations
-        print("Overall Aggregated Metrics:")
-        all_successes = [r["overall"]["pc_success"] for r in all_results]
-        print(f"Mean success rate: {np.mean(all_successes):.2f}%")
-        print(f"Std success rate: {np.std(all_successes):.2f}%")
+                # Save this noise vector in iteration folder
+                episode_output_dir.mkdir(parents=True, exist_ok=True)
+                torch.save(single_noise, episode_output_dir / "initial_noise.pt")
+
+                # Compute per-task success rates (average across episodes for each task)
+                per_task_success_rates = {}
+                for task_info in info["per_task"]:
+                    task_key = f"{task_info['task_group']}_{task_info['task_id']}"
+                    successes = task_info["metrics"]["successes"]
+                    success_rate = float(np.mean(successes)) * 100
+                    per_task_success_rates[task_key] = {
+                        "task_group": task_info["task_group"],
+                        "task_id": task_info["task_id"],
+                        "success_rate": success_rate,
+                        "n_successes": int(np.sum(successes)),
+                        "n_episodes": len(successes),
+                    }
+                    # Update best per task and save noise
+                    if (
+                        task_key not in best_per_task
+                        or success_rate > best_per_task[task_key]["success_rate"]
+                    ):
+                        best_per_task[task_key] = {
+                            "success_rate": success_rate,
+                            "noise_idx": episode_idx,
+                        }
+                        torch.save(
+                            single_noise, Path(output_dir) / f"best_noise_{task_key}.pt"
+                        )
+
+                # Update best overall and save noise
+                overall_success = info["overall"]["pc_success"]
+                if overall_success > best_overall["success_rate"]:
+                    best_overall = {
+                        "success_rate": overall_success,
+                        "noise_idx": episode_idx,
+                    }
+                    torch.save(single_noise, Path(output_dir) / "best_noise_overall.pt")
+
+                # Save detailed per-noise metrics (ready to use, no post-processing needed)
+                per_noise_info = {
+                    "noise_idx": episode_idx,
+                    "overall_success_rate": overall_success,
+                    "iteration_time_seconds": iteration_elapsed_time,
+                    "overall_metrics": info["overall"],
+                    "per_group_success_rates": {
+                        group: metrics["pc_success"]
+                        for group, metrics in info["per_group"].items()
+                    },
+                    "per_group_metrics": info["per_group"],
+                    "per_task_success_rates": per_task_success_rates,
+                    "per_task_metrics": info["per_task"],
+                }
+                with open(episode_output_dir / "noise_metrics.json", "w") as f:
+                    json.dump(per_noise_info, f, indent=2)
+
+                # Save best noise tracker in outer folder at each iteration
+                best_tracker = {
+                    "current_iteration": episode_idx + 1,
+                    "total_iterations": cfg.eval.n_episodes,
+                    "total_time_elapsed_seconds": time.time() - search_start_time,
+                    "latest_iteration_time_seconds": iteration_elapsed_time,
+                    "best_overall": best_overall,
+                    "best_per_task": best_per_task,
+                }
+                with open(Path(output_dir) / "best_noise_tracker.json", "w") as f:
+                    json.dump(best_tracker, f, indent=2)
+
     # Close all vec envs
     close_envs(envs)
-
-    # Save aggregated info
-    summary_info = {
-        "all_results": all_results,
-        "summary": {
-            "mean_success_rate": float(np.mean([r["overall"]["pc_success"] for r in all_results])),
-            "std_success_rate": float(np.std([r["overall"]["pc_success"] for r in all_results])),
-            "n_noise_evaluations": len(all_results),
-        }
-    }
-    with open(Path(output_dir) / "eval_info.json", "w") as f:
-        json.dump(summary_info, f, indent=2)
 
     logging.info("End of eval")
 
@@ -670,6 +802,7 @@ class TaskMetrics(TypedDict):
     """
     Metrics returned by eval_one for one task.
     """
+
     sum_rewards: list[float]
     max_rewards: list[float]
     successes: list[bool]
@@ -694,7 +827,7 @@ def eval_one(
     start_seed: int | None,
 ) -> TaskMetrics:
     """Evaluates one task_id of one suite using the provided vec env.
-    
+
     Args:
         env: The batch of environments.
         policy: The policy.
@@ -707,7 +840,7 @@ def eval_one(
         n_episodes: The number of episodes to evaluate.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
-        return_episode_data: Whether to return episode data 
+        return_episode_data: Whether to return episode data
         start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
             seed is incremented by 1. If not provided, the environments are not manually seeded.
 
@@ -775,7 +908,7 @@ def run_one(
         n_episodes: The number of episodes to evaluate.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
-        return_episode_data: Whether to return episode data 
+        return_episode_data: Whether to return episode data
         start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
             seed is incremented by 1. If not provided, the environments are not manually seeded.
     """
@@ -838,7 +971,7 @@ def eval_policy_all(
         n_episodes: The number of episodes to evaluate per task.
         max_episodes_rendered: Maximum number of episodes to render into videos.
         videos_dir: Where to save rendered videos.
-        return_episode_data: Whether to return episode data 
+        return_episode_data: Whether to return episode data
         start_seed: The first seed to use for the first individual rollout. For all subsequent rollouts the
             seed is incremented by 1. If not provided, the environments are not manually seeded.
         max_parallel_tasks: Maximum number of parallel tasks to run. If <= 1, runs sequentially.
@@ -852,7 +985,9 @@ def eval_policy_all(
     tasks = [(tg, tid, vec) for tg, group in envs.items() for tid, vec in group.items()]
 
     # accumulators: track metrics at both per-group level and across all groups
-    group_acc: dict[str, dict[str, list]] = defaultdict(lambda: {k: [] for k in ACC_KEYS})
+    group_acc: dict[str, dict[str, list]] = defaultdict(
+        lambda: {k: [] for k in ACC_KEYS}
+    )
     overall: dict[str, list] = {k: [] for k in ACC_KEYS}
     per_task_infos: list[dict] = []
 
@@ -901,7 +1036,9 @@ def eval_policy_all(
         for task_group, task_id, env in tasks:
             tg, tid, metrics = task_runner(task_group, task_id, env)
             _accumulate_to(tg, metrics)
-            per_task_infos.append({"task_group": tg, "task_id": tid, "metrics": metrics})
+            per_task_infos.append(
+                {"task_group": tg, "task_id": tid, "metrics": metrics}
+            )
     else:
         # threaded path: submit all tasks, consume completions on main thread and accumulate there
         with cf.ThreadPoolExecutor(max_workers=max_parallel_tasks) as executor:
@@ -912,7 +1049,9 @@ def eval_policy_all(
             for fut in cf.as_completed(fut2meta):
                 tg, tid, metrics = fut.result()
                 _accumulate_to(tg, metrics)
-                per_task_infos.append({"task_group": tg, "task_id": tid, "metrics": metrics})
+                per_task_infos.append(
+                    {"task_group": tg, "task_id": tid, "metrics": metrics}
+                )
 
     # compute aggregated metrics helper (robust to lists/scalars)
     def _agg_from_list(xs):
@@ -927,7 +1066,11 @@ def eval_policy_all(
         groups_aggregated[group] = {
             "avg_sum_reward": _agg_from_list(acc["sum_rewards"]),
             "avg_max_reward": _agg_from_list(acc["max_rewards"]),
-            "pc_success": _agg_from_list(acc["successes"]) * 100 if acc["successes"] else float("nan"),
+            "pc_success": (
+                _agg_from_list(acc["successes"]) * 100
+                if acc["successes"]
+                else float("nan")
+            ),
             "n_episodes": len(acc["sum_rewards"]),
             "video_paths": list(acc["video_paths"]),
         }
@@ -936,7 +1079,11 @@ def eval_policy_all(
     overall_agg = {
         "avg_sum_reward": _agg_from_list(overall["sum_rewards"]),
         "avg_max_reward": _agg_from_list(overall["max_rewards"]),
-        "pc_success": _agg_from_list(overall["successes"]) * 100 if overall["successes"] else float("nan"),
+        "pc_success": (
+            _agg_from_list(overall["successes"]) * 100
+            if overall["successes"]
+            else float("nan")
+        ),
         "n_episodes": len(overall["sum_rewards"]),
         "eval_s": time.time() - start_t,
         "eval_ep_s": (time.time() - start_t) / max(1, len(overall["sum_rewards"])),
