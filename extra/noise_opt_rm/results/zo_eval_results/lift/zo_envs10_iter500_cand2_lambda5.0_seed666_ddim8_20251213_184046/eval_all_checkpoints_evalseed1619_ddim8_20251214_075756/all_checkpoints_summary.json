@@ -1,0 +1,411 @@
+{
+  "n_checkpoints": 3,
+  "checkpoints": [
+    "1k",
+    "5k",
+    "10k"
+  ],
+  "comparison": {
+    "1k": {
+      "reward_mean": -229.89059982299804,
+      "reward_std": 68.40167536405764,
+      "success_mean": 0.417,
+      "success_std": 0.32156181365330055
+    },
+    "5k": {
+      "reward_mean": -213.47759780883788,
+      "reward_std": 60.75928593095576,
+      "success_mean": 0.47739999999999994,
+      "success_std": 0.25288389957976104
+    },
+    "10k": {
+      "reward_mean": -194.55020294189453,
+      "reward_std": 67.13391365532664,
+      "success_mean": 0.546,
+      "success_std": 0.286947149605405
+    }
+  },
+  "detailed_results": {
+    "1k": {
+      "checkpoint": "1k",
+      "checkpoint_prefix": "checkpoint_1k_evals",
+      "n_seed_folders": 10,
+      "seed_folders": [
+        "seed_666",
+        "seed_667",
+        "seed_668",
+        "seed_669",
+        "seed_670",
+        "seed_671",
+        "seed_672",
+        "seed_673",
+        "seed_674",
+        "seed_675"
+      ],
+      "noise_samples_paths": {
+        "seed_666": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_667": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_668": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_669": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_670": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_671": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_672": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_673": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_674": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+        "seed_675": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy"
+      },
+      "reward_mean_across_seeds": -229.89059982299804,
+      "reward_median_across_seeds": -255.04598999023438,
+      "reward_std_across_seeds": 68.40167536405764,
+      "success_mean_across_seeds": 0.417,
+      "success_median_across_seeds": 0.34099999999999997,
+      "success_std_across_seeds": 0.32156181365330055,
+      "per_seed_results": {
+        "seed_666": {
+          "zo_seed": "666",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -244.16598510742188,
+          "reward_std": 7.954936981201172,
+          "success_mean": 0.42000000000000004,
+          "success_std": 0.039999999999999994
+        },
+        "seed_667": {
+          "zo_seed": "667",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -296.53399658203125,
+          "reward_std": 1.4798206090927124,
+          "success_mean": 0.014000000000000002,
+          "success_std": 0.005477225575051661
+        },
+        "seed_668": {
+          "zo_seed": "668",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -265.9259948730469,
+          "reward_std": 8.022780418395996,
+          "success_mean": 0.22800000000000004,
+          "success_std": 0.04711687595755899
+        },
+        "seed_669": {
+          "zo_seed": "669",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -217.2200164794922,
+          "reward_std": 14.380311965942383,
+          "success_mean": 0.6159999999999999,
+          "success_std": 0.07402702209328699
+        },
+        "seed_670": {
+          "zo_seed": "670",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -161.99600219726562,
+          "reward_std": 9.255415916442871,
+          "success_mean": 0.668,
+          "success_std": 0.05805170109479997
+        },
+        "seed_671": {
+          "zo_seed": "671",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -85.5999984741211,
+          "reward_std": 6.062079429626465,
+          "success_mean": 0.906,
+          "success_std": 0.02509980079602225
+        },
+        "seed_672": {
+          "zo_seed": "672",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -274.4620056152344,
+          "reward_std": 8.132680892944336,
+          "success_mean": 0.26199999999999996,
+          "success_std": 0.07496665925596525
+        },
+        "seed_673": {
+          "zo_seed": "673",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -183.7779998779297,
+          "reward_std": 9.228338241577148,
+          "success_mean": 0.818,
+          "success_std": 0.034205262752974114
+        },
+        "seed_674": {
+          "zo_seed": "674",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -300.0,
+          "reward_std": 0.0,
+          "success_mean": 0.0,
+          "success_std": 0.0
+        },
+        "seed_675": {
+          "zo_seed": "675",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_1k_evals_iter50_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_1k_evals_iter50_envs10_cand2/noise_samples.npy",
+          "reward_mean": -269.2239990234375,
+          "reward_std": 10.939277648925781,
+          "success_mean": 0.238,
+          "success_std": 0.08228000972289685
+        }
+      }
+    },
+    "5k": {
+      "checkpoint": "5k",
+      "checkpoint_prefix": "checkpoint_5k_evals",
+      "n_seed_folders": 10,
+      "seed_folders": [
+        "seed_666",
+        "seed_667",
+        "seed_668",
+        "seed_669",
+        "seed_670",
+        "seed_671",
+        "seed_672",
+        "seed_673",
+        "seed_674",
+        "seed_675"
+      ],
+      "noise_samples_paths": {
+        "seed_666": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_667": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_668": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_669": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_670": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_671": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_672": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_673": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_674": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+        "seed_675": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy"
+      },
+      "reward_mean_across_seeds": -213.47759780883788,
+      "reward_median_across_seeds": -235.91999053955078,
+      "reward_std_across_seeds": 60.75928593095576,
+      "success_mean_across_seeds": 0.47739999999999994,
+      "success_median_across_seeds": 0.44699999999999995,
+      "success_std_across_seeds": 0.25288389957976104,
+      "per_seed_results": {
+        "seed_666": {
+          "zo_seed": "666",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -243.04598999023438,
+          "reward_std": 8.194404602050781,
+          "success_mean": 0.354,
+          "success_std": 0.05319774431308153
+        },
+        "seed_667": {
+          "zo_seed": "667",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -259.3960266113281,
+          "reward_std": 5.157357215881348,
+          "success_mean": 0.34800000000000003,
+          "success_std": 0.02588435821108957
+        },
+        "seed_668": {
+          "zo_seed": "668",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -265.9259948730469,
+          "reward_std": 8.022780418395996,
+          "success_mean": 0.22800000000000004,
+          "success_std": 0.04711687595755899
+        },
+        "seed_669": {
+          "zo_seed": "669",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -228.7939910888672,
+          "reward_std": 10.789586067199707,
+          "success_mean": 0.5219999999999999,
+          "success_std": 0.057619441163551714
+        },
+        "seed_670": {
+          "zo_seed": "670",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -172.8359832763672,
+          "reward_std": 7.266231060028076,
+          "success_mean": 0.578,
+          "success_std": 0.03271085446759223
+        },
+        "seed_671": {
+          "zo_seed": "671",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -85.5999984741211,
+          "reward_std": 6.062079429626465,
+          "success_mean": 0.906,
+          "success_std": 0.02509980079602225
+        },
+        "seed_672": {
+          "zo_seed": "672",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -280.6719970703125,
+          "reward_std": 5.3599348068237305,
+          "success_mean": 0.088,
+          "success_std": 0.023874672772626643
+        },
+        "seed_673": {
+          "zo_seed": "673",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -183.7779998779297,
+          "reward_std": 9.228338241577148,
+          "success_mean": 0.818,
+          "success_std": 0.034205262752974114
+        },
+        "seed_674": {
+          "zo_seed": "674",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -163.88600158691406,
+          "reward_std": 16.804275512695312,
+          "success_mean": 0.5599999999999999,
+          "success_std": 0.06964194138592059
+        },
+        "seed_675": {
+          "zo_seed": "675",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_5k_evals_iter250_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_5k_evals_iter250_envs10_cand2/noise_samples.npy",
+          "reward_mean": -250.8419952392578,
+          "reward_std": 4.081318378448486,
+          "success_mean": 0.372,
+          "success_std": 0.03271085446759226
+        }
+      }
+    },
+    "10k": {
+      "checkpoint": "10k",
+      "checkpoint_prefix": "checkpoint_10k_evals",
+      "n_seed_folders": 10,
+      "seed_folders": [
+        "seed_666",
+        "seed_667",
+        "seed_668",
+        "seed_669",
+        "seed_670",
+        "seed_671",
+        "seed_672",
+        "seed_673",
+        "seed_674",
+        "seed_675"
+      ],
+      "noise_samples_paths": {
+        "seed_666": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_667": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_668": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_669": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_670": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_671": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_672": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_673": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_674": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+        "seed_675": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy"
+      },
+      "reward_mean_across_seeds": -194.55020294189453,
+      "reward_median_across_seeds": -195.48200225830078,
+      "reward_std_across_seeds": 67.13391365532664,
+      "success_mean_across_seeds": 0.546,
+      "success_median_across_seeds": 0.5349999999999999,
+      "success_std_across_seeds": 0.286947149605405,
+      "per_seed_results": {
+        "seed_666": {
+          "zo_seed": "666",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_666/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -243.1540069580078,
+          "reward_std": 4.646360874176025,
+          "success_mean": 0.332,
+          "success_std": 0.027748873851023214
+        },
+        "seed_667": {
+          "zo_seed": "667",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_667/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -259.3960266113281,
+          "reward_std": 5.157357215881348,
+          "success_mean": 0.34800000000000003,
+          "success_std": 0.02588435821108957
+        },
+        "seed_668": {
+          "zo_seed": "668",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_668/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -192.18600463867188,
+          "reward_std": 5.114459037780762,
+          "success_mean": 0.634,
+          "success_std": 0.039115214431215926
+        },
+        "seed_669": {
+          "zo_seed": "669",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_669/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -158.4860076904297,
+          "reward_std": 10.290831565856934,
+          "success_mean": 0.8640000000000001,
+          "success_std": 0.04722287581247039
+        },
+        "seed_670": {
+          "zo_seed": "670",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_670/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -172.8359832763672,
+          "reward_std": 7.266231060028076,
+          "success_mean": 0.578,
+          "success_std": 0.03271085446759223
+        },
+        "seed_671": {
+          "zo_seed": "671",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_671/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -85.5999984741211,
+          "reward_std": 6.062079429626465,
+          "success_mean": 0.906,
+          "success_std": 0.02509980079602225
+        },
+        "seed_672": {
+          "zo_seed": "672",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_672/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -280.6719970703125,
+          "reward_std": 5.3599348068237305,
+          "success_mean": 0.088,
+          "success_std": 0.023874672772626643
+        },
+        "seed_673": {
+          "zo_seed": "673",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_673/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -98.74199676513672,
+          "reward_std": 6.729122638702393,
+          "success_mean": 0.922,
+          "success_std": 0.02949576240750523
+        },
+        "seed_674": {
+          "zo_seed": "674",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_674/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -255.65200805664062,
+          "reward_std": 4.092334270477295,
+          "success_mean": 0.29600000000000004,
+          "success_std": 0.02701851217221259
+        },
+        "seed_675": {
+          "zo_seed": "675",
+          "checkpoint_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_10k_evals_iter500_envs10_cand2",
+          "noise_samples_path": "/lam-248-lambdafs/teams/proj-compose/opatil/src/dsrl/logs_res_rm/zo_ticket_results/lift/zo_envs10_iter500_cand2_lambda5.0_seed666_ddim8_20251213_184046/seed_675/checkpoint_10k_evals_iter500_envs10_cand2/noise_samples.npy",
+          "reward_mean": -198.7779998779297,
+          "reward_std": 9.763486862182617,
+          "success_mean": 0.492,
+          "success_std": 0.04919349550499539
+        }
+      }
+    }
+  }
+}

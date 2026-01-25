@@ -1,0 +1,45 @@
+{
+  "n_st2_indices": 3,
+  "st1_idx": 1,
+  "st2_indices": [
+    0,
+    1,
+    2
+  ],
+  "reward_thresholds": {
+    "1": -1.9,
+    "2": -1
+  },
+  "reward_mean_across_indices": -276.67884318033856,
+  "reward_std_across_indices": 0.7628613487446242,
+  "success_mean_across_indices": 0.4166666666666667,
+  "success_std_across_indices": 0.00305505046330392,
+  "st1_success_mean_across_indices": 0.57,
+  "st1_success_std_across_indices": 0.0,
+  "per_index_results": {
+    "0": {
+      "reward_mean": -276.34173583984375,
+      "reward_std": 8.443805694580078,
+      "success_mean": 0.42000000000000004,
+      "success_std": 0.037947331922020544,
+      "st1_success_mean": 0.57,
+      "st1_success_std": 0.05099019513592785
+    },
+    "1": {
+      "reward_mean": -276.1426086425781,
+      "reward_std": 7.260695457458496,
+      "success_mean": 0.41600000000000004,
+      "success_std": 0.019595917942265423,
+      "st1_success_mean": 0.57,
+      "st1_success_std": 0.05099019513592785
+    },
+    "2": {
+      "reward_mean": -277.55218505859375,
+      "reward_std": 9.233305931091309,
+      "success_mean": 0.414,
+      "success_std": 0.036110940170535566,
+      "st1_success_mean": 0.57,
+      "st1_success_std": 0.05099019513592785
+    }
+  }
+}

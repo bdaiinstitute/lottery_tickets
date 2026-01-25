@@ -1,0 +1,88 @@
+{
+  "n_noise_indices": 11,
+  "eval_indices": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+  ],
+  "reward_mean_across_indices": -121.48945617675781,
+  "reward_std_across_indices": 27.535624432878183,
+  "success_mean_across_indices": 0.8567272727272727,
+  "success_std_across_indices": 0.13020375640440707,
+  "per_index_results": {
+    "0": {
+      "reward_mean": -136.7659912109375,
+      "reward_std": 15.152153968811035,
+      "success_mean": 0.8640000000000001,
+      "success_std": 0.058566201857385265
+    },
+    "1": {
+      "reward_mean": -76.28401184082031,
+      "reward_std": 3.059089422225952,
+      "success_mean": 0.992,
+      "success_std": 0.010954451150103333
+    },
+    "2": {
+      "reward_mean": -118.27000427246094,
+      "reward_std": 11.215112686157227,
+      "success_mean": 0.852,
+      "success_std": 0.05118593556827892
+    },
+    "3": {
+      "reward_mean": -111.55000305175781,
+      "reward_std": 6.27374792098999,
+      "success_mean": 0.874,
+      "success_std": 0.03209361307176246
+    },
+    "4": {
+      "reward_mean": -118.05999755859375,
+      "reward_std": 7.214649677276611,
+      "success_mean": 0.9719999999999999,
+      "success_std": 0.02588435821108955
+    },
+    "5": {
+      "reward_mean": -124.43000793457031,
+      "reward_std": 9.999861717224121,
+      "success_mean": 0.724,
+      "success_std": 0.04037325847637269
+    },
+    "6": {
+      "reward_mean": -147.09400939941406,
+      "reward_std": 11.118780136108398,
+      "success_mean": 0.8300000000000001,
+      "success_std": 0.05873670062235366
+    },
+    "7": {
+      "reward_mean": -101.42399597167969,
+      "reward_std": 9.100959777832031,
+      "success_mean": 0.9359999999999999,
+      "success_std": 0.028809720581775836
+    },
+    "8": {
+      "reward_mean": -116.47200012207031,
+      "reward_std": 10.134137153625488,
+      "success_mean": 0.8939999999999999,
+      "success_std": 0.05029910535983717
+    },
+    "9": {
+      "reward_mean": -182.8000030517578,
+      "reward_std": 16.93345069885254,
+      "success_mean": 0.536,
+      "success_std": 0.07300684899377591
+    },
+    "10": {
+      "reward_mean": -103.23399353027344,
+      "reward_std": 6.776423454284668,
+      "success_mean": 0.95,
+      "success_std": 0.03162277660168377
+    }
+  }
+}
