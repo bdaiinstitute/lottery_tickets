@@ -28,6 +28,14 @@ python evaluate.py \
         --output_dir=10000_libero_object_tickets \
         --noise_path="new"
 
+Important changes:
+- Batching along the task instance dimension to evaluate tickets on multiple instances of the same task parallely.
+- Added async env support for parallel libero envs making sim step faster: monkey patching needed
+- Ep length base dording of tickets if success rate/reward are same.
+
+Implementation considerations:
+- n_episodes is the number of noises you want to evaluate. Internally set to 1 so that instances are batched.
+- batch_size is the number of parallel envs to run. Should be set to number of instances of the task you want to eval on.
 """
 # set os variables for libero async
 import os
@@ -722,7 +730,13 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         else:
             noise = loaded_noise
             print(f"Loaded noise from path: {cfg.noise_path}!")
-        output_dir = cfg.output_dir
+
+        # Create informative folder name for loaded ticket evaluation
+        timestamp = time.strftime("%Y%m%d_%H%M%S")
+        noise_path_obj = Path(cfg.noise_path)
+        ticket_name = noise_path_obj.stem  # filename without extension
+        folder_name = f"{cfg.env.task}_ticket_{ticket_name}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
+        output_dir = cfg.output_dir / folder_name
     else:
         raise RuntimeError(
             "eval_mode must be one of NEW_TICKET, LOAD_TICKET, or ORIGINAL_POLICY"
