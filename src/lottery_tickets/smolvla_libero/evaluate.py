@@ -36,18 +36,20 @@ Important changes:
 Implementation considerations:
 - n_episodes is the number of noises you want to evaluate. Internally set to 1 so that instances are batched.
 - batch_size is the number of parallel envs to run. Should be set to number of instances of the task you want to eval on.
+
+For evaluating a ticket:
+CUDA_VISIBLE_DEVICES=5 python evaluate.py --policy.path="HuggingFaceVLA/smolvla_libero" --env.type=libero --env.task=libero_spatial --eval.batch_size=16 --eval.n_episodes=160 --output_dir=outputs/libero_spatial_tickets/ticket_results --eval_mode=LOAD_TICKET --seed=1619 --noise_path
 """
 # set os variables for libero async
 import os
 
 os.environ["MUJOCO_GL"] = "egl"
-import multiprocessing as mp
-
-if __name__ == "__main__":
-    try:
-        mp.set_start_method("spawn", force=True)
-    except RuntimeError:
-        pass  # Already set
+# import multiprocessing as mp
+# if __name__ == "__main__":
+#     try:
+#         mp.set_start_method("spawn", force=True)
+#     except RuntimeError:
+#         pass  # Already set
 
 import concurrent.futures as cf
 import json
@@ -689,7 +691,7 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     set_seed(cfg.seed)
 
     logging.info("Making environment.")
-    envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=True)
+    envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=False)
 
     logging.info("Making policy.")
 
@@ -734,8 +736,10 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         # Create informative folder name for loaded ticket evaluation
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         noise_path_obj = Path(cfg.noise_path)
-        ticket_name = noise_path_obj.stem  # filename without extension
-        folder_name = f"{cfg.env.task}_ticket_{ticket_name}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
+        ticket_hash = (
+            noise_path_obj.parent.name
+        )  # Get the parent folder name (ticket hash)
+        folder_name = f"{cfg.env.task}_ticket_{ticket_hash}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
         output_dir = cfg.output_dir / folder_name
     else:
         raise RuntimeError(
@@ -788,6 +792,25 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                 max_parallel_tasks=cfg.env.max_parallel_tasks,
             )
             all_results = [info]
+
+            # Save results for single evaluation modes
+            output_dir.mkdir(parents=True, exist_ok=True)
+
+            # Save overall metrics
+            overall_metrics = {
+                "eval_mode": cfg.eval_mode.value,
+                "overall_metrics": info["overall"],
+                "per_group_metrics": info["per_group"],
+                "per_task_metrics": info["per_task"],
+            }
+            with open(Path(output_dir) / "evaluation_results.json", "w") as f:
+                json.dump(overall_metrics, f, indent=2)
+
+            # If noise was used, save it
+            if noise is not None:
+                torch.save(noise[0:1], Path(output_dir) / "initial_noise.pt")
+
+            logging.info(f"Saved evaluation results to {output_dir}")
         else:
             # Evaluate n_episodes different noises, each on the same environments
             all_results = []
