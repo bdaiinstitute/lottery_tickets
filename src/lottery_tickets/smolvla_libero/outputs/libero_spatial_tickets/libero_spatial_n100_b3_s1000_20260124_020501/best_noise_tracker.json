@@ -1,0 +1,63 @@
+{
+  "current_iteration": 107,
+  "total_iterations": 5000,
+  "total_time_elapsed_seconds": 128291.81846117973,
+  "latest_iteration_time_seconds": 1214.878808259964,
+  "best_overall": {
+    "success_rate": 70.0,
+    "avg_episode_length": 168.4,
+    "noise_idx": 92
+  },
+  "best_per_task": {
+    "libero_spatial_0": {
+      "success_rate": 0.0,
+      "avg_episode_length": 280.0,
+      "noise_idx": 0
+    },
+    "libero_spatial_1": {
+      "success_rate": 100.0,
+      "avg_episode_length": 98.0,
+      "noise_idx": 18
+    },
+    "libero_spatial_2": {
+      "success_rate": 100.0,
+      "avg_episode_length": 89.0,
+      "noise_idx": 18
+    },
+    "libero_spatial_3": {
+      "success_rate": 100.0,
+      "avg_episode_length": 72.0,
+      "noise_idx": 18
+    },
+    "libero_spatial_4": {
+      "success_rate": 100.0,
+      "avg_episode_length": 124.0,
+      "noise_idx": 39
+    },
+    "libero_spatial_5": {
+      "success_rate": 100.0,
+      "avg_episode_length": 85.0,
+      "noise_idx": 19
+    },
+    "libero_spatial_6": {
+      "success_rate": 100.0,
+      "avg_episode_length": 102.0,
+      "noise_idx": 39
+    },
+    "libero_spatial_7": {
+      "success_rate": 100.0,
+      "avg_episode_length": 98.0,
+      "noise_idx": 18
+    },
+    "libero_spatial_8": {
+      "success_rate": 0.0,
+      "avg_episode_length": 280.0,
+      "noise_idx": 0
+    },
+    "libero_spatial_9": {
+      "success_rate": 100.0,
+      "avg_episode_length": 114.0,
+      "noise_idx": 18
+    }
+  }
+}

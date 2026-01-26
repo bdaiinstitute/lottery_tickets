@@ -1,0 +1,63 @@
+{
+  "current_iteration": 109,
+  "total_iterations": 5000,
+  "total_time_elapsed_seconds": 128271.64094567299,
+  "latest_iteration_time_seconds": 1182.7531175613403,
+  "best_overall": {
+    "success_rate": 50.0,
+    "avg_episode_length": 220.9,
+    "noise_idx": 12
+  },
+  "best_per_task": {
+    "libero_object_0": {
+      "success_rate": 100.0,
+      "avg_episode_length": 134.0,
+      "noise_idx": 79
+    },
+    "libero_object_1": {
+      "success_rate": 100.0,
+      "avg_episode_length": 124.0,
+      "noise_idx": 92
+    },
+    "libero_object_2": {
+      "success_rate": 100.0,
+      "avg_episode_length": 97.0,
+      "noise_idx": 44
+    },
+    "libero_object_3": {
+      "success_rate": 100.0,
+      "avg_episode_length": 104.0,
+      "noise_idx": 18
+    },
+    "libero_object_4": {
+      "success_rate": 100.0,
+      "avg_episode_length": 138.0,
+      "noise_idx": 18
+    },
+    "libero_object_5": {
+      "success_rate": 100.0,
+      "avg_episode_length": 125.0,
+      "noise_idx": 36
+    },
+    "libero_object_6": {
+      "success_rate": 100.0,
+      "avg_episode_length": 144.0,
+      "noise_idx": 57
+    },
+    "libero_object_7": {
+      "success_rate": 100.0,
+      "avg_episode_length": 117.0,
+      "noise_idx": 0
+    },
+    "libero_object_8": {
+      "success_rate": 100.0,
+      "avg_episode_length": 142.0,
+      "noise_idx": 22
+    },
+    "libero_object_9": {
+      "success_rate": 100.0,
+      "avg_episode_length": 125.0,
+      "noise_idx": 19
+    }
+  }
+}
