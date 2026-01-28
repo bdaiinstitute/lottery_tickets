@@ -23,8 +23,8 @@ def load_ticket_results(task_name: str, results_path: Path) -> TicketResult | No
 
     ticket_name = results_path.name
     epsilons = [float(results_path.parent.parent.name)]
-    rewards_path = results_path / "reward_matrix.npy"
-    successes_path = results_path / "success_matrix.npy"
+    rewards_path = results_path / "rewards.npy"
+    successes_path = results_path / "successes.npy"
     if not rewards_path.exists() or not successes_path.exists():
         print(
             f"Warning! {results_path} doesn't contain the expected results files; skipping!"
