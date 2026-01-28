@@ -795,16 +795,38 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
 
             # Save results for single evaluation modes
             output_dir.mkdir(parents=True, exist_ok=True)
+            for result in all_results:
+                for task_info in result["per_task"]:
+                    task_info["metrics"].pop("episode_lengths", None)
 
-            # Save overall metrics
-            overall_metrics = {
-                "eval_mode": cfg.eval_mode.value,
-                "overall_metrics": info["overall"],
-                "per_group_metrics": info["per_group"],
-                "per_task_metrics": info["per_task"],
+            # Compute average episode length across all tasks
+            all_ep_lengths = []
+            for result in all_results:
+                for task_info in result["per_task"]:
+                    if "episode_lengths" in task_info["metrics"]:
+                        all_ep_lengths.extend(task_info["metrics"]["episode_lengths"])
+            avg_episode_length = float(np.mean(all_ep_lengths)) if all_ep_lengths else 0.0
+
+            eval_info = {
+                "all_results": all_results,
+                "summary": {
+                    "mean_success_rate": info["overall"]["pc_success"],
+                    "std_success_rate": 0.0,
+                    "n_noise_evaluations": 1,
+                },
+                "config": {
+                    "eval_mode": cfg.eval_mode.value,
+                    "seed": cfg.seed,
+                    "noise_path": str(cfg.noise_path) if cfg.noise_path else None,
+                    "env_task": cfg.env.task,
+                    "batch_size": cfg.eval.batch_size,
+                    "n_episodes": cfg.eval.n_episodes,
+                    "policy_path": str(cfg.policy.pretrained_path),
+                    "avg_episode_length": avg_episode_length,
+                },
             }
-            with open(Path(output_dir) / "evaluation_results.json", "w") as f:
-                json.dump(overall_metrics, f, indent=2)
+            with open(Path(output_dir) / "eval_info.json", "w") as f:
+                json.dump(eval_info, f, indent=2)
 
             # If noise was used, save it
             if noise is not None:
