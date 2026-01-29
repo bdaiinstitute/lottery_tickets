@@ -3,8 +3,8 @@
 #SBATCH -c 10            # minimum number of cores
 #SBATCH -t 0-12:00:00   # time in d-hh:mm:ss
 #SBATCH --mem=120G
-#SBATCH -p general      # partition
-#SBATCH -q private      # QOS
+#SBATCH -p public      # partition
+#SBATCH -q public      # QOS
 #SBATCH --gres=gpu:a100:1
 #SBATCH -o slurm.%j.out # file to save job's STDOUT (%j = JobId)
 #SBATCH -e slurm.%j.err # file to save job's STDERR (%j = JobId)

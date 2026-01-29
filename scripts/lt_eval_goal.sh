@@ -25,5 +25,6 @@ python evaluate.py \
     --eval.batch_size=10 \
     --eval.n_episodes=50 \
     --output_dir=outputs/libero_goal_tickets/ticket_results \
-    --eval_mode=ORIGINAL_POLICY \
-    --seed=1619
+    --eval_mode=LOAD_TICKET \
+    --seed=1619 \
+    --noise_path "$NOISE_PATH"

@@ -14,6 +14,10 @@
 # Activate your virtual environment
 source activate lottery_tickets
 cd $HOME/src/lottery_tickets/src/lottery_tickets/smolvla_libero/
+
+# Use noise_path from argument if provided, otherwise use default
+NOISE_PATH="${1:-/home/opatil3/src/lottery_tickets/src/lottery_tickets/smolvla_libero/golden_tickets/libero_object_tickets/015a7c80cf9842ebbc2fdd2f4a766025/initial_noise.pt}"
+
 python evaluate.py \
     --policy.path="HuggingFaceVLA/smolvla_libero" \
     --env.type=libero \
@@ -21,6 +25,5 @@ python evaluate.py \
     --eval.batch_size=10 \
     --eval.n_episodes=50 \
     --output_dir=outputs/libero_object_tickets/ticket_results \
-    --eval_mode=LOAD_TICKET \
+    --eval_mode=ORIGINAL_POLICY \
     --seed=1619 \
-    --noise_path /home/opatil3/src/lottery_tickets/src/lottery_tickets/smolvla_libero/golden_tickets/libero_object_tickets/ecf051d3ed474433a505d46dc007e9a6/initial_noise.pt

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Submit evaluation jobs for all spatial tickets
 
-TICKET_DIR="/home/opatil3/src/lottery_tickets/src/lottery_tickets/smolvla_libero/golden_tickets/libero_spatial_tickets"
+TICKET_DIR="/home/opatil3/src/lottery_tickets/src/lottery_tickets/smolvla_libero/new_golden_tickets/libero_spatial_tickets"
 
 for ticket_folder in "$TICKET_DIR"/*/; do
     ticket_hash=$(basename "$ticket_folder")
