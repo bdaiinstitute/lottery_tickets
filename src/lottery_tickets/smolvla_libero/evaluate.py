@@ -31,10 +31,10 @@ python evaluate.py \
 Important changes:
 - Batching along the task instance dimension to evaluate tickets on multiple instances of the same task parallely.
 - Added async env support for parallel libero envs making sim step faster: monkey patching needed
-- Ep length base dording of tickets if success rate/reward are same.
+- Ep length based ordering of tickets if success rate/reward are same.
 
-Implementation considerations:
-- n_episodes is the number of noises you want to evaluate. Internally set to 1 so that instances are batched.
+Implementation considerations for NEW_TICKET mode:
+- n_episodes is the number of noises you want to evaluate. Internally set to batch_size so that instances are batched.
 - batch_size is the number of parallel envs to run. Should be set to number of instances of the task you want to eval on.
 
 For evaluating a ticket:
@@ -681,7 +681,20 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         cfg: Evaluation pipeline configuration.
     """
     global noise
-    logging.info(pformat(asdict(cfg)))
+    
+    # Convert config to dict and stringify Path objects for JSON compatibility- done cause logging pformat has issues with Path objects
+    cfg_dict = asdict(cfg)
+    def _stringify_paths(obj):
+        if isinstance(obj, Path):
+            return str(obj)
+        elif isinstance(obj, dict):
+            return {k: _stringify_paths(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [_stringify_paths(item) for item in obj]
+        return obj
+    cfg_dict = _stringify_paths(cfg_dict)
+    
+    logging.info(pformat(cfg_dict))
 
     # Check device is available
     device = get_safe_torch_device(cfg.policy.device, log=True)
@@ -690,7 +703,7 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     torch.backends.cuda.matmul.allow_tf32 = True
     set_seed(cfg.seed)
 
-    logging.info("Making environment.")
+    logging.info("Making environment.") # uses dummyvecenv
     envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=False)
 
     logging.info("Making policy.")
@@ -732,6 +745,12 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         else:
             noise = loaded_noise
             print(f"Loaded noise from path: {cfg.noise_path}!")
+
+        if noise.shape[0] != cfg.eval.batch_size:
+            raise ValueError(
+                f"Loaded noise batch dimension {noise.shape[0]} does not match eval.batch_size={cfg.eval.batch_size}. "
+                "Provide a (1, T, A) noise tensor to be repeated or a (batch_size, T, A) tensor."
+            )
 
         # Create informative folder name for loaded ticket evaluation
         timestamp = time.strftime("%Y%m%d_%H%M%S")
@@ -795,10 +814,6 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
 
             # Save results for single evaluation modes
             output_dir.mkdir(parents=True, exist_ok=True)
-            for result in all_results:
-                for task_info in result["per_task"]:
-                    task_info["metrics"].pop("episode_lengths", None)
-
             # Compute average episode length across all tasks
             all_ep_lengths = []
             for result in all_results:
@@ -806,6 +821,10 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                     if "episode_lengths" in task_info["metrics"]:
                         all_ep_lengths.extend(task_info["metrics"]["episode_lengths"])
             avg_episode_length = float(np.mean(all_ep_lengths)) if all_ep_lengths else 0.0
+
+            for result in all_results:
+                for task_info in result["per_task"]:
+                    task_info["metrics"].pop("episode_lengths", None)
 
             eval_info = {
                 "all_results": all_results,
@@ -868,7 +887,8 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                     env_postprocessor=env_postprocessor,
                     preprocessor=preprocessor,
                     postprocessor=postprocessor,
-                    n_episodes=1,
+                    # Using n_episodes=1 would incorrectly keep only env 0 due to slicing in `eval_policy`.
+                    n_episodes=cfg.eval.batch_size,
                     max_episodes_rendered=10,
                     videos_dir=episode_output_dir / "videos",
                     start_seed=cfg.seed,
