@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="1200" height="600"
+     viewBox="0 0 1200 600">
+
+  <defs>
+    <!-- Metallic gold highlight (very subtle) -->
+    <linearGradient id="goldShine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%"  stop-color="#ffffff" stop-opacity="0.00"/>
+      <stop offset="30%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.35"/>
+      <stop offset="70%" stop-color="#ffffff" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.00"/>
+    </linearGradient>
+
+    <!-- Soft shadow -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14"
+                    flood-color="#000" flood-opacity="0.28"/>
+    </filter>
+
+    <!-- Ticket shape -->
+    <path id="ticketShape"
+      d="
+        M200,120
+        Q200,80 240,80
+        H960
+        Q1000,80 1000,120
+        V210
+        C880,260 880,340 1000,390
+        V480
+        Q1000,520 960,520
+        H240
+        Q200,520 200,480
+        V390
+        C320,340 320,260 200,210
+        Z
+      " />
+
+    <clipPath id="clipTicket">
+      <use href="#ticketShape"/>
+    </clipPath>
+  </defs>
+
+  <!-- Base ticket (dark gold) -->
+  <use href="#ticketShape"
+       fill="#b8860b"
+       filter="url(#shadow)"/>
+
+  <!-- Inner border -->
+  <path
+    d="
+      M230,140
+      Q230,110 260,110
+      H940
+      Q970,110 970,140
+      V220
+      C860,265 860,335 970,380
+      V460
+      Q970,490 940,490
+      H260
+      Q230,490 230,460
+      V380
+      C340,335 340,265 230,220
+      Z
+    "
+    fill="none"
+    stroke="#6f4f00"
+    stroke-width="6"
+    opacity="0.6"
+  />
+
+  <!-- Shine overlay -->
+  <g clip-path="url(#clipTicket)">
+    <rect x="160" y="80" width="880" height="440"
+          fill="url(#goldShine)"
+          opacity="0.9"/>
+  </g>
+
+</svg>
