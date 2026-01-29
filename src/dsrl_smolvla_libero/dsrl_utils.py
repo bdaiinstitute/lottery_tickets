@@ -28,6 +28,9 @@ class LoggingCallback(BaseCallback):
         action_chunk=50,
         log_freq=1000,
         use_wandb=True,
+        record_video=False,
+        video_fps=20,
+        video_every_eval=10,
         eval_env=None,
         eval_freq=70,
         eval_episodes=2,
@@ -44,6 +47,9 @@ class LoggingCallback(BaseCallback):
         self.episode_rewards = []
         self.episode_lengths = []
         self.use_wandb = use_wandb
+        self.record_video = record_video
+        self.video_fps = video_fps
+        self.video_every_eval = video_every_eval
         self.eval_env = eval_env
         self.eval_episodes = eval_episodes
         self.eval_freq = eval_freq
@@ -120,14 +126,36 @@ class LoggingCallback(BaseCallback):
                 success, rews = [], []
                 rew_total, total_ep = 0, 0
                 rew_ep = np.zeros(self.num_eval_env)
+
+                should_log_video = (
+                    self.use_wandb
+                    and self.record_video
+                    and (self.log_count % self.video_every_eval == 0)
+                )
+                video_frames = []
                 for i in range(self.eval_episodes):
                     obs = env.reset()
-                    success_i = np.zeros(obs.shape[0])
+                    if isinstance(obs, dict):
+                        n_envs = obs[list(obs.keys())[0]].shape[0]
+                    else:
+                        n_envs = obs.shape[0]
+                    success_i = np.zeros(n_envs)
                     r = []
                     for _ in range(self.max_steps):
                         action, _ = agent.predict(obs, deterministic=True)
                         next_obs, reward, done, info = env.step(action)
                         obs = next_obs
+
+                        if should_log_video and i == 0 and isinstance(obs, dict):
+                            for v in obs.values():
+                                if (
+                                    isinstance(v, np.ndarray)
+                                    and v.dtype == np.uint8
+                                    and v.ndim == 4
+                                ):
+                                    video_frames.append(v[0])
+                                    break
+
                         rew_ep += reward
                         rew_total += sum(rew_ep[done])
                         rew_ep[done] = 0
@@ -143,14 +171,18 @@ class LoggingCallback(BaseCallback):
                 else:
                     avg_rew = 0
                 if self.use_wandb:
-                    wandb.log(
-                        {
-                            "eval/success_rate": success_rate,
-                            "eval/reward": avg_rew,
-                            "eval/timesteps": self.total_timesteps,
-                        },
-                        step=self.log_count,
-                    )
+                    payload = {
+                        "eval/success_rate": success_rate,
+                        "eval/reward": avg_rew,
+                        "eval/timesteps": self.total_timesteps,
+                    }
+                    if should_log_video and len(video_frames) > 0:
+                        payload["eval/video"] = wandb.Video(
+                            np.stack(video_frames, axis=0),
+                            fps=self.video_fps,
+                            format="gif",
+                        )
+                    wandb.log(payload, step=self.log_count)
 
     def set_timesteps(self, timesteps):
         self.total_timesteps = timesteps
@@ -158,22 +190,31 @@ class LoggingCallback(BaseCallback):
 
 def collect_rollouts(model, env, num_steps, base_policy, cfg):
     """Collect initial rollouts using random noise for DSRL training.
-    Fixed DSRL bug here.
+    Fixed DSRL bugs here:
     env is wrapped by SmolVLAPolicyEnvWrapper which expects noise as actions.
     The wrapper internally calls base_policy.predict_action_chunk(obs, noise).
+
+    If cfg.noise_shrink is True, noise is sampled only for action_dim and replicated
+    across the chunk dimension, reducing the effective noise space.
     """
     obs = env.reset()
     total_episodes = 0
+    # Use chunk_size for the full action chunk (not n_action_steps which is for execution)
+    chunk_size = base_policy.config.chunk_size
+    action_dim = base_policy.config.max_action_dim
+
     for i in range(num_steps):
         # Generate random noise in the action space expected by SAC
-        noise = torch.randn(
-            cfg.n_envs, cfg.policy.n_action_steps, base_policy.config.max_action_dim
-        ).to(device=cfg.device)
-        # Clip noise to action magnitude
-        noise[noise < -cfg.train.action_magnitude] = -cfg.train.action_magnitude
-        noise[noise > cfg.train.action_magnitude] = cfg.train.action_magnitude
-        # Flatten noise to match SAC's action space
-        noise_flat = noise.reshape(cfg.n_envs, -1).cpu().numpy()
+        if cfg.noise_shrink:
+            noise = torch.randn(cfg.n_envs, action_dim).to(device=cfg.device)
+            noise = noise.clamp(-cfg.train.action_magnitude, cfg.train.action_magnitude)
+            noise_flat = noise.cpu().numpy()
+        else:
+            noise = torch.randn(cfg.n_envs, chunk_size, action_dim).to(
+                device=cfg.device
+            )
+            noise = noise.clamp(-cfg.train.action_magnitude, cfg.train.action_magnitude)
+            noise_flat = noise.reshape(cfg.n_envs, -1).cpu().numpy()
         # Scale to SAC's action space (the wrapper will unscale it)
         action_store = model.policy.scale_action(noise_flat)
 
@@ -195,9 +236,9 @@ def collect_rollouts(model, env, num_steps, base_policy, cfg):
     model.replay_buffer.final_offline_step()
 
     # Return total steps and episodes collected
-    total_steps = num_steps * cfg.n_envs * cfg.policy.n_action_steps
+    total_steps = num_steps * cfg.n_envs * chunk_size
     return total_steps, int(total_episodes)
-    
+
 
 class CheckpointCallbackOnEpisodes(BaseCallback):
     """Callback for saving a model at specific episode milestones (1k, 5k, 10k).

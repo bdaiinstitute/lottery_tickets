@@ -18,7 +18,7 @@ class TrainConfig:
 
     tau: float = 0.005
     actor_lr: float = 3e-4
-    batch_size: int = 16
+    batch_size: int = 256
     train_freq: int = 1
     utd: int = 20
     use_layer_norm: bool = True
@@ -42,6 +42,15 @@ class WandbConfig:
 
 
 @dataclass
+class VideoConfig:
+    """Video logging configuration."""
+
+    enabled: bool = False
+    fps: int = 20
+    every_eval: int = 10
+
+
+@dataclass
 class DSRLLiberoConfig:
     """Main configuration for DSRL training on Libero."""
 
@@ -53,6 +62,7 @@ class DSRLLiberoConfig:
     # Training settings
     train: TrainConfig = field(default_factory=TrainConfig)
     wandb: WandbConfig = field(default_factory=WandbConfig)
+    video: VideoConfig = field(default_factory=VideoConfig)
 
     # General settings
     name: str = "libero_dsrl"
@@ -62,14 +72,20 @@ class DSRLLiberoConfig:
     device: str = "cuda:0"
     use_wandb: bool = True
     load_offline_data: bool = False
-    eval_interval: int = 3000
-    num_evals: int = 200
+    eval_interval: int = 50000
+    num_evals: int = 20
     save_model_interval: int = 50000
     save_replay_buffer: bool = False
-    n_envs: int = 4
-    n_eval_envs: int = 25
+    n_envs: int = 16
+    n_eval_envs: int = 10
     reward_offset: float = 1.0
-    max_episode_steps: int = 280
+    max_episode_steps: int = 300
+    task_id: int = 0  # Task ID within the task suite
+    image_only: bool = False  # If True, SAC policy only uses images (no robot state)
+    state_only: bool = False  # If True, SAC policy only uses robot state (no images)
+    noise_shrink: bool = (
+        False  # If True, sample noise only for action_dim and replicate across chunk_dim
+    )
 
     def __post_init__(self) -> None:
         """Load policy config from pretrained path if provided."""
@@ -91,7 +107,7 @@ class DSRLLiberoConfig:
             now = dt.datetime.now()
             task_name = getattr(self.env, "task", "libero")
             log_dir = f"{task_name}_{self.algorithm}_{now:%Y-%m-%d}_{now:%H-%M-%S}_{self.seed}"
-            self.logdir = Path("./logs_libero_dsrl") / log_dir
+            self.logdir = Path("/mount/scratch3/omkar/dsrl/") / log_dir
 
     @classmethod
     def __get_path_fields__(cls) -> list[str]:
