@@ -178,7 +178,6 @@ class LiberoPixelOnlyExtractor(BaseFeaturesExtractor):
             n_channels = img_space.shape[0]
             encoder = self._create_cnn(n_channels, cnn_features_dim)
             self.image_encoders[key.replace(".", "_")] = encoder
-            break
 
         # Final projection
         total_dim = cnn_features_dim
@@ -217,7 +216,6 @@ class LiberoPixelOnlyExtractor(BaseFeaturesExtractor):
                 img = img.float() / 255.0
                 encoder_key = img_key.replace(".", "_")
                 features.append(self.image_encoders[encoder_key](img))
-                break
 
         combined = torch.cat(features, dim=1)
         return self.final_projection(combined)
