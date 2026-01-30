@@ -681,9 +681,10 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         cfg: Evaluation pipeline configuration.
     """
     global noise
-    
+
     # Convert config to dict and stringify Path objects for JSON compatibility- done cause logging pformat has issues with Path objects
     cfg_dict = asdict(cfg)
+
     def _stringify_paths(obj):
         if isinstance(obj, Path):
             return str(obj)
@@ -692,8 +693,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         elif isinstance(obj, list):
             return [_stringify_paths(item) for item in obj]
         return obj
+
     cfg_dict = _stringify_paths(cfg_dict)
-    
+
     logging.info(pformat(cfg_dict))
 
     # Check device is available
@@ -703,7 +705,7 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
     torch.backends.cuda.matmul.allow_tf32 = True
     set_seed(cfg.seed)
 
-    logging.info("Making environment.") # uses dummyvecenv
+    logging.info("Making environment.")  # uses dummyvecenv
     envs = make_env(cfg.env, n_envs=cfg.eval.batch_size, use_async_envs=False)
 
     logging.info("Making policy.")
@@ -756,8 +758,11 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         timestamp = time.strftime("%Y%m%d_%H%M%S")
         noise_path_obj = Path(cfg.noise_path)
         ticket_hash = (
-            noise_path_obj.parent.name
-        )  # Get the parent folder name (ticket hash)
+            #     noise_path_obj.parent.name
+            # )  # Get the parent folder name (ticket hash)
+            noise_path_obj.stem
+        )  # Get the filename without extension (ticket hash)
+
         folder_name = f"{cfg.env.task}_ticket_{ticket_hash}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
         output_dir = cfg.output_dir / folder_name
     else:
@@ -820,7 +825,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                 for task_info in result["per_task"]:
                     if "episode_lengths" in task_info["metrics"]:
                         all_ep_lengths.extend(task_info["metrics"]["episode_lengths"])
-            avg_episode_length = float(np.mean(all_ep_lengths)) if all_ep_lengths else 0.0
+            avg_episode_length = (
+                float(np.mean(all_ep_lengths)) if all_ep_lengths else 0.0
+            )
 
             for result in all_results:
                 for task_info in result["per_task"]:
