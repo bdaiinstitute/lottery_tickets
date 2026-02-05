@@ -26,6 +26,8 @@ export MUJOCO_GL=egl
 From the repo root, create a virtual environment with `uv`, and install the `smolvla` and `libero` dependencies:
 
 ```bash
+# Note: If git lfs causes issues, you can skip it with the following export
+# export GIT_LFS_SKIP_SMUDGE=1
 uv sync --extra smolvla-libero
 source .venv/bin/activate
 ```
