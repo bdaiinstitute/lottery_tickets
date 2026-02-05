@@ -11,33 +11,22 @@ We have scripts for:
 
 ## Setup
 
-Clone the repo and go into it.
+Clone the repo **with submodules** and go into it.
 
 ```bash
-git clone https://github.com/rai-inst/lottery_tickets.git
+git clone --recursive https://github.com/rai-inst/lottery_tickets.git
 cd lottery_tickets
 ```
 
-Create and activate python3.10 conda env, then install robomimic + dppo dependencies 
-TODO: simplify the dependencies, not sure we need the stable-baselines for basic results?
+From the repo root, create a virtual environment with `uv`, and install the `dppo-robomimic` dependencies:
 
 ```bash
-conda create -n dppo_robomimic python=3.10 -y
-conda activate dppo_robomimic
-pip install -e .[dppo-robomimic]
+uv sync --extra dppo-robomimic
+source .venv/bin/activate
 ```
 
-Then, setup DPPO.
-TODO: See if we can add this to `dppo-robomimic` optional dependency setup and still have everything work nicely
+**TODO: simplify the dependencies, not sure we need the stable-baselines for basic results?**
 
-```bash
-cd src/lottery_tickets/robomimic_dppo_lt
-git clone https://github.com/ajwagen/dppo-dsrl.git dppo
-cd dppo
-pip install -e .[gym,robomimic]
-# go back to main directory.
-cd ..
-```
 
 For robomimic, you will also need to install the MuJoCo 2.1 binaries as described in [this README](https://github.com/openai/mujoco-py?tab=readme-ov-file#install-mujoco).
 

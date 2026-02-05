@@ -1,0 +1,3 @@
+[submodule "src/lottery_tickets/robomimic_dppo_lt/dppo"]
+	path = src/lottery_tickets/robomimic_dppo_lt/dppo
+	url = https://github.com/ajwagen/dppo-dsrl
