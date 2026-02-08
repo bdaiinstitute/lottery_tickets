@@ -1,3 +1,11 @@
+# Diff
+Contains many additional features over the main branch
+- DSRL implementation for SmolVLA + Libero
+- Most of the tickets found for Libero- `spatial`, `goal` and `object` that have been used for generating the paper results
+- The batched eval code used to generate reults in the paper
+- Top-k ticket eval for adding stochasticity back to LT policy inference- also results in superior performance.
+- Plotting scripts and the plots themselves + some new media used in the paper
+
 # 🎫 The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies 
 <table>
   <!-- Header row -->
