@@ -4,7 +4,7 @@
 - Noise search is configured in a way that every reset of the environment resets to the same seed
 assigned to that environment instance. All the environment instances are stepped in parallel,
 while the noise instances are evaluated in sequence over all the environment instances.
-- Unlike DMG, we don't zero the Gaussian noise added to manipulator initial state
+- We don't zero the Gaussian noise added to manipulator initial state
 - Reward calculation is different from the way DSRL does it for RM envs as ignore once finished
 """
 
