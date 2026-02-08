@@ -162,6 +162,10 @@ from lerobot.utils.utils import (
 
 from functools import partial
 
+# Global variables for top_k random sampling at each inference step
+top_k_tickets: list[torch.Tensor] | None = None  # Preloaded ticket tensors
+top_k_rng: np.random.Generator | None = None
+
 
 def rollout(
     env: gym.vector.VectorEnv,
@@ -258,7 +262,13 @@ def rollout(
         observation = preprocessor(observation)
         policy_start = time.time()
         with torch.inference_mode():
-            if noise != None:
+            # Determine which noise to use for this step
+            if top_k_tickets is not None and top_k_rng is not None:
+                # Randomly sample from preloaded tickets for each env in the batch (with replacement)
+                sampled_indices = top_k_rng.integers(0, len(top_k_tickets), size=env.num_envs)
+                step_noise = torch.cat([top_k_tickets[i] for i in sampled_indices], dim=0)
+                action = policy.select_action(observation, noise=step_noise.clone().detach())
+            elif noise != None:
                 action = policy.select_action(observation, noise=noise.clone().detach())
             else:
                 action = policy.select_action(observation, noise=None)
@@ -671,6 +681,7 @@ class EvalPipelineConfigNoisePath(EvalPipelineConfig):
 
     eval_mode: EvalMode = EvalMode.NEW_TICKET
     noise_path: Optional[str] = None
+    top_k: Optional[str] = None  # Directory to randomly sample a ticket from
 
 
 @parser.wrap()
@@ -736,32 +747,64 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
         folder_name = f"{cfg.env.task}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
         output_dir = cfg.output_dir / folder_name
     elif cfg.eval_mode is EvalMode.LOAD_TICKET:
-        # Load an existing ticket
-        loaded_noise = torch.load(cfg.noise_path, map_location=cfg.policy.device)
-        # Repeat the loaded noise across the batch dimension to match batch_size
-        if loaded_noise.shape[0] == 1 and cfg.eval.batch_size > 1:
-            noise = loaded_noise.repeat(cfg.eval.batch_size, 1, 1)
-            print(
-                f"Loaded noise from path: {cfg.noise_path} and repeated across batch_size={cfg.eval.batch_size}!"
-            )
-        else:
-            noise = loaded_noise
-            print(f"Loaded noise from path: {cfg.noise_path}!")
+        global top_k_tickets, top_k_rng
+        
+        # Determine the noise path - either from top_k directory or direct noise_path
+        if cfg.top_k is not None:
+            # Set up global variables for random sampling at each inference step
+            top_k_dir = Path(cfg.top_k)
+            if not top_k_dir.is_dir():
+                raise ValueError(f"top_k path is not a directory: {cfg.top_k}")
+            top_k_ticket_files = sorted(top_k_dir.glob("*.pt"))  # Sort for reproducibility
+            if not top_k_ticket_files:
+                raise ValueError(f"No .pt files found in top_k directory: {cfg.top_k}")
+            # Preload all tickets into memory
+            print(f"Preloading {len(top_k_ticket_files)} tickets from {cfg.top_k}...")
+            top_k_tickets = [torch.load(p, map_location=cfg.policy.device) for p in top_k_ticket_files]
+            top_k_rng = noise_rng  # Use the seed-based RNG for reproducible sampling
+            noise = None  # Will be sampled at each step in rollout
+            actual_noise_path = None  # No single path when using top_k
+            print(f"Will randomly sample from {len(top_k_tickets)} preloaded tickets at each inference step!")
+        elif cfg.noise_path is not None:
+            actual_noise_path = Path(cfg.noise_path)
+            top_k_tickets = None  # Disable per-step sampling
+            top_k_rng = None
+            
+            # Load the ticket
+            loaded_noise = torch.load(actual_noise_path, map_location=cfg.policy.device)
+            # Repeat the loaded noise across the batch dimension to match batch_size
+            if loaded_noise.shape[0] == 1 and cfg.eval.batch_size > 1:
+                noise = loaded_noise.repeat(cfg.eval.batch_size, 1, 1)
+                print(
+                    f"Loaded noise from path: {actual_noise_path} and repeated across batch_size={cfg.eval.batch_size}!"
+                )
+            else:
+                noise = loaded_noise
+                print(f"Loaded noise from path: {actual_noise_path}!")
 
-        if noise.shape[0] != cfg.eval.batch_size:
+            if noise.shape[0] != cfg.eval.batch_size:
+                raise ValueError(
+                    f"Loaded noise batch dimension {noise.shape[0]} does not match eval.batch_size={cfg.eval.batch_size}. "
+                    "Provide a (1, T, A) noise tensor to be repeated or a (batch_size, T, A) tensor."
+                )
+        else:
             raise ValueError(
-                f"Loaded noise batch dimension {noise.shape[0]} does not match eval.batch_size={cfg.eval.batch_size}. "
-                "Provide a (1, T, A) noise tensor to be repeated or a (batch_size, T, A) tensor."
+                "LOAD_TICKET mode requires either noise_path or top_k to be specified."
             )
 
         # Create informative folder name for loaded ticket evaluation
         timestamp = time.strftime("%Y%m%d_%H%M%S")
-        noise_path_obj = Path(cfg.noise_path)
-        ticket_hash = (
-            #     noise_path_obj.parent.name
-            # )  # Get the parent folder name (ticket hash)
-            noise_path_obj.stem
-        )  # Get the filename without extension (ticket hash)
+        if actual_noise_path is not None:
+            noise_path_obj = Path(actual_noise_path)
+            ticket_hash = (
+                #     noise_path_obj.parent.name
+                # )  # Get the parent folder name (ticket hash)
+                noise_path_obj.stem
+            )  # Get the filename without extension (ticket hash)
+        else:
+            # Create hash from first 5 chars of each ticket filename
+            ticket_short_hashes = [p.stem[:5] for p in top_k_ticket_files]  # Already sorted
+            ticket_hash = f"top_k_{len(top_k_tickets)}_{'_'.join(ticket_short_hashes)}"
 
         folder_name = f"{cfg.env.task}_ticket_{ticket_hash}_n{cfg.eval.n_episodes}_b{cfg.eval.batch_size}_s{cfg.seed}_{timestamp}"
         output_dir = cfg.output_dir / folder_name
@@ -843,7 +886,9 @@ def eval_main(cfg: EvalPipelineConfigNoisePath):
                 "config": {
                     "eval_mode": cfg.eval_mode.value,
                     "seed": cfg.seed,
-                    "noise_path": str(cfg.noise_path) if cfg.noise_path else None,
+                    "noise_path": str(actual_noise_path) if (cfg.eval_mode is EvalMode.LOAD_TICKET and actual_noise_path is not None) else (str(cfg.noise_path) if cfg.noise_path else None),
+                    "top_k": str(cfg.top_k) if cfg.top_k else None,
+                    "top_k_num_tickets": len(top_k_tickets) if top_k_tickets else None,
                     "env_task": cfg.env.task,
                     "batch_size": cfg.eval.batch_size,
                     "n_episodes": cfg.eval.n_episodes,

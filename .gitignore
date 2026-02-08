@@ -211,3 +211,5 @@ __marimo__/
 pareto_results
 wandb
 dsrl_eval_results
+lt_eval_*
+submit_*
