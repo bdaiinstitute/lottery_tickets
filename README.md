@@ -1,3 +1,8 @@
+> This branch implements batched lottery ticket search (along the task-instance dimension) for Libero + SmolVLA. However, this was not used to generate results in the paper. 
+
+Omkar  
+opatil3@asu.edu
+
 # 🎫 The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies 
 <table>
   <!-- Header row -->
