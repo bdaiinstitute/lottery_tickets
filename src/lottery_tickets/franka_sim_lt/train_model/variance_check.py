@@ -13,6 +13,8 @@ from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_flow_matching_model
 
 def collect_rollouts(policy, cfg):
+    video_path = Path(cfg.evaluation.video_save_path)
+
     print(f"Building environment: {cfg.evaluation.env_name}")
     env = make_frankasim_env(
         cfg.evaluation.env_name,
@@ -22,12 +24,11 @@ def collect_rollouts(policy, cfg):
     num_episodes = cfg.evaluation.num_episodes  # X
 
     print(f"Running {num_episodes} episodes with standard Gaussian noise...")
-    print(f"Sampling {num_noises} noise vectors for variance eval")
-
     obs_rollouts = [] # list of episodes, where each episode is a list of observations (T, obs_dim)
     frames_rollouts = [] # list of episodes, where each episode is a list of frames (T, H, W, C)
     rollout_lengths = []
     return_rollouts = [] # list of episodes, where each episode is a list of episode rewards (T,)
+    action_rollouts = [] # list of episodes, where each episode is a list of actions (T, action_dim) -- only for debugging, not used in variance eval
 
     # ------------------------------------------------------------
     # Collect rollouts using standard Gaussian noise
@@ -40,12 +41,14 @@ def collect_rollouts(policy, cfg):
         done = False
         frames = []
         obs_list = []
+        action_list = []
         step = 0
 
         while not done:
             obs_list.append(obs['state']) # for franka_sim, obs['state'] is shape (1,10)
             action = policy(obs, init_x = None)
             obs, reward, terminated, truncated, info = env.step(action)
+            action_list.append(action)
             done = terminated or truncated
             frames.append(env.render()) # each frame is shape [128, 256, 3]
             step += 1
@@ -53,6 +56,7 @@ def collect_rollouts(policy, cfg):
 
         # Store episode information
         obs_rollouts.append(np.concatenate(obs_list,axis=0))
+        action_rollouts.append(np.stack(action_list,axis=0))
         rollout_lengths.append(len(obs_list))
         frames_rollouts.append(np.stack(frames,axis=0))
         return_rollouts.append(episode_returns)
@@ -62,16 +66,20 @@ def collect_rollouts(policy, cfg):
         imageio.mimsave(video_file, frames, fps=30)
         print(f"[Episode {episode+1}] returns={episode_returns,}, steps={step}, saved video to {video_file}")
 
+    env.close()
+
     # Concatenate each rollouts into a single array 
     obs_rollouts = np.stack(obs_rollouts,axis=0) # (num_episodes, T, obs_dim)
+    action_rollouts = np.stack(action_rollouts,axis=0) # (num_episodes, T, action_dim)
     frames_rollouts = np.stack(frames_rollouts,axis=0) # (num_episodes, T, H, W, C)
     return_rollouts = np.array(return_rollouts) # (num_episodes,)
     # Save the observations, frames, and returns
     np.save(video_path / "obs_rollouts.npy", obs_rollouts)
+    np.save(video_path / "action_rollouts.npy", action_rollouts)
     np.save(video_path / "frames_rollouts.npy", frames_rollouts)
     np.save(video_path / "return_rollouts.npy", return_rollouts)
     
-    return obs_rollouts, frames_rollouts, return_rollouts
+    return obs_rollouts, action_rollouts, frames_rollouts, return_rollouts
 
 def eval_variance(cfg: DictConfig) -> None:
     """
@@ -106,14 +114,16 @@ def eval_variance(cfg: DictConfig) -> None:
         rollout_dir = Path(cfg.load_rollout_dir)
         print(f"Loading rollouts from {rollout_dir}")
         obs_rollouts = np.load(rollout_dir / "obs_rollouts.npy")
+        action_rollouts = np.load(rollout_dir / "action_rollouts.npy")
         frames_rollouts = np.load(rollout_dir / "frames_rollouts.npy")
         return_rollouts = np.load(rollout_dir / "return_rollouts.npy")
     else:
-        obs_rollouts, frames_rollouts, return_rollouts = collect_rollouts(policy, cfg)
+        obs_rollouts, action_rollouts, frames_rollouts, return_rollouts = collect_rollouts(policy, cfg)
 
     # ------------------------------------------------------------
     # 2) Sample Y noise vectors
     # ------------------------------------------------------------
+    print(f"Sampling {num_noises} noise vectors for variance eval")
     init_x_size = 4 * cfg.evaluation.chunk_size # action space is 4 in frankasim (x,y,z,gripper)
     noise_bank = torch.randn((num_noises, init_x_size), device=device)
     torch.save(noise_bank, video_path / "noise_bank.pt")
@@ -121,27 +131,31 @@ def eval_variance(cfg: DictConfig) -> None:
     # ------------------------------------------------------------
     # 3) For each episode + observation, compute variance
     # ------------------------------------------------------------
+    plot_path = video_path / "variance_plots"
+    plot_path.mkdir(parents=True, exist_ok=True)
+
     all_episode_variances = []
 
-    for ep_idx, obs_list in enumerate(obs_rollouts):
+    for ep_idx in range(obs_rollouts.shape[0]): # for each episode
         print(f"Computing variances for episode {ep_idx}/{obs_rollouts.shape[0] - 1}")
 
-        episode_variances = []  # list of (T, action_dim * chunk_size)
+        episode_variances = []  # list of (T, action_chunk_size)
 
-        for t, obs in enumerate(obs_list):
+        for t in range(obs_rollouts[ep_idx].shape[0]): # for each step in episode
             action_chunks = []
-
-            for n in range(num_noises):
+            cur_obs = {'state': np.expand_dims(obs_rollouts[ep_idx][t],axis=0)}
+            for n in range(num_noises): # for each noise vector
                 policy.reset()  # important: reset policy state for fair comparison
                 with torch.no_grad():
-                    action_chunk = policy(obs, init_x=noise_bank[n:n+1])
-                action_chunks.append(action_chunk)
+                    action_chunk = policy(cur_obs, init_x=noise_bank[n:n+1]) # (1, action_chunk_size)
+                action_chunks.append(action_chunk) 
 
+            # stack action_chunks so shape is (num_noises, action_chunk_size), then compute variance across noise dimension
             action_chunks = np.stack(action_chunks, axis=0)
             var_t = np.var(action_chunks, axis=0)  # per action-dimension variance
             
             if np.max(var_t).item() >= 1.0:
-                breakpoint()    
+                print("variance is really high...")
         
             episode_variances.append(var_t)
 
@@ -150,12 +164,11 @@ def eval_variance(cfg: DictConfig) -> None:
         all_episode_variances.append(episode_variances)
 
         np.save(plot_path / f"episode_{ep_idx}_variance.npy", episode_variances)
+        print(f"Saved episode {ep_idx} variances to {plot_path / f'episode_{ep_idx}_variance.npy'}")
 
     # ------------------------------------------------------------
     # 4) Plot variance over time for each episode + action dim
     # ------------------------------------------------------------
-    plot_path = video_path / "variance_plots"
-    plot_path.mkdir(parents=True, exist_ok=True)
     for ep_idx, ep_var in enumerate(all_episode_variances):
         T, D = ep_var.shape
 
@@ -181,7 +194,6 @@ def eval_variance(cfg: DictConfig) -> None:
 
         print(f"Saved variance plot to {fig_path}")
 
-    env.close()
     print("Variance evaluation complete!")
 
 
