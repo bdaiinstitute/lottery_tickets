@@ -27,12 +27,24 @@ The codebase supports the following:
 
 ## Will it steer
 
+Generate new data
+
+```
+python variance_check.py \
+    evaluation.model_path=checkpoints/fm_seed_1002/checkpoints/fm_policy_final.pt \
+    hydra.run.dir=outputs/2026-02-17/test \
+    evaluation.num_episodes=3 \
+    +num_noises=5
+```
+
+Load old data
 ```
 python variance_check.py \
     evaluation.model_path=checkpoints/fm_seed_1002/checkpoints/fm_policy_final.pt \
     hydra.run.dir=outputs/2026-02-17/check \
     evaluation.num_episodes=3 \
-    +evaluation.num_noises=5
+    +num_noises=5 \
+    +load_rollout_dir=outputs/2026-02-17/test/videos
 ```
 
 

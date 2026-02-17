@@ -12,27 +12,7 @@ from omegaconf import DictConfig, OmegaConf
 from lottery_tickets.franka_sim_lt.gym_utils import make_frankasim_env
 from lottery_tickets.franka_sim_lt.models_utils import FMPolicyInterface, load_flow_matching_model
 
-
-def eval_variance(cfg: DictConfig) -> None:
-    """
-    Evaluates variance of action chunks across multiple noise initializations
-    for fixed rollouts of observations.
-    """
-
-    device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
-
-    print(f"Loading model from {cfg.evaluation.model_path}")
-    fm_model, config = load_flow_matching_model(cfg.evaluation.model_path, device)
-
-    policy = FMPolicyInterface(
-        fm_model,
-        cfg.evaluation.chunk_size,
-        device,
-        use_state_history=cfg.evaluation.use_state_history,
-        state_history_length=cfg.evaluation.state_history_length,
-    )
-
+def collect_rollouts(policy, cfg):
     print(f"Building environment: {cfg.evaluation.env_name}")
     env = make_frankasim_env(
         cfg.evaluation.env_name,
@@ -45,7 +25,7 @@ def eval_variance(cfg: DictConfig) -> None:
     plot_path.mkdir(parents=True, exist_ok=True)
 
     num_episodes = cfg.evaluation.num_episodes  # X
-    num_noises = cfg.evaluation.num_noises      # Y
+    num_noises = cfg.num_noises      # Y
 
     print(f"Running {num_episodes} episodes with standard Gaussian noise...")
     print(f"Sampling {num_noises} noise vectors for variance eval")
@@ -56,7 +36,7 @@ def eval_variance(cfg: DictConfig) -> None:
     return_rollouts = [] # list of episodes, where each episode is a list of episode rewards (T,)
 
     # ------------------------------------------------------------
-    # 1) Collect rollouts using standard Gaussian noise
+    # Collect rollouts using standard Gaussian noise
     # ------------------------------------------------------------
     for episode in range(num_episodes):
         print(f"Collecting rollout for episode {episode+1}/{num_episodes}...")
@@ -91,6 +71,48 @@ def eval_variance(cfg: DictConfig) -> None:
     # Concatenate each rollouts into a single array 
     obs_rollouts = np.stack(obs_rollouts,axis=0) # (num_episodes, T, obs_dim)
     frames_rollouts = np.stack(frames_rollouts,axis=0) # (num_episodes, T, H, W, C)
+    return_rollouts = np.array(return_rollouts) # (num_episodes,)
+    # Save the observations, frames, and returns
+    np.save(video_path / "obs_rollouts.npy", obs_rollouts)
+    np.save(video_path / "frames_rollouts.npy", frames_rollouts)
+    np.save(video_path / "return_rollouts.npy", return_rollouts)
+    
+    return obs_rollouts, frames_rollouts, return_rollouts
+
+def eval_variance(cfg: DictConfig) -> None:
+    """
+    Evaluates variance of action chunks across multiple noise initializations
+    for fixed rollouts of observations.
+    """
+
+    device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
+    print(f"Loading model from {cfg.evaluation.model_path}")
+    fm_model, config = load_flow_matching_model(cfg.evaluation.model_path, device)
+
+    policy = FMPolicyInterface(
+        fm_model,
+        cfg.evaluation.chunk_size,
+        device,
+        use_state_history=cfg.evaluation.use_state_history,
+        state_history_length=cfg.evaluation.state_history_length,
+    )
+
+    # ------------------------------------------------------------
+    # 1) Get rollouts (either live, or load from file)
+    # ------------------------------------------------------------
+    
+    # check if load_rollout_dir is provided, if so load the rollouts from file, otherwise collect new rollouts
+    if cfg.get("load_rollout_dir", None) is not None:
+        rollout_dir = Path(cfg.load_rollout_dir)
+        print(f"Loading rollouts from {rollout_dir}")
+        obs_rollouts = np.load(rollout_dir / "obs_rollouts.npy")
+        frames_rollouts = np.load(rollout_dir / "frames_rollouts.npy")
+        return_rollouts = np.load(rollout_dir / "return_rollouts.npy")
+    else:
+        obs_rollouts, frames_rollouts, return_rollouts = collect_rollouts(policy, cfg)
+
     breakpoint()
 
     # ------------------------------------------------------------
