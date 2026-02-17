@@ -19,13 +19,7 @@ def collect_rollouts(policy, cfg):
         env_kwargs=cfg.evaluation.env_kwargs,
     )
 
-    video_path = Path(cfg.evaluation.video_save_path)
-    video_path.mkdir(parents=True, exist_ok=True)
-    plot_path = video_path / "variance_plots"
-    plot_path.mkdir(parents=True, exist_ok=True)
-
     num_episodes = cfg.evaluation.num_episodes  # X
-    num_noises = cfg.num_noises      # Y
 
     print(f"Running {num_episodes} episodes with standard Gaussian noise...")
     print(f"Sampling {num_noises} noise vectors for variance eval")
@@ -84,6 +78,10 @@ def eval_variance(cfg: DictConfig) -> None:
     Evaluates variance of action chunks across multiple noise initializations
     for fixed rollouts of observations.
     """
+    video_path = Path(cfg.evaluation.video_save_path)
+    video_path.mkdir(parents=True, exist_ok=True)
+
+    num_noises = cfg.num_noises      # Y
 
     device = torch.device(cfg.device if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -113,12 +111,10 @@ def eval_variance(cfg: DictConfig) -> None:
     else:
         obs_rollouts, frames_rollouts, return_rollouts = collect_rollouts(policy, cfg)
 
-    breakpoint()
-
     # ------------------------------------------------------------
     # 2) Sample Y noise vectors
     # ------------------------------------------------------------
-    init_x_size = env.action_space.shape[0] * cfg.evaluation.chunk_size
+    init_x_size = 4 * cfg.evaluation.chunk_size # action space is 4 in frankasim (x,y,z,gripper)
     noise_bank = torch.randn((num_noises, init_x_size), device=device)
     torch.save(noise_bank, video_path / "noise_bank.pt")
 
@@ -128,7 +124,7 @@ def eval_variance(cfg: DictConfig) -> None:
     all_episode_variances = []
 
     for ep_idx, obs_list in enumerate(obs_rollouts):
-        print(f"Computing variances for episode {ep_idx+1}/{num_episodes}")
+        print(f"Computing variances for episode {ep_idx}/{obs_rollouts.shape[0]}")
 
         episode_variances = []  # list of (T, action_dim * chunk_size)
 
@@ -158,6 +154,8 @@ def eval_variance(cfg: DictConfig) -> None:
     # ------------------------------------------------------------
     # 4) Plot variance over time for each episode + action dim
     # ------------------------------------------------------------
+    plot_path = video_path / "variance_plots"
+    plot_path.mkdir(parents=True, exist_ok=True)
     for ep_idx, ep_var in enumerate(all_episode_variances):
         T, D = ep_var.shape
 
