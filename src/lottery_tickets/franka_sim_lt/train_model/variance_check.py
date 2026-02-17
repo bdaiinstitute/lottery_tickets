@@ -194,20 +194,35 @@ def eval_variance(cfg: DictConfig) -> None:
     for ep_idx, ep_var in enumerate(all_episode_variances):
         T, D = ep_var.shape
 
-        plt.figure(figsize=(12, 6))
+        # Create subplots with shared x-axis
+        # We adjust figure height based on D to give each plot enough vertical space
+        fig, axes = plt.subplots(D, 1, figsize=(12, 2 * D), sharex=True)
+        
+        # Handle case where D=1 (axes is not a list in that case)
+        if D == 1:
+            axes = [axes]
+
         for d in range(D):
-            plt.plot(
+            ax = axes[d]
+            ax.plot(
                 np.arange(T),
                 ep_var[:, d],
-                alpha=0.7,
-                linewidth=1,
+                alpha=0.8,
+                linewidth=1.2,
                 label=f"action_dim_{d}"
             )
+            
+            # Add dotted line at y=0
+            ax.axhline(0, color='gray', linestyle=':', linewidth=1.5, alpha=0.8)
 
-        plt.xlabel("Timestep")
-        plt.ylabel("Variance across noise vectors")
-        plt.title(f"Episode {ep_idx} – Per-action-dimension variance over time")
-        plt.legend(ncol=2, fontsize=8)  # tweak ncol based on how many dims you have
+            ax.set_ylabel(f"Dim {d} Var")
+            ax.grid(True, linestyle='--', alpha=0.3)
+
+        # Only set xlabel on the bottom-most subplot
+        axes[-1].set_xlabel("Timestep")
+        
+        # Adjust layout
+        fig.suptitle(f"Episode {ep_idx} – Per-action-dimension variance over time")
         plt.tight_layout()
 
         fig_path = plot_path / f"episode_{ep_idx}_variance.png"
