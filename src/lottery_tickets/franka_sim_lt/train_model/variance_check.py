@@ -124,7 +124,7 @@ def eval_variance(cfg: DictConfig) -> None:
     all_episode_variances = []
 
     for ep_idx, obs_list in enumerate(obs_rollouts):
-        print(f"Computing variances for episode {ep_idx}/{obs_rollouts.shape[0]}")
+        print(f"Computing variances for episode {ep_idx}/{obs_rollouts.shape[0] - 1}")
 
         episode_variances = []  # list of (T, action_dim * chunk_size)
 
