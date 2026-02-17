@@ -18,11 +18,23 @@ export MUJOCO_GL=egl
 All experiment scripts run from the `franka_sim_lt` folder, `src/lottery_tickets/franka_sim_lt/`
 
 The codebase supports the following:
+0. [Check if the policy will steer](#will-it-steer)
 1. [Flow matching policies already trained that you can evaluate](#evaluating-pretrained-flow-matching-policy)
 2. [Generating a new lottery ticket for franka-sim](#generating-a-new-lottery-ticket-for-franka-sim)
 3. [Evaluating an existing franka-sim lottery ticket](#evaluating-an-existing-franka-sim-lottery-ticket)
 4. [Visualize ticket and original policy performance](#visualize-ticket-and-original-policy-performance)
 5. [Generate data and train your own base policy](#generating-data-and-training-your-own-base-policy)
+
+## Will it steer
+
+```
+python variance_check.py \
+    evaluation.model_path=checkpoints/fm_seed_1002/checkpoints/fm_policy_final.pt \
+    hydra.run.dir=outputs/2026-02-17/check \
+    evaluation.num_episodes=3 \
+    +evaluation.num_noises=5
+```
+
 
 ## Evaluating pretrained flow matching policy
 First, go into the `train_model` folder and download a checkpoint.

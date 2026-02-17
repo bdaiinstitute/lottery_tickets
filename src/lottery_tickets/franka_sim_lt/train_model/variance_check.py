@@ -50,8 +50,10 @@ def eval_variance(cfg: DictConfig) -> None:
     print(f"Running {num_episodes} episodes with standard Gaussian noise...")
     print(f"Sampling {num_noises} noise vectors for variance eval")
 
-    obs_rollouts = []
+    obs_rollouts = [] # list of episodes, where each episode is a list of observations (T, obs_dim)
+    frames_rollouts = [] # list of episodes, where each episode is a list of frames (T, H, W, C)
     rollout_lengths = []
+    return_rollouts = [] # list of episodes, where each episode is a list of episode rewards (T,)
 
     # ------------------------------------------------------------
     # 1) Collect rollouts using standard Gaussian noise
@@ -67,22 +69,29 @@ def eval_variance(cfg: DictConfig) -> None:
         step = 0
 
         while not done:
-            obs_list.append(obs)
+            obs_list.append(obs['state']) # for franka_sim, obs['state'] is shape (1,10)
             action = policy(obs, init_x = None)
             obs, reward, terminated, truncated, info = env.step(action)
             done = terminated or truncated
-            frames.append(env.render())
+            frames.append(env.render()) # each frame is shape [128, 256, 3]
             step += 1
             episode_returns += reward.item()
 
-        obs_rollouts.append(obs_list)
+        # Store episode information
+        obs_rollouts.append(np.concatenate(obs_list,axis=0))
         rollout_lengths.append(len(obs_list))
+        frames_rollouts.append(np.stack(frames,axis=0))
+        return_rollouts.append(episode_returns)
 
+        # Save video + print episode stats
         video_file = video_path / f"ep_video_{episode}.mp4"
         imageio.mimsave(video_file, frames, fps=30)
         print(f"[Episode {episode+1}] returns={episode_returns,}, steps={step}, saved video to {video_file}")
 
-    raise RuntimeError("Stop for now")
+    # Concatenate each rollouts into a single array 
+    obs_rollouts = np.stack(obs_rollouts,axis=0) # (num_episodes, T, obs_dim)
+    frames_rollouts = np.stack(frames_rollouts,axis=0) # (num_episodes, T, H, W, C)
+    breakpoint()
 
     # ------------------------------------------------------------
     # 2) Sample Y noise vectors
