@@ -52,5 +52,6 @@ evaluation:
   env_kwargs: # If you're using a Jaxish env, env_kwargs must be empty.
     max_episode_steps: 300  # Original env has 100.
     # sampling_bounds: [[0.4, -0.0], [0.4, 0.0]] # new-tianshou bounds
-    sampling_bounds: [[0.25, -0.25], [0.55, 0.25]] # Old jax bounds
+    # sampling_bounds: [[0.25, -0.25], [0.55, 0.25]] # Old jax bounds
+    sampling_bounds: [[0.4, 0.0], [0.4, 0.0]] # fixed block pos
     render_mode: rgb_array  # rgb_array
