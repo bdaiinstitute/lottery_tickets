@@ -9,7 +9,6 @@ Wrapper order: MujocoEnv -> RobotEnv -> ManipulatorEnv -> PickPlace (Robosuite) 
 ObservationWrapperRobomimic (DSRL, parent: gym.Env) -> ActionChunkWrapper (p: gym.Env) -> VecEnv (SB3) -> DiffusionPolicyEnvWrapper (p: VecEnvWrapper- SB3)
 
 - The whole Robosuite and Robomimic stack does not set or use seeds or generators upto 1.4.1 (currently used by dsrl)
-- However, the env wrappers enable the flow of seed till MujocoEnv which sets a self.rng in its init in 1.5.1 (used by vpl)- which is then used for sampling initial states
 - ActionChunkWrapper passes up the seed in reset to ObservationWrapperRobomimic, which does seed np.random
 - SB3 VecEnv defines a _seed which stores a list fo seeds for each env. This is initialized to None, and can be set using seed()- to ensure heterogeneous envs
 - reset in SB3 SubprocVecEnv sends the respective seed to each env's FIRST reset call. SB3 DummyVecEnv does the same.
