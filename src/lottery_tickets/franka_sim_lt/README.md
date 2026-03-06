@@ -2,6 +2,13 @@
 
 ## Setup
 
+Clone the repo **with submodules** and go into it.
+
+```bash
+git clone --recursive https://github.com/rai-inst/lottery_tickets.git
+cd lottery_tickets
+```
+
 From the repo root, create a virtual environment with `uv`, and install the `franka-sim` dependencies:
 
 ```bash
