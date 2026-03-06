@@ -1,0 +1,38 @@
+device: cuda
+seed: 1004
+save_dir: ${hydra:runtime.output_dir}/checkpoints
+dataset:
+  data_path: data/demos_1k.pkl
+  chunk_size: 8
+  use_state_history: false
+  state_history_length: 2
+model:
+  backbone:
+    _target_: lottery_tickets.franka_sim_lt.models.DiffusionBackboneSimple
+    hidden_dim: 256
+    num_layers: 4
+  fm:
+    _target_: lottery_tickets.franka_sim_lt.models.FM
+    n_inference_steps: 10
+training:
+  batch_size: 20
+  learning_rate: 0.001
+  num_epochs: 100
+  checkpoint_interval: 10
+evaluation:
+  model_path: checkpoints/fm_policy_final.pt
+  env_name: PandaPickCubeRealisticControl-v0
+  num_episodes: 10
+  max_steps_per_episode: 300
+  chunk_size: 8
+  video_save_path: ${hydra:runtime.output_dir}/videos
+  use_state_history: false
+  state_history_length: 2
+  env_kwargs:
+    max_episode_steps: 300
+    sampling_bounds:
+    - - 0.25
+      - -0.25
+    - - 0.55
+      - 0.25
+    render_mode: rgb_array

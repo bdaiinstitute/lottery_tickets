@@ -75,9 +75,8 @@ python dppo_base_eval.py \
 ```
 
 ## Evaluate golden tickets for dppo robomimic
-
-You can download a folder containing golden tickets for the `can` task [here](https://drive.google.com/drive/folders/1GCtMUE3bylCTIZb_zQYgCxVcrj_Phl3-).
-You can then run the following script to evaluate the golden tickets on different environment states by passing the directory path to `eval` parameter.
+We provide golden tickets for all robomimic tasks inside `envs100_samples5000_seed999_ddim8_20251130_221846_ddim8`.
+You can then run the following script to evaluate the golden tickets on different environment states by passing the directory path to `eval` parameter and setting `task_name` to the desired task.
 The folder contains multiple tickets, ranked by their performance, so you can use `eval_idx` to select which ticket to run, with `0` representing the best golden ticket. 
 
 Generally, the average success rate of the golden ticket in `envs100_samples5000_seed999_ddim8_20251130_221846_ddim8` for `eval_idx=0` is ~80% for the `can` task.

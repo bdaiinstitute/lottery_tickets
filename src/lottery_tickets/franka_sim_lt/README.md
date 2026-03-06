@@ -25,13 +25,7 @@ The codebase supports the following:
 5. [Generate data and train your own base policy](#generating-data-and-training-your-own-base-policy)
 
 ## Evaluating pretrained flow matching policy
-First, go into the `train_model` folder and download a checkpoint.
-**(TODO: Make this accessible to public)**
-
-```bash
-cd train_model
-gsutil -m cp -r  "gs://bdai-common-storage/lottery_tickets/checkpoints" .
-```
+We supply 4 pretrained policy checkpoints located in `lottery_tickets/src/lottery_tickets/franka_sim_lt/train_model/checkpoints`. Their performance varies, with `fm_seed_1001` being the worst.
 
 You can evaluate that checkpoint by running `evaluate.py` and setting `evaluation.model_path` to your chosen checkpoint.
 You can set `num_episodes` to determine how many block poses the policy is evaluated on.
@@ -83,13 +77,9 @@ This will create a directory containing a subdirectory for the results of each t
 
 ## Evaluating an existing `franka-sim` lottery ticket
 You can evaluate the saved `init_x.pt` of a model by passing a path as an argument to the script via the `noise_path` parameter.
-For example, you can download a golden ticket for the `fm_seed_1001` checkpoint (and others):
+For example, we have golden tickets for all 4 pretrained models located in `lottery_tickets/src/lottery_tickets/franka_sim_lt/train_model/golden_tickets`.
 
-```bash
-gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/golden_tickets" .
-```
-
-Now you can evaluate the golden tickets, for example:
+You can evaluate the golden tickets, for example:
 
 ```bash
 python evaluate.py \
@@ -150,13 +140,6 @@ By default, the script will run until it has collected 1000 successful demos (i.
 All successful demos (and other saved data) will be placed in the `outputs` folder by default.
 There will be a pickle file `demos.pkl` that contains all the demonstrations and will be used for training.
 
-You can also download the data we used to train our checkpoints if you'd prefer not to generate your own data:
-
-(**TODO: Make accessible to public**)
-```bash
-gsutil -m cp -r "gs://bdai-common-storage/lottery_tickets/data" .
-```
-
 Now we can train a policy by using the `train.py` script inside `train_model`, and passing the path to `demo.pkl` via the `dataset.data_path` parameter.
 For example:
 
@@ -171,16 +154,7 @@ You can [evaluate your newly trained checkpoint](#evaluating-pretrained-flow-mat
 
 ## Generate demos using state-based planner
 
-`mg_frankasim.py` works for all variants of the SQUIRL FrankaSim env, such as `PandaPickCube-v0` and `PandaPickCubeVision-v0`.
-
-**TODO: Link SQUIRL**
+`mg_frankasim.py` works for all variants of the FrankaSim env, such as `PandaPickCube-v0` and `PandaPickCubeVision-v0`.
 
 It's configured using hydra; see the `cfgs` directory for examples.
 Demos get saved into hydra output directories.
-
-## Datasets:
-
-- demos_1k_PandaPickCube-v0.pkl, action_mag=\[0.004, 0.004\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_PandaPickCube-v0.pkl`
-- demos_1k_PandaPickCubeRealisticControl-v0.pkl, action_mag=\[0.004, 0.004\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_PandaPickCubeRealisticControl-v0.pkl`
-- demos_1k_PandaPickCube-v0.pkl, action_mag=\[0.002, 0.008\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_am_PandaPickCube-v0.pkl`
-- demos_1k_PandaPickCubeRealisticControl-v0.pkl, action_mag=\[0.002, 0.008\]: `gs://bdai-common-storage/squirl/frankasim/demos_1k_am_PandaPickCubeRealisticControl-v0.pkl`
