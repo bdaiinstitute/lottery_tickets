@@ -155,15 +155,26 @@
         <a href="#" class="button">🎥 Video</a>
     </div>
 
-    <div class="image-container">
+
+    <div class="section">
+        <h2>Video Presentation</h2>
+        <div class="video-container">
+            <video width="100%" controls autoplay muted loop>
+                <source src="/home/erosen/Videos/rss2026_sebastian.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="caption">We propose that the performance of a pretrained, frozen diffusion or flow matching policy can be improved by swapping the sampling of initial noise from the prior distribution with a well-chosen, constant initial noise input.</div>
+    </div>
+
+    <!-- <div class="image-container">
         <img src="https://via.placeholder.com/800x400.png?text=Teaser+Image+Placeholder" alt="Project Teaser">
         <div class="caption">Figure 1: A brief caption explaining your teaser image.</div>
-    </div>
+    </div> -->
 
     <div class="section">
         <h2>Abstract</h2>
         <p>
-            Write your abstract here. Make it compelling! This simplified template includes everything you need to showcase a project without the heavy boilerplate of complex frameworks. It focuses on readability, responsive layout, and speed. Simply edit the HTML file, swap the images, update the links, and push to GitHub pages.
+            What happens when a pretrained generative robot policy is provided a constant initial noise as input, rather than repeatedly sampling it from a Gaussian? We demonstrate that the performance of a pretrained, frozen diffusion or flow matching policy can be improved with respect to a downstream reward by swapping the sampling of initial noise from the prior distribution (typically isotropic Gaussian) with a well-chosen, constant initial noise input---a golden ticket. We propose a search method to find golden tickets using Monte-Carlo policy evaluation that keeps the pretrained policy frozen, does not train any new networks, and is applicable to all diffusion/flow matching policies (and therefore many VLAs). Our approach to policy improvement makes no assumptions beyond being able to inject initial noise into the policy and calculate (sparse) task rewards of episode rollouts, making it deployable with no additional infrastructure or models. Our method improves the performance of policies in 38 out of 43 tasks across simulated and real-world robot manipulation benchmarks, with relative improvements in success rate by up to 58% for some simulated tasks, and 60% within 50 search episodes for real-world tasks. We also show unique benefits of golden tickets for multi-task settings: the diversity of behaviors from different tickets naturally defines a Pareto frontier for balancing different objectives (e.g., speed, success rates); in VLAs, we find that a golden ticket optimized for one task can also boost performance in other related tasks. We release a codebase with pretrained policies and golden tickets for simulation benchmarks using VLAs, diffusion policies, and flow matching policies.
         </p>
     </div>
 
