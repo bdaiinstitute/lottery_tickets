@@ -181,13 +181,26 @@
     <div class="section">
         <h2>Methodology</h2>
         <p>
-            Explain how your project works. You can easily add more images or paragraphs by copying the <code>&lt;p&gt;</code> tags or the <code>image-container</code> div.
-        </p>
+        The lottery ticket hypothesis for robot control proposes that the performance of a pretrained, frozen diffusion or flow matching policy can be improved by replacing the sampling of initial noise from a prior distribution with a well-chosen, constant initial noise input, called a golden ticket.        </p>
         <div class="image-container">
             <img src="./media/method_pan_main.png" alt="Architecture">
-            <div class="caption">Figure 2: Overview of the proposed architecture.</div>
+            <div class="caption"> Overview of standard diffusion policy inference (left) versus our proposed approach of using golden tickets (right).
+                Given a frozen, pretrained diffusion or flow matching policy $\pi_{\text{pre}}$, rather than sampling from a Gaussian every time an action needs to be computed, we use a constant, well-chosen initial noise vector $w$, called a golden ticket.
+                We find golden tickets improve policy performance across a range of observation inputs, model architectures, and embodiments.</div>
         </div>
     </div>
+
+    <p>
+        Given a pretrained policy and a reward function and an environment for a new downstream task, we pose finding golden tickets as a search problem, where candidate initial noise vectors, which we call lottery tickets, are optimized to find the ticket that maximizes cumulative discounted expected rewards on the downstream task. 
+    </p>
+    <p>
+    Our proposed method has several unique benefits:
+    <ul>
+    <li> The pretrained policy weights are kept frozen. </li>
+    <li> There is no additional network that is trained. </li>
+    <li> It can be applied to any diffusion or flow matching framework without additional training or test-time assumptions. </li>
+    </ul>
+</p>
 
     <div class="section">
         <h2>Video Presentation</h2>
@@ -200,10 +213,10 @@
         <h2>Citation</h2>
         <div class="bibtex-box">
 <button class="copy-btn" onclick="copyBibtex()">Copy</button>
-<code id="bibtex-content">@article{author2026project,
-  title={Your Awesome Project Title Goes Here},
-  author={One, Author and Two, Author and Three, Author},
-  journal={Journal of Awesome Research},
+<code id="bibtex-content">@article{patil2026goldenticket,
+  title={You've Got a Golden Ticket: Improving Generative Robot Policies With A Single Noise Vector},
+  author={Patil, Omkar and Biza, Ondrej and Weng, Thomas and Schmeckpeper, Karl and Thomason, Wil and Zhang, Xiaohan and Walters, Robin and Gopalan, Nakul and Castro, Sebastian and Rosen, Eric},
+  journal={},
   year={2026}
 }</code>
         </div>
