@@ -151,12 +151,13 @@
 
     <div class="links">
         <a href="#" class="button">📄 Paper</a>
+        <a href="#" class="button">🧪 arxiv (TBD)</a>
         <a href="https://github.com/rai-inst/lottery_tickets" class="button">💻 Code</a>
-        <a href="#" class="button">🎥 Video</a>
+        <a href="#teaser" class="button">🎥 Video</a>
     </div>
 
 
-    <div class="section">
+    <div class="section" id="teaser">
         <h2>Video Presentation (🔊 Audio included)</h2>
         <div class="video-container">
             <video width="100%" controls autoplay loop>
@@ -200,6 +201,14 @@
     <li> There is no additional network that is trained. </li>
     <li> It can be applied to any diffusion or flow matching framework without additional training or test-time assumptions. </li>
     </ul>
+
+    <div class="image-container">
+        <img src="./media/gt_algo.png" alt="Architecture" style="width: 60%;">
+        <div class="caption">
+            For each ticket, we run the policy in each environment, fixing the initial noise vector fed into the policy. 
+            We then calculate the average cumulative discounted rewards, providing an empirical estimate (i.e., Monte-Carlo estimate) of the value function for the ticket.
+            After all tickets have been evaluated, we select and return the best performing ticket. </div>
+    </div>
     
 </p>
 
@@ -885,7 +894,7 @@ We therefore show we can drive success rate from 80% to 98%, an 18% increase, us
         </div>
         <div class="carousel-caption" id="caption-carousel1">Episode 1 of 50</div>
 
-    <h3>🎫 Golden Ticket 5 (49 out of 50)</h3>
+    <h3>🎫 Golden Ticket 5 (49 out of 50, 98% S.R)</h3>
     <style>
         .carousel-wrapper {
             position: relative;
@@ -1542,6 +1551,9 @@ We therefore show we can drive success rate from 80% to 98%, an 18% increase, us
     <div class="carousel-caption" id="caption-carousel3">Episode 1 of 50</div>
 
 
+
+
+    
     <div class="section">
         <h2>Citation</h2>
         <div class="bibtex-box">
