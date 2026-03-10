@@ -547,8 +547,342 @@ When evaluated an additional $10$ times, we found that it continued to achieve a
 
 
         </div>
-    </div>
     
+
+    <div class="section">
+        <h2>📦 Pick cube</h2>
+        For the cup pushing pointcloud policy, we evaluated the base policy $10$ times and observed an average success rate of $40\%$. We searched for $10$ tickets, with $5$ rollouts, and found a ticket that achieved $100\%$ success rate.
+When evaluated an additional $10$ times, we found that it continued to achieve a $100\%$ success rate. This constitutes our largest improvements on hardware, where the average success rate was increased by $60\%$.
+        <h3>🎲 Gaussian Noise</h3>
+    
+        <style>
+            .carousel-wrapper {
+                position: relative;
+                max-width: 50%; /* Adjust this if you want it narrower */
+                margin: 0 auto;
+                overflow: hidden;
+                border-radius: 8px;
+                background-color: #000; /* Black background for video letterboxing */
+            }
+    
+            .carousel-track {
+                display: flex;
+                transition: transform 0.4s ease-in-out;
+                width: 100%;
+            }
+    
+            .carousel-slide {
+                min-width: 100%;
+                box-sizing: border-box;
+            }
+    
+            .carousel-slide video {
+                width: 100%;
+                display: block;
+            }
+    
+            .nav-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: rgba(255, 255, 255, 0.7);
+                color: #333;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 20px;
+                cursor: pointer;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.2s;
+            }
+    
+            .nav-btn:hover {
+                background-color: rgba(255, 255, 255, 1);
+            }
+    
+            .nav-btn.prev {
+                left: 10px;
+            }
+    
+            .nav-btn.next {
+                right: 10px;
+            }
+            
+            .carousel-caption {
+                text-align: center;
+                font-size: 0.9em;
+                color: #666;
+                margin-top: 10px;
+            }
+        </style>
+    
+        <div class="carousel-wrapper">
+            <button class="nav-btn prev" onclick="moveSlide(-1)">&#10094;</button>
+    
+            <div class="carousel-track" id="track">
+                
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_1.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_2.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_3.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_4.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_5.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_6.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_7.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_8.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_9.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_10.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_11.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_12.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_13.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_14.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_15.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_16.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_17.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_18.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_19.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_20.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_21.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_22.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_23.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_24.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_25.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_26.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_27.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_28.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_29.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_30.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_31.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_32.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_33.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_34.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_35.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_36.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_37.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_38.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_39.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_40.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_41.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_42.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_43.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_44.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_45.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_46.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_47.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_48.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_49.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_50.mp4" type="video/mp4">
+                    </video>
+                </div>
+    
+            </div>
+    
+            <button class="nav-btn next" onclick="moveSlide(1)">&#10095;</button>
+        </div>
+        <div class="carousel-caption" id="carousel-text">Result 1 of 50</div>
+
+    <h3>🎫 Golden Ticket</h3>
 
     <div class="section">
         <h2>Citation</h2>
@@ -564,6 +898,45 @@ When evaluated an additional $10$ times, we found that it continued to achieve a
     </div>
 
 </div>
+
+</div>
+<script>
+    let currentSlide = 0;
+
+    function moveSlide(direction) {
+        const track = document.getElementById('track');
+        const slides = document.querySelectorAll('.carousel-slide');
+        const videos = document.querySelectorAll('.carousel-slide video');
+        const caption = document.getElementById('carousel-text');
+        
+        // 1. Pause all videos so nothing runs invisibly in the background
+        videos.forEach(video => video.pause());
+
+        // 2. Update the current slide index
+        currentSlide += direction;
+
+        // 3. Loop around if we hit the ends
+        if (currentSlide < 0) {
+            currentSlide = slides.length - 1;
+        } else if (currentSlide >= slides.length) {
+            currentSlide = 0;
+        }
+
+        // 4. Slide the track
+        const slideWidth = 100; // 100% width
+        track.style.transform = `translateX(-${currentSlide * slideWidth}%)`;
+        
+        // 5. Update the caption (if you are still using it)
+        if (caption) {
+            caption.innerText = `Result ${currentSlide + 1} of ${slides.length}`;
+        }
+        
+        // 6. THE FIX: Play the specific video that just slid onto the screen
+        videos[currentSlide].play().catch(err => {
+            console.log("Autoplay blocked by browser:", err);
+        }); 
+    }
+</script>
 
 <script>
     function copyBibtex() {
