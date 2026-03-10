@@ -207,7 +207,9 @@
         <h1>Hardware Experiments</h1>
         We use Franka hardware to conduct all real-world experiments. We perform three tasks: picking a banana, pushing a cup, and picking a cube. The first two tasks (banana and cup) use pointcloud-based diffusion policies, whereas for the cup picking task we used an RGB-based diffusion policy.
         
+        For each task (and corresponding base policy), we first evaluate the base policy using Gaussian noise (🎲). Then, we search for golden tickets (🎫), with the most number of rollouts being 150 episodes, and report the performance of the best performing ticket.
 <h2>🍌 Banana picking task</h2>     
+For the banana picking pointcloud policy, we initially evaluate the base policy at a single location 10 times, where it successfully picks the banana 30% of the time. After searching for 10 tickets in the same location for 5 episodes each (50 episode rollouts total), we found a ticket that performed 100% in that location. We then evaluated that golden ticket and the base policy at 4 other locations on the table, 10 episodes each. 
 <h3>🎲 Gaussian Noise</h3>
         
         <style>
@@ -249,14 +251,14 @@
                 <video autoplay loop muted playsinline>
                     <source src="./media/pick/eagle_base.mp4" type="video/mp4">
                 </video>
-                <div class="grid-caption">Location 1 (❌ Grasp too high)</div>
+                <div class="grid-caption">Location 1: 30% (❌ Grasp too high)</div>
             </div>
     
             <div class="grid-item">
                 <video autoplay loop muted playsinline>
                     <source src="./media/pick/near_edge_base.mp4" type="video/mp4">
                 </video>
-                <div class="grid-caption">Location 2 (❌ Wrong orientation)</div>
+                <div class="grid-caption">Location 2:  (❌ Wrong orientation)</div>
             </div>
     
             <div class="grid-item">
@@ -332,6 +334,8 @@
 
     <div class="section">
         <h2>🥤 Push Cup</h2>
+        For the cup pushing pointcloud policy, we evaluated the base policy $10$ times and observed an average success rate of $40\%$. We searched for $10$ tickets, with $5$ rollouts, and found a ticket that achieved $100\%$ success rate.
+When evaluated an additional $10$ times, we found that it continued to achieve a $100\%$ success rate. This constitutes our largest improvements on hardware, where the average success rate was increased by $60\%$.
         <h3>🎲 Gaussian Noise</h3>
         <style>
             .video-grid {
@@ -437,7 +441,7 @@
         </div>
     </div>
 
-    <h3>🎲 Gaussian Noise</h3>
+    <h3>🎫 Golden Ticket</h3>
         <style>
             .video-grid {
                 display: grid;
