@@ -334,8 +334,9 @@ For the banana picking pointcloud policy, we initially evaluate the base policy 
 
     <div class="section">
         <h2>🥤 Push Cup</h2>
-        For the cup pushing pointcloud policy, we evaluated the base policy $10$ times and observed an average success rate of $40\%$. We searched for $10$ tickets, with $5$ rollouts, and found a ticket that achieved $100\%$ success rate.
-When evaluated an additional $10$ times, we found that it continued to achieve a $100\%$ success rate. This constitutes our largest improvements on hardware, where the average success rate was increased by $60\%$.
+        The goal of the push cup task is to push a cup to touch the red x on the table.
+        For the cup pushing pointcloud policy, we evaluated the base policy 10 times and observed an average success rate of 40%. We searched for 10 tickets, with 5 rollouts, and found a ticket that achieved 100% success rate.
+When evaluated an additional 10 times, we found that it continued to achieve a 100% success rate. This constitutes our largest improvements on hardware, where the average success rate was increased by 60%.
         <h3>🎲 Gaussian Noise</h3>
         <style>
             .video-grid {
@@ -551,8 +552,10 @@ When evaluated an additional $10$ times, we found that it continued to achieve a
 
     <div class="section">
         <h2>📦 Pick cube</h2>
-        For the cup pushing pointcloud policy, we evaluated the base policy $10$ times and observed an average success rate of $40\%$. We searched for $10$ tickets, with $5$ rollouts, and found a ticket that achieved $100\%$ success rate.
-When evaluated an additional $10$ times, we found that it continued to achieve a $100\%$ success rate. This constitutes our largest improvements on hardware, where the average success rate was increased by $60\%$.
+        When using standard Gaussian noise, our block-picking policy successfully picks up the cube 80% of the time (40 out of 50). 
+After searching for 6 tickets, each with 25 episode rollouts, 150 episodes in total, we find a golden ticket (Ticket 5) that succeeded 25 out of 25 times, and also a ticket (Ticket 6) that succeeded only 1 out of 25 times).
+When we then evaluate those two tickets an additional 50 times, Ticket 5 successfully picked the cube 98% of the time (49 out of 50), where Ticket 6 only succeeded 2 out of 50 times.
+We therefore show we can drive success rate from 80% to 98%, an 18% increase, using just 150 search episodes, or conversely steer the policy to miss with extreme reliability.
         <h3>🎲 Gaussian Noise</h3>
     
         <style>
@@ -880,7 +883,7 @@ When evaluated an additional $10$ times, we found that it continued to achieve a
     
             <button class="nav-btn next" onclick="moveSlide(1)">&#10095;</button>
         </div>
-        <div class="carousel-caption" id="carousel-text">Result 1 of 50</div>
+        <div class="carousel-caption" id="carousel-text">Episode 1 of 50</div>
 
     <h3>🎫 Golden Ticket</h3>
 
@@ -928,7 +931,7 @@ When evaluated an additional $10$ times, we found that it continued to achieve a
         
         // 5. Update the caption (if you are still using it)
         if (caption) {
-            caption.innerText = `Result ${currentSlide + 1} of ${slides.length}`;
+            caption.innerText = `Episode ${currentSlide + 1} of ${slides.length}`;
         }
         
         // 6. THE FIX: Play the specific video that just slid onto the screen
