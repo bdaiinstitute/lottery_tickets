@@ -33,13 +33,13 @@
             margin-bottom: 5px;
             font-size: 1.1em;
         }
-
         .authors a {
             color: #0066cc;
             text-decoration: none;
             margin: 0 10px;
+            white-space: nowrap; /* Forces the first and last name to stay together */
+            display: inline-block; /* Helps the whole name wrap nicely to the next line on mobile */
         }
-
         .authors a:hover {
             text-decoration: underline;
         }
