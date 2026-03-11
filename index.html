@@ -1,0 +1,1706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You've Got a Golden Ticket: Improving Generative Robot Policies With A Single Noise Vector</title>
+    
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #fafafa;
+        }
+        
+        .container {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        h1, h2, h3 {
+            text-align: center;
+            color: #111;
+        }
+
+        .authors {
+            text-align: center;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+        }
+        .authors a {
+            color: #0066cc;
+            text-decoration: none;
+            margin: 0 10px;
+            white-space: nowrap; /* Forces the first and last name to stay together */
+            display: inline-block; /* Helps the whole name wrap nicely to the next line on mobile */
+        }
+        .authors a:hover {
+            text-decoration: underline;
+        }
+
+        .affiliations {
+            text-align: center;
+            font-style: italic;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .links {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #333;
+            color: #fff;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 20px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .button:hover {
+            background-color: #555;
+        }
+
+        .section {
+            margin-top: 40px;
+        }
+
+        .image-container, .video-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .image-container img {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+
+        .video-container iframe {
+            max-width: 100%;
+            border-radius: 4px;
+        }
+
+        .caption {
+            font-size: 0.9em;
+            color: #666;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .bibtex-box {
+            background-color: #f4f4f4;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            position: relative;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 0.8em;
+        }
+
+        .copy-btn:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎫 You've Got a Golden Ticket: Improving Generative Robot Policies With A Single Noise Vector</h1>
+
+    <div class="authors">
+        <a href="https://yourwebsite.com" target="_blank">Omkar Patil</a>
+        <a href="https://author2website.com" target="_blank">Ondrej Biza</a>
+        <a href="https://author3website.com" target="_blank">Thomas Weng</a>
+        <a href="https://author3website.com" target="_blank">Karl Schmeckpeper</a>
+        <a href="https://author3website.com" target="_blank">Wil Thomason</a>
+        <a href="https://author3website.com" target="_blank">Xiaohan Zhang</a>
+        <a href="https://author3website.com" target="_blank">Robin Walters</a>
+        <a href="https://author3website.com" target="_blank">Nakul Gopalan</a>
+        <a href="https://author3website.com" target="_blank">Sebastian Castro</a>
+        <a href="https://author3website.com" target="_blank">Eric Rosen</a>
+    </div>
+
+    <div class="affiliations">
+        <span>Robotics and AI Institute (RAI)</span>
+    </div>
+
+    <div class="links">
+        <a href="#" class="button">📄 Paper</a>
+        <a href="#" class="button">🧪 arxiv (TBD)</a>
+        <a href="https://github.com/rai-inst/lottery_tickets" class="button">💻 Code</a>
+        <a href="#teaser" class="button">🎥 Video</a>
+    </div>
+
+
+    <div class="section" id="teaser">
+        <h1>Video Presentation (🔊 Audio included)</h1>
+        <div class="video-container">
+            <video width="100%" controls autoplay loop>
+                <source src="./media/rss2026_sebastian.mp4" type="video/mp4">
+            </video>
+        </div>
+        <div class="caption">We propose that the performance of a pretrained, frozen diffusion or flow matching policy can be improved by swapping the sampling of initial noise from the prior distribution with a well-chosen, constant initial noise input.</div>
+    </div>
+
+    <!-- <div class="image-container">
+        <img src="https://via.placeholder.com/800x400.png?text=Teaser+Image+Placeholder" alt="Project Teaser">
+        <div class="caption">Figure 1: A brief caption explaining your teaser image.</div>
+    </div> -->
+
+    <div class="section">
+        <h1>Abstract</h1>
+        <p>
+            What happens when a pretrained generative robot policy is provided a constant initial noise as input, rather than repeatedly sampling it from a Gaussian? We demonstrate that the performance of a pretrained, frozen diffusion or flow matching policy can be improved with respect to a downstream reward by swapping the sampling of initial noise from the prior distribution (typically isotropic Gaussian) with a well-chosen, constant initial noise input---a golden ticket. We propose a search method to find golden tickets using Monte-Carlo policy evaluation that keeps the pretrained policy frozen, does not train any new networks, and is applicable to all diffusion/flow matching policies (and therefore many VLAs). Our approach to policy improvement makes no assumptions beyond being able to inject initial noise into the policy and calculate (sparse) task rewards of episode rollouts, making it deployable with no additional infrastructure or models. Our method improves the performance of policies in 38 out of 43 tasks across simulated and real-world robot manipulation benchmarks, with relative improvements in success rate by up to 58% for some simulated tasks, and 60% within 50 search episodes for real-world tasks. We also show unique benefits of golden tickets for multi-task settings: the diversity of behaviors from different tickets naturally defines a Pareto frontier for balancing different objectives (e.g., speed, success rates); in VLAs, we find that a golden ticket optimized for one task can also boost performance in other related tasks. We release a codebase with pretrained policies and golden tickets for simulation benchmarks using VLAs, diffusion policies, and flow matching policies.
+        </p>
+    </div>
+
+    <div class="section">
+        <h1>Methodology</h1>
+        <p>
+        The lottery ticket hypothesis for robot control proposes that the performance of a pretrained, frozen diffusion or flow matching policy can be improved by replacing the sampling of initial noise from a prior distribution with a well-chosen, constant initial noise input, called a golden ticket.        </p>
+        <div class="image-container">
+            <img src="./media/method_pan_main.png" alt="Architecture">
+            <div class="caption"> Overview of standard diffusion policy inference (left) versus our proposed approach of using golden tickets (right).
+                Given a frozen, pretrained diffusion or flow matching policy, rather than sampling from a Gaussian every time an action needs to be computed, we use a constant, well-chosen initial noise vector, called a golden ticket.
+                We find golden tickets improve policy performance across a range of observation inputs, model architectures, and embodiments.</div>
+        </div>
+    </div>
+
+    <p>
+        Given a pretrained policy and a reward function and an environment for a new downstream task, we pose finding golden tickets as a search problem, where candidate initial noise vectors, which we call lottery tickets, are optimized to find the ticket that maximizes cumulative discounted expected rewards on the downstream task. 
+    </p>
+    <p>
+    Our proposed method has several unique benefits:
+    <ul>
+    <li> The pretrained policy weights are kept frozen. </li>
+    <li> There is no additional network that is trained. </li>
+    <li> It can be applied to any diffusion or flow matching framework without additional training or test-time assumptions. </li>
+    </ul>
+
+    <div class="image-container">
+        <img src="./media/gt_algo.png" alt="Architecture" style="width: 60%;">
+        <div class="caption">
+            For each ticket, we run the policy in each environment, fixing the initial noise vector fed into the policy. 
+            We then calculate the average cumulative discounted rewards, providing an empirical estimate (i.e., Monte-Carlo estimate) of the value function for the ticket.
+            After all tickets have been evaluated, we select and return the best performing ticket. </div>
+    </div>
+    
+</p>
+
+    <div class="section">
+        <h1>Hardware Experiments</h1>
+        We use Franka hardware to conduct all real-world experiments. We perform three tasks: picking a banana, pushing a cup, and picking a cube. The first two tasks (banana and cup) use pointcloud-based diffusion policies, whereas for the cup picking task we used an RGB-based diffusion policy.
+        
+        For each task (and corresponding base policy), we first evaluate the base policy using Gaussian noise (🎲). Then, we search for golden tickets (🎫), with the most number of rollouts being 150 episodes, and report the performance of the best performing ticket.
+<h2>🍌 Banana picking task</h2>     
+For the banana picking pointcloud policy, we initially evaluate the base policy at a single location 10 times, where it successfully picks the banana 30% of the time. After searching for 10 tickets in the same location for 5 episodes each (50 episode rollouts total), we found a ticket that performed 100% in that location. We then evaluated that golden ticket and the base policy at 4 other locations on the table, 10 episodes each. 
+<h3>🎲 Gaussian Noise</h3>
+        
+        <style>
+            .video-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+    
+            .grid-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f9f9;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #eee;
+            }
+    
+            .grid-item video {
+                width: 100%;
+                border-radius: 4px;
+                background-color: #000;
+            }
+    
+            .grid-caption {
+                margin-top: 10px;
+                font-size: 0.9em;
+                color: #555;
+                text-align: center;
+                font-weight: 500;
+            }
+        </style>
+    
+        <div class="video-grid">
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/pick/eagle_base.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Location 1 (❌ Grasp too high)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/pick/near_edge_base.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Location 2  (❌ Wrong orientation)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/pick/near_me_base2.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Location 3 (❌ Drops banana)</div>
+            </div>
+    
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>🎫 Golden Ticket</h3>
+        <style>
+            .video-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+    
+            .grid-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f9f9;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #eee;
+            }
+    
+            .grid-item video {
+                width: 100%;
+                border-radius: 4px;
+                background-color: #000;
+            }
+    
+            .grid-caption {
+                margin-top: 10px;
+                font-size: 0.9em;
+                color: #555;
+                text-align: center;
+                font-weight: 500;
+            }
+        </style>
+    
+        <div class="video-grid">
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/pick/eagle_noise.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Location 1 (✅ Correct height)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/pick/near_edge_noise.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Location 2 (✅ Correct orientation)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/pick/near_me_noise.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Location 3 (✅ Holds banana)</div>
+            </div>
+    
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>🥤 Push Cup</h2>
+        The goal of the push cup task is to push a cup to touch the red x on the table.
+        For the cup pushing pointcloud policy, we evaluated the base policy 10 times and observed an average success rate of 40%. We searched for 10 tickets, with 5 rollouts, and found a ticket that achieved 100% success rate.
+When evaluated an additional 10 times, we found that it continued to achieve a 100% success rate. This constitutes our largest improvements on hardware, where the average success rate was increased by 60%.
+        <h3>🎲 Gaussian Noise</h3>
+        <style>
+            .video-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+    
+            .grid-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f9f9;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #eee;
+            }
+    
+            .grid-item video {
+                width: 100%;
+                border-radius: 4px;
+                background-color: #000;
+            }
+    
+            .grid-caption {
+                margin-top: 10px;
+                font-size: 0.9em;
+                color: #555;
+                text-align: center;
+                font-weight: 500;
+            }
+        </style>
+    
+        <div class="video-grid">
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_1.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(❌  Too short)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_2.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_3.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+                
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_4.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(❌ Too short)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_5.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(❌ Too short)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_6.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(❌ Too short)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_7.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(❌ Too short)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_8.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_9.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(❌ Too short)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/base/fixed_camera_data_episode_10.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+    
+
+
+        </div>
+    </div>
+
+    <h3>🎫 Golden Ticket</h3>
+        <style>
+            .video-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+    
+            .grid-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f9f9;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #eee;
+            }
+    
+            .grid-item video {
+                width: 100%;
+                border-radius: 4px;
+                background-color: #000;
+            }
+    
+            .grid-caption {
+                margin-top: 10px;
+                font-size: 0.9em;
+                color: #555;
+                text-align: center;
+                font-weight: 500;
+            }
+        </style>
+    
+        <div class="video-grid">
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_1.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_2.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_3.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+                
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_4.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_5.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_6.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_7.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_8.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_9.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/push/gt_eval/fixed_camera_data_episode_10.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">(✅ Touches x)</div>
+            </div>
+    
+
+
+        </div>
+    
+
+    <div class="section">
+        <h2>📦 Pick cube</h2>
+        When using standard Gaussian noise, our block-picking policy successfully picks up the cube 80% of the time (40 out of 50). 
+After searching for 6 tickets, each with 25 episode rollouts, 150 episodes in total, we find a golden ticket (Ticket 5) that succeeded 25 out of 25 times, and also a ticket (Ticket 6) that succeeded only 1 out of 25 times).
+When we then evaluate those two tickets an additional 50 times, Ticket 5 successfully picked the cube 98% of the time (49 out of 50), where Ticket 6 only succeeded 2 out of 50 times.
+We therefore show we can drive success rate from 80% to 98%, an 18% increase, using just 150 search episodes, or conversely steer the policy to miss with extreme reliability.
+        <h3>🎲 Gaussian Noise (40 out of 50, 80% S.R)</h3>
+    
+        <style>
+            .carousel-wrapper {
+                position: relative;
+                max-width: 50%; /* Adjust this if you want it narrower */
+                margin: 0 auto;
+                overflow: hidden;
+                border-radius: 8px;
+                background-color: #000; /* Black background for video letterboxing */
+            }
+    
+            .carousel-track {
+                display: flex;
+                transition: transform 0.4s ease-in-out;
+                width: 100%;
+            }
+    
+            .carousel-slide {
+                min-width: 100%;
+                box-sizing: border-box;
+            }
+    
+            .carousel-slide video {
+                width: 100%;
+                display: block;
+            }
+    
+            .nav-btn {
+                position: absolute;
+                top: 50%;
+                transform: translateY(-50%);
+                background-color: rgba(255, 255, 255, 0.7);
+                color: #333;
+                border: none;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                font-size: 20px;
+                cursor: pointer;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.2s;
+            }
+    
+            .nav-btn:hover {
+                background-color: rgba(255, 255, 255, 1);
+            }
+    
+            .nav-btn.prev {
+                left: 10px;
+            }
+    
+            .nav-btn.next {
+                right: 10px;
+            }
+            
+            .carousel-caption {
+                text-align: center;
+                font-size: 0.9em;
+                color: #666;
+                margin-top: 10px;
+            }
+        </style>
+    
+        <div class="carousel-wrapper" id="carousel1">
+            <button class="nav-btn prev" onclick="moveSlide(-1, 'carousel1')">&#10094;</button>
+    
+            <div class="carousel-track">
+                
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_1.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_2.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_3.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_4.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_5.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_6.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_7.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_8.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_9.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_10.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_11.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_12.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_13.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_14.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_15.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_16.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_17.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_18.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_19.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_20.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_21.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_22.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_23.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_24.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_25.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_26.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_27.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_28.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_29.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_30.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_31.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_32.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_33.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_34.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_35.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_36.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_37.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_38.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_39.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_40.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_41.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_42.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_43.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_44.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_45.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_46.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_47.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_48.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_49.mp4" type="video/mp4">
+                    </video>
+                </div>
+                <div class="carousel-slide">
+                    <video controls muted autoplay loop>
+                        <source src="media/pick_cube/base/corrected_camera_data_episode_50.mp4" type="video/mp4">
+                    </video>
+                </div>
+    
+            </div>
+    
+            <button class="nav-btn next" onclick="moveSlide(1, 'carousel1')">&#10095;</button>
+        </div>
+        <div class="carousel-caption" id="caption-carousel1">Episode 1 of 50</div>
+
+    <h3>🎫 Golden Ticket 5 (49 out of 50, 98% S.R)</h3>
+    <style>
+        .carousel-wrapper {
+            position: relative;
+            max-width: 50%; /* Adjust this if you want it narrower */
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: #000; /* Black background for video letterboxing */
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+            width: 100%;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .carousel-slide video {
+            width: 100%;
+            display: block;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #333;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        .nav-btn.prev {
+            left: 10px;
+        }
+
+        .nav-btn.next {
+            right: 10px;
+        }
+        
+        .carousel-caption {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+
+    <div class="carousel-wrapper" id="carousel2">
+        <button class="nav-btn prev" onclick="moveSlide(-1, 'carousel2')">&#10094;</button>
+
+        <div class="carousel-track">
+            
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_1.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_2.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_3.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_4.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_5.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_6.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_7.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_8.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_9.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_10.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_11.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_12.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_13.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_14.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_15.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_16.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_17.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_18.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_19.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_20.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_21.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_22.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_23.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_24.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_25.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_26.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_27.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_28.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_29.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_30.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_31.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_32.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_33.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_34.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_35.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_36.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_37.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_38.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_39.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_40.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_41.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_42.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_43.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_44.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_45.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_46.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_47.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_48.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_49.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_good/corrected_camera_data_episode_50.mp4" type="video/mp4">
+                </video>
+            </div>
+
+        </div>
+
+        <button class="nav-btn next" onclick="moveSlide(1, 'carousel2')">&#10095;</button>
+    </div>
+    <div class="carousel-caption" id="caption-carousel2">Episode 1 of 50</div>
+
+    <h3>🎫 Golden Ticket 6 (2 out of 50, 4% S.R)</h3>
+    <style>
+        .carousel-wrapper {
+            position: relative;
+            max-width: 50%; /* Adjust this if you want it narrower */
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: #000; /* Black background for video letterboxing */
+        }
+
+        .carousel-track {
+            display: flex;
+            transition: transform 0.4s ease-in-out;
+            width: 100%;
+        }
+
+        .carousel-slide {
+            min-width: 100%;
+            box-sizing: border-box;
+        }
+
+        .carousel-slide video {
+            width: 100%;
+            display: block;
+        }
+
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background-color: rgba(255, 255, 255, 0.7);
+            color: #333;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .nav-btn:hover {
+            background-color: rgba(255, 255, 255, 1);
+        }
+
+        .nav-btn.prev {
+            left: 10px;
+        }
+
+        .nav-btn.next {
+            right: 10px;
+        }
+        
+        .carousel-caption {
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+
+    <div class="carousel-wrapper" id="carousel3">
+        <button class="nav-btn prev" onclick="moveSlide(-1, 'carousel3')">&#10094;</button>
+
+        <div class="carousel-track">
+            
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_1.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_2.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_3.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_4.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_5.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_6.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_7.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_8.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_9.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_10.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_11.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_12.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_13.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_14.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_15.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_16.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_17.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_18.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_19.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_20.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_21.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_22.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_23.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_24.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_25.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_26.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_27.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_28.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_29.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_30.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_31.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_32.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_33.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_34.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_35.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_36.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_37.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_38.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_39.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_40.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_41.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_42.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_43.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_44.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_45.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_46.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_47.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_48.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_49.mp4" type="video/mp4">
+                </video>
+            </div>
+            <div class="carousel-slide">
+                <video controls muted autoplay loop>
+                    <source src="media/pick_cube/gt_miss/corrected_camera_data_episode_50.mp4" type="video/mp4">
+                </video>
+            </div>
+
+        </div>
+
+        <button class="nav-btn next" onclick="moveSlide(1, 'carousel3')">&#10095;</button>
+    </div>
+    <div class="carousel-caption" id="caption-carousel3">Episode 1 of 50</div>
+
+
+
+    <div class="section" id="pareto">
+        <h1>Pareto Frontier for Multiple Reward Functions</h1>
+        <p>
+        We use the frankasim MuJoCo environment to train a single-arm Franka robot to pick a cube, which randomly spawns in a 0.5 square meter region in front of the robot.
+We train a flow matching policy that takes as input the low-dimensional state of the cube and robot.
+        </p>
+
+        <div class="image-container">
+            <img src="./media/pareto.png" alt="pareto" style="width: 80%;">
+            <div class="caption">
+                Various tickets (pink) for the frankasim pick policy, evaluated according to success rate and speed (determined by length of successful episodes).
+                Higher is better success rate, left is faster time to success.
+                Because lottery tickets exhibit extreme differences in policy performance, a Pareto frontier is defined by tickets that are further left/up than others (represented with golden ticket icons). </div>
+        </div>
+
+        <style>
+            .video-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-top: 20px;
+            }
+    
+            .grid-item {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                background: #f9f9f9;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #eee;
+            }
+    
+            .grid-item video {
+                width: 100%;
+                border-radius: 4px;
+                background-color: #000;
+            }
+    
+            .grid-caption {
+                margin-top: 10px;
+                font-size: 0.9em;
+                color: #555;
+                text-align: center;
+                font-weight: 500;
+            }
+        </style>
+    
+        <div class="video-grid">
+            
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/frankasim/output_43_accurate.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Ticket A: Accurate, but slower</div>
+            </div>
+    
+            <div class="grid-item">
+                <video autoplay loop muted playsinline>
+                    <source src="./media/frankasim/output_fast_11.mp4" type="video/mp4">
+                </video>
+                <div class="grid-caption">Ticket B: Fast, but less accurate</div>
+            </div>
+    
+        </div>
+    </div>
+    </div>
+
+    We see a large variation in ticket performance on metrics measuring picking accuracy and speed.
+    This diversity results in a small subset of golden tickets that define a Pareto frontier, meaning that they outperform all other regular tickets to the right and below them, and represent a balance between the two objectives.
+    This is a unique property of golden tickets compared to other RL methods: rather than designing multiple reward functions that balance these objectives differently, we naturally find tickets that balance them without any reward tuning.
+    This suggests a simple way to alter a robot's behavior to adapt between objectives online: collect the golden tickets on the Pareto frontier, and switch between them as desired.
+    
+    
+    <div class="section">
+        <h2>Citation</h2>
+        <div class="bibtex-box">
+<button class="copy-btn" onclick="copyBibtex()">Copy</button>
+<code id="bibtex-content">@article{patil2026goldenticket,
+  title={You've Got a Golden Ticket: Improving Generative Robot Policies With A Single Noise Vector},
+  author={Patil, Omkar and Biza, Ondrej and Weng, Thomas and Schmeckpeper, Karl and Thomason, Wil and Zhang, Xiaohan and Walters, Robin and Gopalan, Nakul and Castro, Sebastian and Rosen, Eric},
+  journal={},
+  year={2026}
+}</code>
+        </div>
+    </div>
+
+</div>
+
+</div>
+<script>
+    // Keep track of the current slide for each carousel by its ID
+    const carouselStates = {
+        'carousel1': 0,
+        'carousel2': 0,
+        'carousel3': 0
+        // Add more here if you add a 3rd or 4th carousel! (e.g., 'carousel3': 0)
+    };
+
+    function moveSlide(direction, carouselId) {
+        // Find the specific carousel we are clicking inside of
+        const wrapper = document.getElementById(carouselId);
+        const track = wrapper.querySelector('.carousel-track');
+        const slides = wrapper.querySelectorAll('.carousel-slide');
+        const videos = wrapper.querySelectorAll('video');
+        const caption = document.getElementById('caption-' + carouselId);
+        
+        // 1. Pause all videos IN THIS SPECIFIC CAROUSEL
+        videos.forEach(video => video.pause());
+
+        // 2. Update the current slide index for this carousel
+        carouselStates[carouselId] += direction;
+
+        // 3. Loop around if we hit the ends
+        if (carouselStates[carouselId] < 0) {
+            carouselStates[carouselId] = slides.length - 1;
+        } else if (carouselStates[carouselId] >= slides.length) {
+            carouselStates[carouselId] = 0;
+        }
+
+        const currentIdx = carouselStates[carouselId];
+
+        // 4. Slide the track
+        const slideWidth = 100; 
+        track.style.transform = `translateX(-${currentIdx * slideWidth}%)`;
+        
+        // 5. Update the caption for this carousel
+        if (caption) {
+            caption.innerText = `Episode ${currentIdx + 1} of ${slides.length}`;
+        }
+        
+        // 6. Play the specific video that just slid onto the screen
+        videos[currentIdx].play().catch(err => {
+            console.log("Autoplay blocked by browser:", err);
+        }); 
+    }
+</script>
+<script>
+    function copyBibtex() {
+        const bibtexContent = document.getElementById('bibtex-content').innerText;
+        navigator.clipboard.writeText(bibtexContent).then(() => {
+            const btn = document.querySelector('.copy-btn');
+            btn.innerText = 'Copied!';
+            setTimeout(() => { btn.innerText = 'Copy'; }, 2000);
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+        });
+    }
+</script>
+
+</body>
+</html>
