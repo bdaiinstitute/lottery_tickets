@@ -1,4 +1,10 @@
 # 🎫 The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies 
+
+  <div align="center">
+    <h2>
+      <a href="https://bdaiinstitute.github.io/lottery_tickets/">🔗 Project website</a>
+    </h2>
+  </div>
 <table>
   <!-- Header row -->
   <tr>
