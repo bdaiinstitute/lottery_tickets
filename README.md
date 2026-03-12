@@ -3,6 +3,8 @@
   <div align="center">
     <h2>
       <a href="https://bdaiinstitute.github.io/lottery_tickets/">🔗 Project website</a>
+      <br>
+      <a href="./Lottery_Ticket_Hypothesis_for_Robot_Policies_full.pdf">📝 Paper</a>
     </h2>
   </div>
 <table>
