@@ -99,3 +99,12 @@ This repository is released as-is to accompany a paper submission.
 If you find any bugs, corrections, or issues that should be resolved for anyone looking to reproduce the results in this repository, please file an issue and we will look at it as soon as we can.
 
 For other improvements, including new features, we recommend creating your own fork of the repository.
+
+# Citation
+```
+@article{patil2026you,
+    title={You've Got a Golden Ticket: Improving Generative Robot Policies With A Single Noise Vector},
+    author={Patil, Omkar and Biza, Ondrej and Weng, Thomas and Schmeckpeper, Karl and Thomason, Wil and Zhang, Xiaohan and Walters, Robin and Gopalan, Nakul and Castro, Sebastian and Rosen, Eric},
+    journal={arXiv preprint arXiv:2603.15757},
+    year={2026}
+```
