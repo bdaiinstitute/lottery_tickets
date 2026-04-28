@@ -1,5 +1,8 @@
 # 🎫 The Lottery Ticket Hypothesis for Improving Pretrained Robot Diffusion and Flow Policies 
 
+> [!IMPORTANT]
+> This repository has moved from [`bdaiinstitute/lottery_tickets`](https://github.com/bdaiinstitute/lottery_tickets) to [`rai-opensource/lottery_tickets`](https://github.com/rai-opensource/lottery_tickets).
+
   <div align="center">
     <h2>
       <a href="https://bdaiinstitute.github.io/lottery_tickets/">🔗 Project website</a>
